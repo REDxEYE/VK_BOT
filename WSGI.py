@@ -234,7 +234,7 @@ class FifeNights():
                         self.Reply(args)
                         # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group, message="!Не удалось выполнить",v="5.38")
                 else:
-                    args['message'] = "Команда не распознана"
+                    args['message'] = "!Команда не распознана"
                     self.Reply(args)
                     # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group,message="Команда не распознана", v="5.38")
 

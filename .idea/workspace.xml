@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8e8d7c2a-d8a5-4bd1-9412-f3862de24023" name="Default" comment="cleanup">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/WSGI.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/WSGI.py" afterPath="$PROJECT_DIR$/WSGI.py" />
     </list>
     <ignored path="VK_BOT.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -50,8 +50,8 @@
       <file leaf-file-name="WSGI.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/WSGI.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="7.035473">
-              <caret line="251" column="0" selection-start-line="251" selection-start-column="0" selection-end-line="251" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.7415541">
+              <caret line="236" column="40" selection-start-line="236" selection-start-column="40" selection-end-line="236" selection-end-column="40" />
               <folding />
             </state>
           </provider>
@@ -442,7 +442,13 @@
       <option name="project" value="LOCAL" />
       <updated>1467231943077</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="cleanup">
+      <created>1467232321637</created>
+      <option name="number" value="00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1467232321637</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TodoView">
@@ -553,8 +559,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/WSGI.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="7.035473">
-          <caret line="251" column="0" selection-start-line="251" selection-start-column="0" selection-end-line="251" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.7415541">
+          <caret line="236" column="40" selection-start-line="236" selection-start-column="40" selection-end-line="236" selection-end-column="40" />
           <folding />
         </state>
       </provider>
