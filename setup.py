@@ -6,6 +6,7 @@ import os
 import json
 from datetime import datetime, timedelta
 
+V = 1.5
 
 def getpath():
     return os.path.dirname(os.path.abspath(__file__))
@@ -234,7 +235,7 @@ class FifeNights():
                         self.Reply(args)
                         # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group, message="!Не удалось выполнить",v="5.38")
                 else:
-                    args['message'] = "Команда не распознана"
+                    args['message'] = "!Команда не распознана"
                     self.Reply(args)
                     # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group,message="Команда не распознана", v="5.38")
 
