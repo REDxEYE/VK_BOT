@@ -1,3 +1,4 @@
+import os
 from math import ceil
 from time import sleep
 import vk
@@ -10,8 +11,8 @@ def getpath():
     return os.path.dirname(os.path.abspath(__file__))
 
 
-class FifeNights:
-    def __init__(self, GroupToken=0, UserToken=0):
+class FifeNights():
+    def __init__(self):
         self.LoadConfig()
         self.Group = "-75615891"
         self.GroupDomain = "5nights"
@@ -179,7 +180,6 @@ class FifeNights:
         else:
             return False
 
-    @staticmethod
     def ExecCommand(self, command, args):
         return command(args)
 
@@ -225,7 +225,7 @@ class FifeNights:
                         args['message'] = "!Недостаточно прав"
                         self.Reply(args)
                         # self.GroupApi.messages.send(user_id=user_id, peer_id=self.Group, message="!Недостаточно прав",v="5.38")
-                    if ret:
+                    if ret == True:
                         args['message'] = "!Выполннено"
                         self.Reply(args)
                         # self.GroupApi.messages.send(user_id=user_id, peer_id=self.Group, message="!Выполннено",v="5.38")
