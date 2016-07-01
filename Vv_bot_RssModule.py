@@ -34,8 +34,11 @@ feed = feedparser.parse(python_wiki_rss_url)
 for I in feed['entries'][:1]:
     soup = BS(I['summary_detail']['value'], "html.parser")
     img = soup.find_all('img')[0]['src']
+    text = strip_tags(I['summary_detail']['value']).replace(I['title'], "")
+    title = I['title']
     # print(I)
     print("Date: ", ConvertTime(I.published_parsed))
-    print('Text:', strip_tags(I['summary_detail']['value']))
+    print('Title:', title)
+    print('Text:', text)
     print('Img: ', img)
     print('Link:', I['link'], '\n')

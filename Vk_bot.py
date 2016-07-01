@@ -194,7 +194,10 @@ class VK_Bot():
     def Reply(self, api, args):
         print('Reply:', args)
         sleep(0.1)
-        api.messages.send(**args)
+        try:
+            api.messages.send(**args)
+        except:
+            pass
 
     def CheckForCommands(self, data="", StartCommand="!Команда", count=10):
         print(data)
@@ -362,6 +365,7 @@ class VK_Bot():
                         args['message_id'] = message_id
                         args['user_id'] = self.GetUserFormMessage(message_id)
                         args['v'] = 5.38
+                        print(args['user_id'])
                         if args['user_id'] != self.MyUId:
                             self.CheckForCommands(args)
                             # self.Reply(self.UserApi,args)
