@@ -12,11 +12,11 @@ def getpath():
     return os.path.dirname(os.path.abspath(__file__))
 
 
-class FifeNights():
+class VK_Bot():
     def __init__(self):
         self.LoadConfig()
-        self.Group = "-75615891"
-        self.GroupDomain = "5nights"
+        self.Group = self.Settings['Group']
+        self.GroupDomain = self.Settings['Domain']
         self.GroupAccess_token = self.Settings['GroupAccess_token']
         self.UserAccess_token = self.Settings['UserAccess_token']
         self.UserSession = vk.Session(access_token=self.UserAccess_token)
@@ -247,7 +247,7 @@ class FifeNights():
         print(music)
 
 
-A = FifeNights()
+A = VK_Bot()
 # print(A.CheckWall("5nights"))
 # A.ClearPosts()
 A.CheckForCommands()
