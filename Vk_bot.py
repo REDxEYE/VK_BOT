@@ -1,12 +1,11 @@
+import json
 import os
-import urllib
+from datetime import datetime, timedelta
 from math import ceil
-from time import sleep, time
+from time import sleep
+
 import requests
 import vk
-import os
-import json
-from datetime import datetime, timedelta
 
 V = 1.5
 
@@ -32,7 +31,7 @@ class VK_Bot():
 
     def ClearPosts(self, Posts=None, treshholdTime=10, treshholdLikes=10):
         if Posts == None:
-            Posts = self.posts
+            Posts = self.CheckWall(self.GroupDomain)
         Currtime = datetime.now()
         for post in Posts:
             PostTime = datetime.fromtimestamp(post['date'])
@@ -48,7 +47,7 @@ class VK_Bot():
         self.UserApi.wall.createComment(owner_id=group, post_id=post, from_group=owner, message=text)
 
     def GetUserNameById(self, Id):
-        sleep(0.3)
+        sleep(0.01)
         User = self.UserApi.users.get(user_ids=Id)[0]
         return User
 
@@ -193,7 +192,8 @@ class VK_Bot():
         return command(args)
 
     def Reply(self, api, args):
-        pass
+        print('Reply:', args)
+        sleep(0.1)
         api.messages.send(**args)
 
     def CheckForCommands(self, data="", StartCommand="!Команда", count=10):
@@ -266,26 +266,26 @@ class VK_Bot():
                         ret = self.ExecCommand(Commands[CommandDict["!команда"].replace(" ", "")][0], CommandDict)
                     else:
                         ret = False
-                        args['message'] = "!Недостаточно прав"
+                        args['message'] = "Недостаточно прав"
                         self.Reply(self.UserApi, args)
                         # self.GroupApi.messages.send(user_id=user_id, peer_id=self.Group, message="!Недостаточно прав",v="5.38")
                     if ret == True:
-                        args['message'] = "!Выполннено"
+                        args['message'] = "Выполннено"
                         self.Reply(self.UserApi, args)
                         # self.GroupApi.messages.send(user_id=user_id, peer_id=self.Group, message="!Выполннено",v="5.38")
                     else:
-                        args['message'] = "!Не удалось выполнить"
+                        args['message'] = "Не удалось выполнить"
                         self.Reply(self.UserApi, args)
                         # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group, message="!Не удалось выполнить",v="5.38")
                 else:
-                    args['message'] = "!Команда не распознана"
+                    args['message'] = "Команда не распознана"
                     self.Reply(self.UserApi, args)
                     # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group,message="Команда не распознана", v="5.38")
             if (self.GetUserNameById(self.MyUId)['first_name'] + ',привет').lower().replace(' ', '') in data[
                 'message'].lower().replace(' ', ''):
                 args['peer_id'] = data['peer_id']
                 args['v'] = 5.38
-                args['message'] = 'Здравствуй ' + self.GetUserNameById(args['peer_id'])['first_name']
+                args['message'] = 'Здравствуй, ' + self.GetUserNameById(data['user_id'])['first_name']
                 self.Reply(self.UserApi, args)
 
 
@@ -294,7 +294,6 @@ class VK_Bot():
         print(music)
 
     def LongPool(self, key, server, ts):
-        ww = '?act=a_check&key=3a604b7f4fa66960707ac5d71a606c63ef0200b1&ts=1769693777&wait=25&mode=2'
         url = 'http://' + server + '?act=a_check&key=' + key + '&ts=' + str(ts) + '&wait=25&mode=2'
         try:
 
