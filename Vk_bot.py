@@ -17,8 +17,8 @@ class FifeNights():
         self.LoadConfig()
         self.Group = "-75615891"
         self.GroupDomain = "5nights"
-        self.GroupAccess_token = "f27b32a27bd2ce47bde629d4323fc50ee5cc8e3a55b4955973344c56fc903a19c6825ea70e6e278aef3b5"
-        self.UserAccess_token = 'c4b2c76c4089453fac5da6015eb6f5c732e3e1486be288430fcb356f1d4a97a52f535f5ec646e8052c4fb'
+        self.GroupAccess_token = self.Settings['GroupAccess_token']
+        self.UserAccess_token = self.Settings['UserAccess_token']
         self.UserSession = vk.Session(access_token=self.UserAccess_token)
         self.GroupSession = vk.Session(access_token=self.GroupAccess_token)
         self.UserApi = vk.API(self.UserSession)
@@ -154,13 +154,16 @@ class FifeNights():
 
     def LoadConfig(self):
         path = getpath()
-        with open(path + '/config.json', 'r') as config:
-            self.data = json.load(config)
+        with open(path + '/settings.json', 'r') as config:
+            settings = json.load(config)
+            self.UserGroups = settings["users"]
+            self.Settings = settings["settings"]
+
 
     def SaveConfig(self):
         path = getpath()
-        with open(path + '/config.json', 'w') as config:
-            json.dump(self.data, config)
+        with open(path + '/settings.json', 'w') as config:
+            json.dump(self.UserGroups, config)
 
     def AddUser(self, args):
         print(args)
@@ -169,12 +172,12 @@ class FifeNights():
         else:
             Group = "user"
         if 'id' in args:
-            if Group in self.data:
-                Ids = self.data[Group]
+            if Group in self.UserGroups:
+                Ids = self.UserGroups[Group]
                 Ids.append(args['id'])
-                self.data[Group] = Ids
+                self.UserGroups[Group] = Ids
             else:
-                self.data[Group] = [int(args['id'])]
+                self.UserGroups[Group] = [int(args['id'])]
 
             self.SaveConfig()
             return True
@@ -215,8 +218,8 @@ class FifeNights():
                     CommandDict[C[0].replace(" ", "").lower()] = C[1]
                 print(CommandDict)
                 if CommandDict["!команда"].replace(" ", "") in Commands:
-                    for group in self.data:
-                        if int(user_id) in self.data[group]:
+                    for group in self.UserGroups:
+                        if int(user_id) in self.UserGroups[group]:
                             User_group = group
                     if User_group in Commands[CommandDict["!команда"].replace(" ", "")][1] or 'all' in \
                             Commands[CommandDict["!команда"].replace(" ", "")][1]:
