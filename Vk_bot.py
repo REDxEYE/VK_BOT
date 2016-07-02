@@ -17,7 +17,8 @@ def getpath():
 
 class VK_Bot(vk.api.Session):
     def __init__(self):
-
+        print('Loading')
+        super(vk.api.Session, self).__init__()
         self.LoadConfig()
         self.Group = self.Settings['Group']
         self.GroupDomain = self.Settings['Domain']
@@ -30,6 +31,7 @@ class VK_Bot(vk.api.Session):
         self.MyUId = self.UserApi.users.get()[0]['uid']
 
     def get_captcha_key(self, captcha_image_url):
+
         importlib.reload(vk)
         print(captcha_image_url)
         cap = input()
