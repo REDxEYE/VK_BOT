@@ -210,11 +210,12 @@ class VK_Bot:
         self.UserApi.wall.createComment(owner_id=group, post_id=post, from_group=owner, message=text)
 
     def GetUserNameById(self, Id):
+        print('GetUserNameById: ', Id)
         sleep(0.01)
         try:
             User = self.UserApi.users.get(user_ids=Id)[0]
         except:
-            pass
+            return None
         return User
 
     def GetCommentsFromPost(self, GroupId, PostId, count):
@@ -382,7 +383,10 @@ class VK_Bot:
             pass
 
     def CheckForCommands(self, data="", StartCommand="!Команда", count=10):
-        print(data)
+        user = self.GetUserNameById(self.GetUserFormMessage(data['message_id']))
+        toPrint = user['first_name'] + ' ' + user['last_name'] + " : " + str(
+            data['message']) + '\n' + 'message_id : ' + str(data['message_id']) + '  peer_id : ' + str(data['peer_id'])
+        print(toPrint)
         Commands = {
             'пост': [self.MakePost, ['admin', 'editor', 'moderator']],
             'бан': [self.BanUser, ['admin', 'editor', 'moderator']],
