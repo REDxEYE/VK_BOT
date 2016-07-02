@@ -14,7 +14,7 @@ def getpath():
     return os.path.dirname(os.path.abspath(__file__))
 
 
-class VK_Bot():
+class VK_Bot(vk.api.Session):
     def __init__(self):
 
         self.LoadConfig()
@@ -28,7 +28,10 @@ class VK_Bot():
         self.GroupApi = vk.API(self.GroupSession)
         self.MyUId = self.UserApi.users.get()[0]['uid']
 
-
+    def get_captcha_key(self, captcha_image_url):
+        print(captcha_image_url)
+        cap = input()
+        return cap
     def ClearPosts(self, Posts=None, treshholdTime=10, treshholdLikes=10):
         if Posts == None:
             Posts = self.CheckWall(self.GroupDomain)
@@ -365,7 +368,8 @@ class VK_Bot():
                         args['message_id'] = message_id
                         args['user_id'] = self.GetUserFormMessage(message_id)
                         args['v'] = 5.38
-                        print(args['user_id'])
+                        # user =self.GetUserNameById(args['user_id'])
+                        # print(user['first_name'],user['second_name'],' : ',text)
                         if args['user_id'] != self.MyUId:
                             self.CheckForCommands(args)
                             # self.Reply(self.UserApi,args)
