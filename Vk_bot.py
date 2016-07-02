@@ -1,5 +1,7 @@
 import importlib
 import json
+import logging
+import logging.config
 import os
 from datetime import datetime, timedelta
 from math import ceil
@@ -7,25 +9,160 @@ from time import sleep
 
 import requests
 import vk
+from vk.exceptions import VkAuthError, VkAPIError
+from vk.logs import LOGGING_CONFIG
+from vk.utils import stringify_values, json_iter_parse, LoggingSession, str_type
 
 V = 1.5
-
+logging.config.dictConfig(LOGGING_CONFIG)
+logger = logging.getLogger('vk')
 
 def getpath():
     return os.path.dirname(os.path.abspath(__file__))
 
 
+class SessionCapchaFix(object):
+    API_URL = 'https://api.vk.com/method/'
+
+    def __init__(self, access_token=None):
+
+        logger.debug('API.__init__(access_token=%(access_token)r)', {'access_token': access_token})
+
+        self.access_token = access_token
+        self.access_token_is_needed = False
+
+        self.requests_session = LoggingSession()
+        self.requests_session.headers['Accept'] = 'application/json'
+        self.requests_session.headers['Content-Type'] = 'application/x-www-form-urlencoded'
+
+    @property
+    def access_token(self):
+        logger.debug('Check that we need new access token')
+        if self.access_token_is_needed:
+            logger.debug('We need new access token. Try to get it.')
+            self.access_token = self.get_access_token()
+        else:
+            logger.debug('Use old access token')
+        return self._access_token
+
+    @access_token.setter
+    def access_token(self, value):
+        self._access_token = value
+        if isinstance(value, str_type) and len(value) >= 12:
+            self.censored_access_token = '{}***{}'.format(value[:4], value[-4:])
+        else:
+            self.censored_access_token = value
+        logger.debug('access_token = %r', self.censored_access_token)
+        self.access_token_is_needed = not self._access_token
+
+    def get_user_login(self):
+        logger.debug('Do nothing to get user login')
+
+    def get_access_token(self):
+        """
+        Dummy method
+        """
+        logger.debug('API.get_access_token()')
+        return self._access_token
+
+    def make_request(self, method_request, captcha_response=None):
+
+        logger.debug('Prepare API Method request')
+
+        response = self.send_api_request(method_request, captcha_response=captcha_response)
+        # todo Replace with something less exceptional
+        response.raise_for_status()
+
+        # there are may be 2 dicts in one JSON
+        # for example: "{'error': ...}{'response': ...}"
+        for response_or_error in json_iter_parse(response.text):
+            if 'response' in response_or_error:
+                # todo Can we have error and response simultaneously
+                # for error in errors:
+                #     logger.warning(str(error))
+
+                return response_or_error['response']
+
+            elif 'error' in response_or_error:
+                error_data = response_or_error['error']
+                error = VkAPIError(error_data)
+
+                if error.is_captcha_needed():
+                    captcha_key = self.get_captcha_key(error.captcha_img)
+                    if not captcha_key:
+                        raise error
+
+                    captcha_response = {
+                        'sid': error.captcha_sid,
+                        'key': captcha_key,
+                    }
+                    return self.make_request(method_request, captcha_response=captcha_response)
+
+                elif error.is_access_token_incorrect():
+                    logger.info('Authorization failed. Access token will be dropped')
+                    self.access_token = None
+                    return self.make_request(method_request)
+
+                else:
+                    raise error
+
+    def send_api_request(self, request, captcha_response=None):
+        url = self.API_URL + request._method_name
+        method_args = request._api._method_default_args.copy()
+        method_args.update(stringify_values(request._method_args))
+        access_token = self.access_token
+        if access_token:
+            method_args['access_token'] = access_token
+        if captcha_response:
+            method_args['captcha_sid'] = captcha_response['sid']
+            method_args['captcha_key'] = captcha_response['key']
+        timeout = request._api._timeout
+        response = self.requests_session.post(url, method_args, timeout=timeout)
+        return response
+
+    def get_captcha_key(self, captcha_image_url):
+        """
+        Default behavior on CAPTCHA is to raise exception
+        Reload this in child
+        """
+        print(captcha_image_url)
+        cap = input('capcha text:')
+        return cap
+
+    def auth_code_is_needed(self, content, session):
+        """
+        Default behavior on 2-AUTH CODE is to raise exception
+        Reload this in child
+        """
+        raise VkAuthError('Authorization error (2-factor code is needed)')
+
+    def auth_captcha_is_needed(self, content, session):
+        """
+        Default behavior on CAPTCHA is to raise exception
+        Reload this in child
+        """
+        raise VkAuthError('Authorization error (captcha)')
+
+    def phone_number_is_needed(self, content, session):
+        """
+        Default behavior on PHONE NUMBER is to raise exception
+        Reload this in child
+        """
+        logger.error('Authorization error (phone number is needed)')
+        raise VkAuthError('Authorization error (phone number is needed)')
+
+
+
 class VK_Bot(vk.api.Session):
     def __init__(self):
         print('Loading')
-        super(vk.api.Session, self).__init__()
         self.LoadConfig()
         self.Group = self.Settings['Group']
         self.GroupDomain = self.Settings['Domain']
         self.GroupAccess_token = self.Settings['GroupAccess_token']
         self.UserAccess_token = self.Settings['UserAccess_token']
-        self.UserSession = vk.Session(access_token=self.UserAccess_token)
-        self.GroupSession = vk.Session(access_token=self.GroupAccess_token)
+        self.UserSession = vk.SessionCapchaFix(access_token=self.UserAccess_token)
+        self.GroupSession = vk.SessionCapchaFix(access_token=self.GroupAccess_token)
         self.UserApi = vk.API(self.UserSession)
         self.GroupApi = vk.API(self.GroupSession)
         self.MyUId = self.UserApi.users.get()[0]['uid']
