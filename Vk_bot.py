@@ -1,3 +1,4 @@
+import importlib
 import json
 import os
 from datetime import datetime, timedelta
@@ -29,6 +30,7 @@ class VK_Bot(vk.api.Session):
         self.MyUId = self.UserApi.users.get()[0]['uid']
 
     def get_captcha_key(self, captcha_image_url):
+        importlib.reload(vk)
         print(captcha_image_url)
         cap = input()
         return cap
