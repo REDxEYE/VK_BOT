@@ -161,8 +161,8 @@ class VK_Bot(vk.api.Session):
         self.GroupDomain = self.Settings['Domain']
         self.GroupAccess_token = self.Settings['GroupAccess_token']
         self.UserAccess_token = self.Settings['UserAccess_token']
-        self.UserSession = vk.SessionCapchaFix(access_token=self.UserAccess_token)
-        self.GroupSession = vk.SessionCapchaFix(access_token=self.GroupAccess_token)
+        self.UserSession = SessionCapchaFix(access_token=self.UserAccess_token)
+        self.GroupSession = SessionCapchaFix(access_token=self.GroupAccess_token)
         self.UserApi = vk.API(self.UserSession)
         self.GroupApi = vk.API(self.GroupSession)
         self.MyUId = self.UserApi.users.get()[0]['uid']
