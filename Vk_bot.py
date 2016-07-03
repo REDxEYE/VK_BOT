@@ -2,6 +2,7 @@ import json
 import logging
 import logging.config
 import os
+import sys
 from datetime import datetime, timedelta
 from math import ceil
 from time import sleep
@@ -210,7 +211,7 @@ class VK_Bot:
         self.UserApi.wall.createComment(owner_id=group, post_id=post, from_group=owner, message=text)
 
     def GetUserNameById(self, Id):
-        print('GetUserNameById: ', Id)
+        # print('GetUserNameById: ', Id)
         sleep(0.01)
         try:
             User = self.UserApi.users.get(user_ids=Id)[0]
@@ -373,6 +374,8 @@ class VK_Bot:
     def ExecCommand(self, command, args):
         return command(args)
 
+    def GetRss(self, args):
+        pass
     def Reply(self, api, args):
         print('Reply:', args)
         sleep(0.2)
@@ -391,53 +394,51 @@ class VK_Bot:
             'пост': [self.MakePost, ['admin', 'editor', 'moderator']],
             'бан': [self.BanUser, ['admin', 'editor', 'moderator']],
             'добавить': [self.AddUser, ['admin']],
+            'rss': [self.GetRss, ['admin', 'editor', 'moderator']]
         }
         CommandDict = {}
         args = {}
-        if data == '':
-
-            Dialogs = self.GroupApi.messages.getDialogs(count=count)
-
-            for Dialog in Dialogs[1:]:
-                # print(Dialog)
-                if StartCommand in Dialog['body']:
-
-                    user_id = Dialog["uid"]
-                    args['user_id'] = user_id
-                    args['peer_id'] = self.Group
-                    args['v'] = '5.38'
-                    User_group = 'user'
-                    comm = Dialog["body"]
-                    comm = comm.split("<br>")
-                    for C in comm:
-                        C = C.split(":")
-                        CommandDict[C[0].replace(" ", "").lower()] = C[1]
-                        CommandDict['args'] = args
-                    print(CommandDict)
-                    if CommandDict["!команда"].replace(" ", "") in Commands:
-                        for group in self.UserGroups:
-                            if int(user_id) in self.UserGroups[group]:
-                                User_group = group
-                        if User_group in Commands[CommandDict["!команда"].replace(" ", "")][1] or 'all' in \
-                                Commands[CommandDict["!команда"].replace(" ", "")][1]:
-                            ret = self.ExecCommand(Commands[CommandDict["!команда"].replace(" ", "")][0], CommandDict)
-                        else:
-                            ret = False
-                            args['message'] = "!Недостаточно прав"
-                            self.Reply(self.GroupApi, args)
-                            # self.GroupApi.messages.send(user_id=user_id, peer_id=self.Group, message="!Недостаточно прав",v="5.38")
-                        if ret == True:
-                            args['message'] = "!Выполннено"
-                            self.Reply(self.GroupApi, args)
-                            # self.GroupApi.messages.send(user_id=user_id, peer_id=self.Group, message="!Выполннено",v="5.38")
-                        else:
-                            args['message'] = "!Не удалось выполнить"
-                            self.Reply(self.GroupApi, args)
-                            # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group, message="!Не удалось выполнить",v="5.38")
-                    else:
-                        args['message'] = "!Команда не распознана"
-                        self.Reply(self.GroupApi, args)
-                        # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group,message="Команда не распознана", v="5.38")
+        # if data == '':
+        #    Dialogs = self.GroupApi.messages.getDialogs(count=count)
+        #    for Dialog in Dialogs[1:]:
+        #        # print(Dialog)
+        #        if StartCommand in Dialog['body']:
+        #            user_id = Dialog["uid"]
+        #            args['user_id'] = user_id
+        #            args['peer_id'] = self.Group
+        #            args['v'] = '5.38'
+        #            User_group = 'user'
+        #            comm = Dialog["body"]
+        #            comm = comm.split("<br>")
+        #            for C in comm:
+        #                C = C.split(":")
+        #                CommandDict[C[0].replace(" ", "").lower()] = C[1]
+        #                CommandDict['args'] = args
+        #            print(CommandDict)
+        #            if CommandDict["!команда"].replace(" ", "") in Commands:
+        #                for group in self.UserGroups:
+        #                    if int(user_id) in self.UserGroups[group]:
+        #                        User_group = group
+        #                if User_group in Commands[CommandDict["!команда"].replace(" ", "")][1] or 'all' in \
+        #                        Commands[CommandDict["!команда"].replace(" ", "")][1]:
+        #                    ret = self.ExecCommand(Commands[CommandDict["!команда"].replace(" ", "")][0], CommandDict)
+        #                else:
+        #                    ret = False
+        #                    args['message'] = "!Недостаточно прав"
+        #                    self.Reply(self.GroupApi, args)
+        #                    # self.GroupApi.messages.send(user_id=user_id, peer_id=self.Group, message="!Недостаточно прав",v="5.38")
+        #                if ret == True:
+        #                    args['message'] = "!Выполннено"
+        #                    self.Reply(self.GroupApi, args)
+        #                    # self.GroupApi.messages.send(user_id=user_id, peer_id=self.Group, message="!Выполннено",v="5.38")
+        #                else:
+        #                    args['message'] = "!Не удалось выполнить"
+        #                    self.Reply(self.GroupApi, args)
+        #                    # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group, message="!Не удалось выполнить",v="5.38")
+        #            else:
+        #                args['message'] = "!Команда не распознана"
+        #                self.Reply(self.GroupApi, args)
+        #                # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group,message="Команда не распознана", v="5.38")
         if data != '':
 
             try:
@@ -488,6 +489,8 @@ class VK_Bot:
             except Exception as Ex:
                 args['peer_id'] = data['peer_id']
                 args['v'] = 5.38
+                print(sys.exc_info())
+
                 args['message'] = "Не удалось выполнить, ошибка: " + str(Ex)
                 self.Reply(self.UserApi, args)
 
@@ -506,6 +509,7 @@ class VK_Bot:
         return result
 
     def GetUserFormMessage(self, message_id):
+        sleep(0.25)
         uid = self.UserApi.messages.getById(message_id=message_id)[1]['uid']
         return uid
 
