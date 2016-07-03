@@ -8,6 +8,8 @@ from math import ceil
 from time import sleep
 
 import requests
+
+import Vk_bot_RssModule
 # import vk
 from vk.exceptions import VkAuthError, VkAPIError
 from vk.logs import LOGGING_CONFIG
@@ -372,10 +374,14 @@ class VK_Bot:
             return False
 
     def ExecCommand(self, command, args):
+        print('executing command: ', command, ' with args:')
+        print(args)
         return command(args)
 
     def GetRss(self, args):
-        pass
+
+        Vk_bot_RssModule.RssParser.Parse(args['rss'])
+
     def Reply(self, api, args):
         print('Reply:', args)
         sleep(0.2)
@@ -387,9 +393,15 @@ class VK_Bot:
 
     def CheckForCommands(self, data="", StartCommand="!Команда", count=10):
         user = self.GetUserNameById(self.GetUserFormMessage(data['message_id']))
-        toPrint = user['first_name'] + ' ' + user['last_name'] + " : " + str(
-            data['message']) + '\n' + 'message_id : ' + str(data['message_id']) + '  peer_id : ' + str(data['peer_id'])
-        print(toPrint)
+
+        try:
+            toPrint = user['first_name'] + ' ' + user['last_name'] + " : " + str(
+                data['message']) + '\n' + 'message_id : ' + str(data['message_id']) + '  peer_id : ' + str(
+                data['peer_id'])
+            print(toPrint)
+        except:
+            pass
+
         Commands = {
             'пост': [self.MakePost, ['admin', 'editor', 'moderator']],
             'бан': [self.BanUser, ['admin', 'editor', 'moderator']],
@@ -447,6 +459,7 @@ class VK_Bot:
                     args['v'] = 5.38
                     comm = data["message"]
                     comm = comm.split("<br>")
+                    User_group = 'user'
                     for C in comm:
                         C = C.split(":")
                         CommandDict[C[0].replace(" ", "").lower()] = C[1]

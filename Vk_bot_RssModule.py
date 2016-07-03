@@ -28,16 +28,26 @@ class RssParser:
         return datetime.datetime.fromtimestamp(mktime(date))
 
     def Parse(self, url):
+        rss = []
         # python_wiki_rss_url = "http://www.oszone.net/rss-cat-2.xml"
         feed = feedparser.parse(url)
         for I in feed['entries']:
+            rssE = {}
             soup = BS(I['summary_detail']['value'], "html.parser")
             img = soup.find_all('img')[0]['src']
             text = self.strip_tags(I['summary_detail']['value']).replace(I['title'], "")
             title = I['title']
             # print(I)
             print("Date: ", self.ConvertTime(I.published_parsed))
+            rssE['date'] = self.ConvertTime(I.published_parsed)
             print('Title:', title)
+            rssE['title'] = title
             print('Text:', text)
+            rssE['text'] = text
             print('Img: ', img)
+            rssE['img'] = img
             print('Link:', I['link'], '\n')
+            rssE['ling'] = I['link']
+            rss.append()
+
+        return
