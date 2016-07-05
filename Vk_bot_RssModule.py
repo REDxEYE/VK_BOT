@@ -7,8 +7,12 @@ from bs4 import BeautifulSoup as BS
 
 
 class RssParser:
+    def __init__(self, url):
+        self.url = url
+        print('Rss bot loaded')
+
     class MLStripper(HTMLParser):
-        def __init__(self):
+        def __init__(self, url):
             super().__init__()
             self.reset()
             self.fed = []
@@ -27,10 +31,11 @@ class RssParser:
     def ConvertTime(self, date):
         return datetime.datetime.fromtimestamp(mktime(date))
 
-    def Parse(self, url):
+    def Parse(self):
         rss = []
+        url = self.url
         # python_wiki_rss_url = "http://www.oszone.net/rss-cat-2.xml"
-        feed = feedparser.parse(url)
+        feed = feedparser.parse('http://' + url)
         for I in feed['entries']:
             rssE = {}
             soup = BS(I['summary_detail']['value'], "html.parser")
@@ -48,6 +53,6 @@ class RssParser:
             rssE['img'] = img
             print('Link:', I['link'], '\n')
             rssE['ling'] = I['link']
-            rss.append()
+            rss.append(rssE)
 
-        return
+        return rss

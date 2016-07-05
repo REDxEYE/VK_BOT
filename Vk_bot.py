@@ -379,16 +379,34 @@ class VK_Bot:
         return command(args)
 
     def GetRss(self, args):
+        print('GetRss ', args)
+        comm = args['rss'].replace(" ", "").lower()
+        url = args['url']
+        rss = Vk_bot_RssModule.RssParser(url=url).Parse()
+        # rss = RssBot.Parse()
+        if comm == 'новости':
+            for r in rss:
+                print(r)
+                Margs = {}
+                Margs['v'] = 5.38
+                Margs['peer_id'] = args['args']['peer_id']
+                msg = r['date'] + '\n'
+                msg += r['title'] + '\n'
+                msg += r['link']
+                msg += r['img']
+                Margs['message'] = msg
+                self.Reply(self.UserApi, Margs)
+                sleep(0.25)
 
-        Vk_bot_RssModule.RssParser.Parse(args['rss'])
+
 
     def Reply(self, api, args):
         print('Reply:', args)
         sleep(0.2)
         try:
             rep = api.messages.send(**args)
-        except:
-            print("error couldn't send message")
+        except Exception as Ex:
+            print("error couldn't send message:", Ex)
             pass
 
     def CheckForCommands(self, data="", StartCommand="!Команда", count=10):
