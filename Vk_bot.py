@@ -19,6 +19,7 @@ V = 1.5
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger('vk')
 
+
 def getpath():
     return os.path.dirname(os.path.abspath(__file__))
 
@@ -195,6 +196,7 @@ class VK_Bot:
         self.UserApi = API(self.UserSession)
         self.GroupApi = API(self.GroupSession)
         self.MyUId = self.UserApi.users.get()[0]['uid']
+
     def ClearPosts(self, Posts=None, treshholdTime=10, treshholdLikes=10):
         if Posts == None:
             Posts = self.CheckWall(self.GroupDomain)
@@ -346,13 +348,13 @@ class VK_Bot:
     def AddUser(self, args):
         print('Adduser: ', args)
         if "группа" in args:
-            Group = args['группа']
+            Group = args['группа'].lower()
         else:
             Group = "user"
 
         if 'id' in args:
             print(Group in self.UserGroups)
-            if Group in self.UserGroups:
+            if Group in self.UserGroups.keys():
                 Ids = self.UserGroups[Group]
                 Ids.append(int(args['id']))
                 self.UserGroups[Group] = Ids
@@ -397,8 +399,6 @@ class VK_Bot:
                 Margs['message'] = msg
                 self.Reply(self.UserApi, Margs)
                 sleep(0.25)
-
-
 
     def Reply(self, api, args):
         print('Reply:', args)
@@ -472,7 +472,7 @@ class VK_Bot:
         if data != '':
 
             try:
-                if '!Команда' in data['message']:
+                if '!команда' in data['message']:
                     args['peer_id'] = data['peer_id']
                     args['v'] = 5.38
                     comm = data["message"]
@@ -481,36 +481,37 @@ class VK_Bot:
                     for C in comm:
                         C = C.split(":")
                         CommandDict[C[0].replace(" ", "").lower()] = C[1]
+                    Cmd = CommandDict['!команда'].replace(" ", "").lower()
+                    print('Command - ', Cmd)
                     CommandDict['args'] = args
+                    print(CommandDict)
                     if CommandDict["!команда"].replace(" ", "") in Commands:
-                        for group in self.UserGroups:
-                            if int(data['user_id']) in self.UserGroups[group]:
+                        for group in self.UserGroups.keys():
+
+                            if int(CommandDict['args']['peer_id']) in self.UserGroups[group]:
+                                print('user check - True')
                                 User_group = group
-                        if User_group in Commands[CommandDict["!команда"].replace(" ", "")][1] or ('all' in \
-                                                                                                           Commands[
-                                                                                                               CommandDict[
-                                                                                                                   "!команда"].replace(
-                                                                                                                   " ",
-                                                                                                                   "")][
-                                                                                                               1]):
-                            ret = self.ExecCommand(Commands[CommandDict["!команда"].replace(" ", "")][0], CommandDict)
+                                print('User group - ', User_group)
+                            else:
+                                continue
+                        Command_Users = Commands[Cmd][1]
+                        print('Users groups for command -', Cmd, ' - ', Command_Users)
+                        print('access check of user - ', User_group, ' - ', User_group in Command_Users)
+                        if (User_group in Command_Users) or ('all' in Command_Users):
+                            ret = self.ExecCommand(Commands[Cmd][0], CommandDict)
                         else:
                             ret = False
                             args['message'] = "Недостаточно прав"
                             self.Reply(self.UserApi, args)
-                            # self.GroupApi.messages.send(user_id=user_id, peer_id=self.Group, message="!Недостаточно прав",v="5.38")
                         if ret == True:
                             args['message'] = "Выполннено"
                             self.Reply(self.UserApi, args)
-                            # self.GroupApi.messages.send(user_id=user_id, peer_id=self.Group, message="!Выполннено",v="5.38")
                         else:
                             args['message'] = "Не удалось выполнить"
                             self.Reply(self.UserApi, args)
-                            # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group, message="!Не удалось выполнить",v="5.38")
                     else:
                         args['message'] = "Команда не распознана"
                         self.Reply(self.UserApi, args)
-                        # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group,message="Команда не распознана", v="5.38")
                 if (self.GetUserNameById(self.MyUId)['first_name'] + ',привет').lower().replace(' ', '') in data[
                     'message'].lower().replace(' ', ''):
                     args['peer_id'] = data['peer_id']
@@ -521,10 +522,14 @@ class VK_Bot:
                 args['peer_id'] = data['peer_id']
                 args['v'] = 5.38
                 print(sys.exc_info())
-
+                sleep(1)
                 args['message'] = "Не удалось выполнить, ошибка: " + str(Ex)
                 self.Reply(self.UserApi, args)
-
+        if '!команды' in data['message']:
+            args['peer_id'] = data['peer_id']
+            args['v'] = 5.38
+            args['message'] = Commands
+            self.Reply(self.UserApi, args)
 
     def getMus(self):
         music = self.UserApi.audio.get(count=6000)
@@ -541,8 +546,14 @@ class VK_Bot:
 
     def GetUserFormMessage(self, message_id):
         sleep(0.25)
-        uid = self.UserApi.messages.getById(message_id=message_id)[1]['uid']
-        return uid
+
+        try:
+            uid = self.UserApi.messages.getById(message_id=message_id)[1]['uid']
+            return uid
+        except:
+            sleep(1)
+            uid = self.UserApi.messages.getById(message_id=message_id)[1]['uid']
+            return uid
 
     def ContiniousMessageCheck(self, server=''):
         print('done')
@@ -604,8 +615,8 @@ class VK_Bot:
                         # print(user['first_name'],user['second_name'],' : ',text)
                         # if args['user_id'] != self.MyUId:
                         self.CheckForCommands(args)
-                            # self.Reply(self.UserApi,args)
-                            # return from_id,text,subject
+                        # self.Reply(self.UserApi,args)
+                        # return from_id,text,subject
                     except KeyError:
                         continue
 
