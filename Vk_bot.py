@@ -1,14 +1,17 @@
 import json
 import logging
 import logging.config
-import os
 import sys
 from datetime import datetime, timedelta
 from math import ceil
 from time import sleep
+from urllib.request import urlopen
 
 import requests
 
+from Mimimi_Api import *
+from tempfile_ import *
+# import VK_bot_GUI as GUI
 import Vk_bot_RssModule
 # import vk
 from vk.exceptions import VkAuthError, VkAPIError
@@ -196,7 +199,14 @@ class VK_Bot:
         self.UserApi = API(self.UserSession)
         self.GroupApi = API(self.GroupSession)
         self.MyUId = self.UserApi.users.get()[0]['uid']
+        self.MyName = self.GetUserNameById(self.MyUId)
 
+    def GetChatName(self, id):
+        url = 'https://api.vk.com/method/{}?{}&access_token={}'.format('messages.getChat', 'chat_id={}'.format(id),
+                                                                       self.Settings['UserAccess_token'])
+        resp = requests.get(url).json()
+
+        return resp['response']
     def ClearPosts(self, Posts=None, treshholdTime=10, treshholdLikes=10):
         if Posts == None:
             Posts = self.CheckWall(self.GroupDomain)
@@ -218,7 +228,7 @@ class VK_Bot:
         # print('GetUserNameById: ', Id)
         sleep(0.01)
         try:
-            User = self.UserApi.users.get(user_ids=Id)[0]
+            User = self.UserApi.users.get(user_ids=Id, fields=['sex'])[0]
         except:
             return None
         return User
@@ -384,17 +394,21 @@ class VK_Bot:
         print('GetRss ', args)
         comm = args['rss'].replace(" ", "").lower()
         url = args['url']
-        rss = Vk_bot_RssModule.RssParser(url=url).Parse()
+        rss = Vk_bot_RssModule.RssParser(url=url)
+        news = rss.Parse()
         # rss = RssBot.Parse()
         if comm == 'новости':
-            for r in rss:
+            for r in news:
                 print(r)
                 Margs = {}
                 Margs['v'] = 5.38
                 Margs['peer_id'] = args['args']['peer_id']
-                msg = r['date'] + '\n'
+                msg = str(r['date']) + '\n'
                 msg += r['title'] + '\n'
-                msg += r['link']
+                try:
+                    msg += r['link']
+                except:
+                    pass
                 msg += r['img']
                 Margs['message'] = msg
                 self.Reply(self.UserApi, Margs)
@@ -409,20 +423,77 @@ class VK_Bot:
             print("error couldn't send message:", Ex)
             pass
 
+    def GetUploadServer(self):
+        return self.UserApi.photos.getMessagesUploadServer()
+
+    def UploadPhoto(self, args, url):
+        R_args = {}
+        R_args['peer_id'] = args['peer_id']
+        # print(R_args)
+        R_args['v'] = 5.38
+
+        server = self.GetUploadServer()['upload_url']
+        img = urlopen(url).read()
+        Tmp = TempFile(img, 'jpg')
+        args = {}
+        args['server'] = server
+        # print('uploading')
+        req = requests.post(server, files={'photo': open(Tmp.file_(), 'rb')})
+        Tmp.rem()
+
+        # req = requests.post(server,files = {'photo':img})
+        if req.status_code == requests.codes.ok:
+
+            # print('req',req.json())
+            params = {'server': req.json()['server'], 'photo': req.json()['photo'], 'hash': req.json()['hash']}
+            photos = self.UserApi.photos.saveMessagesPhoto(**params)
+            # print(photos)
+            atts = []
+            for photo in photos:
+                atts.append(photo['id'])
+            R_args['message'] = 'фото'
+            R_args['attachment'] = atts
+            return atts
+
+    def Music(self, args):
+        name = args['имя']
+        T_args = {}
+        T_args['q'] = name
+        tracks = self.UserApi.audio.search(**T_args)[1:]
+
+        R_args = {}
+        atts = []
+        R_args['peer_id'] = args['args']['peer_id']
+        # print(R_args)
+        R_args['v'] = 5.38
+        R_args['message'] = 'Песни по запросу {}'.format(name)
+        print(tracks[0])
+        for track in tracks:
+            print(track)
+            atts.append('audio{}_{}'.format(track['owner_id'], track['aid']))
+        # print(atts)
+
+        R_args['attachment'] = atts
+        # print('ats',atts)
+        self.Reply(self.UserApi, R_args)
+        return True
+        #print(tracks)
     def CheckForCommands(self, data="", StartCommand="!Команда", count=10):
         user = self.GetUserNameById(self.GetUserFormMessage(data['message_id']))
 
         try:
-            toPrint = user['first_name'] + ' ' + user['last_name'] + " : " + str(
+            self.toPrint = user['first_name'] + ' ' + user['last_name'] + " : " + str(
                 data['message']) + '\n' + 'message_id : ' + str(data['message_id']) + '  peer_id : ' + str(
                 data['peer_id'])
-            print(toPrint)
+            print(self.toPrint)
         except:
             pass
 
         Commands = {
             'пост': [self.MakePost, ['admin', 'editor', 'moderator']],
             'бан': [self.BanUser, ['admin', 'editor', 'moderator']],
+            'музыка': [self.Music, ['admin', 'editor', 'moderator', 'user']],
+            #'фото': [self.UploadPhoto, ['admin', 'editor', 'moderator','user']],
             'добавить': [self.AddUser, ['admin']],
             'rss': [self.GetRss, ['admin', 'editor', 'moderator']]
         }
@@ -488,7 +559,7 @@ class VK_Bot:
                     if CommandDict["!команда"].replace(" ", "") in Commands:
                         for group in self.UserGroups.keys():
 
-                            if int(CommandDict['args']['peer_id']) in self.UserGroups[group]:
+                            if int(self.GetUserFormMessage(data['message_id'])) in self.UserGroups[group]:
                                 print('user check - True')
                                 User_group = group
                                 print('User group - ', User_group)
@@ -512,12 +583,28 @@ class VK_Bot:
                     else:
                         args['message'] = "Команда не распознана"
                         self.Reply(self.UserApi, args)
-                if (self.GetUserNameById(self.MyUId)['first_name'] + ',привет').lower().replace(' ', '') in data[
-                    'message'].lower().replace(' ', ''):
-                    args['peer_id'] = data['peer_id']
-                    args['v'] = 5.38
-                    args['message'] = 'Здравствуй, ' + self.GetUserNameById(data['user_id'])['first_name']
-                    self.Reply(self.UserApi, args)
+
+                try:
+                    if (self.MyName['first_name'] + ',привет').lower().replace(' ', '') in data[
+                        'message'].lower().replace(' ', ''):
+                        args['peer_id'] = data['peer_id']
+                        args['v'] = 5.38
+                        args['message'] = 'Здравствуй, ' + self.GetUserNameById(data['user_id'])['first_name']
+                        self.Reply(self.UserApi, args)
+                except:
+                    pass
+                try:
+                    if (self.MyName['first_name'] + ',котики').lower().replace(' ', '') in data[
+                        'message'].lower().replace(' ', ''):
+                        args['peer_id'] = data['peer_id']
+                        args['v'] = 5.38
+                        args['message'] = 'мимими, '
+                        Kotik = mimimi()
+                        att = self.UploadPhoto(data, Kotik)
+                        args['attachment'] = att
+                        self.Reply(self.UserApi, args)
+                except:
+                    pass
             except Exception as Ex:
                 args['peer_id'] = data['peer_id']
                 args['v'] = 5.38
@@ -557,15 +644,14 @@ class VK_Bot:
 
     def ContiniousMessageCheck(self, server=''):
         print('done')
-        while True:
 
+        while True:
+            #print(time.time())
             if (server == ''):
                 results = self.UserApi.messages.getLongPollServer()
-
                 key = results['key']
                 server = results['server']
                 ts = results['ts']
-
             results = self.LongPool(key, server, ts)
             try:
                 ts = results['ts']
@@ -575,7 +661,6 @@ class VK_Bot:
                 ts = ''
                 sleep(0.001)
                 continue
-
             try:
                 updates = results['updates']
             except (KeyError, TypeError):
@@ -584,19 +669,15 @@ class VK_Bot:
                 ts = ''
                 sleep(0.001)
                 continue
-
             if updates:
-
                 try:
                     s = updates[0]
                 except KeyError:
                     continue
-
                 try:
                     code = s[0]
                 except KeyError:
                     continue
-
                 if code == 4:
                     try:
                         args = {}
@@ -614,12 +695,56 @@ class VK_Bot:
                         # user =self.GetUserNameById(args['user_id'])
                         # print(user['first_name'],user['second_name'],' : ',text)
                         # if args['user_id'] != self.MyUId:
+                        #GUI.Gui.UpdateGUI(args)
                         self.CheckForCommands(args)
                         # self.Reply(self.UserApi,args)
                         # return from_id,text,subject
                     except KeyError:
                         continue
+                elif code == 8:
+                    try:
+                        user = self.GetUserNameById(s[1] * -1)
+                        if user['sex'] == 2:
+                            sex = 'Вошел'
+                        elif user['sex'] == 1:
+                            sex = 'Вошла'
+                        else:
+                            sex = 'Вошло'
+                        print(user['first_name'], user['last_name'], ' {} в сеть'.format(sex))
+                    except:
+                        continue
+                elif code == 9:
+                    try:
 
+                        user = self.GetUserNameById(s[1] * -1)
+                        try:
+                            if user['sex'] == 2:
+                                sex = 'Вышел'
+                            elif user['sex'] == 1:
+                                sex = 'Вышла'
+
+
+                        except:
+                            sex = 'Вышло'
+                        print(user['first_name'], user['last_name'], ' {} из сети'.format(sex))
+                    except KeyError:
+                        continue
+                elif code == 61:
+                    user = self.GetUserNameById(s[1])
+                    print(user['first_name'], user['last_name'], 'Набирает сообщение')
+                elif code == 62:
+                    user = self.GetUserNameById(s[1])
+
+                    arg = {}
+                    arg['chat_id'] = s[2]
+
+                    try:
+                        chat = self.UserApi.messages.getChat(**arg)
+                    except:
+                        chat = {}
+                        chat['title'] = 'Хз чё, но тута ошибка'
+
+                    print(user['first_name'], user['last_name'], 'Набирает сообщение в беседе', chat['title'])
                 try:
                     sflags = ''
                     if flags & 1:
@@ -643,12 +768,17 @@ class VK_Bot:
                     if flags & 512:
                         sflags = sflags + 'MEDIA '
                 except:
-                    pass
+                    continue
+
+
+
+
 
 
 A = VK_Bot()
 # print(A.CheckWall("5nights"))
-# A.ClearPosts()
+#A.ClearPosts()
+
 A.ContiniousMessageCheck()
 # print(A.getMus())
-# print(A.GetChats())
+#print(A.GetChats())

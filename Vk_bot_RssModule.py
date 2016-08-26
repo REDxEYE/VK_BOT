@@ -12,7 +12,7 @@ class RssParser:
         print('Rss bot loaded')
 
     class MLStripper(HTMLParser):
-        def __init__(self, url):
+        def __init__(self):
             super().__init__()
             self.reset()
             self.fed = []
