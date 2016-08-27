@@ -13,12 +13,13 @@ from Mimimi_Api import *
 from tempfile_ import *
 # import VK_bot_GUI as GUI
 import Vk_bot_RssModule
+import e621_Api as e6
 # import vk
 from vk.exceptions import VkAuthError, VkAPIError
 from vk.logs import LOGGING_CONFIG
 from vk.utils import stringify_values, json_iter_parse, LoggingSession, str_type
 
-V = 1.5
+V = 3.0
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger('vk')
 
@@ -426,34 +427,44 @@ class VK_Bot:
     def GetUploadServer(self):
         return self.UserApi.photos.getMessagesUploadServer()
 
-    def UploadPhoto(self, args, url):
-        R_args = {}
-        R_args['peer_id'] = args['peer_id']
-        # print(R_args)
-        R_args['v'] = 5.38
+    def UploadPhoto(self, args, urls):
+        atts = []
+        hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+       'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+       'Accept-Encoding': 'none',
+       'Accept-Language': 'en-US,en;q=0.8',
+       'Connection': 'keep-alive'}
+        if type(urls) != type(['1','2']):
+            urls = [urls]
+        i = 0
+        for url in urls:
+            i +=1
+            server = self.GetUploadServer()['upload_url']
+            req = urllib.request.Request(url, headers=hdr)
+            img = urlopen(req).read()
+            Tmp = TempFile(img, 'jpg')
+            args = {}
+            args['server'] = server
+            # print('uploading')
 
-        server = self.GetUploadServer()['upload_url']
-        img = urlopen(url).read()
-        Tmp = TempFile(img, 'jpg')
-        args = {}
-        args['server'] = server
-        # print('uploading')
-        req = requests.post(server, files={'photo': open(Tmp.file_(), 'rb')})
-        Tmp.rem()
+            req = requests.post(server, files={'photo': open(Tmp.file_(), 'rb')})
+            Tmp.rem()
 
-        # req = requests.post(server,files = {'photo':img})
-        if req.status_code == requests.codes.ok:
+            # req = requests.post(server,files = {'photo':img})
+            if req.status_code == requests.codes.ok:
+                    # print('req',req.json())
+                    photo = 'photo'+str(i)
+                    try:
+                        params = {'server': req.json()['server'], 'photo': req.json()['photo'], 'hash': req.json()['hash']}
+                        photos = self.UserApi.photos.saveMessagesPhoto(**params)
+                        for photo in photos:
+                            atts.append(photo['id'])
+                    except:
+                        continue
 
-            # print('req',req.json())
-            params = {'server': req.json()['server'], 'photo': req.json()['photo'], 'hash': req.json()['hash']}
-            photos = self.UserApi.photos.saveMessagesPhoto(**params)
-            # print(photos)
-            atts = []
-            for photo in photos:
-                atts.append(photo['id'])
-            R_args['message'] = 'фото'
-            R_args['attachment'] = atts
-            return atts
+
+        return atts
 
     def Music(self, args):
         name = args['имя']
@@ -478,6 +489,32 @@ class VK_Bot:
         self.Reply(self.UserApi, R_args)
         return True
         #print(tracks)
+    def e621(self,args):
+        R_args = {}
+        print(args)
+        R_args['peer_id'] = args['args']['peer_id']
+        tags = args['tags'].split(';')
+        n = int(args['n'])
+        imgs = e6.get(tags = tags,n = n)
+        atts = self.UploadPhoto(args,imgs)
+        R_args['attachment'] = atts
+        R_args['v'] = 5.38
+        R_args['message'] = 'Вот порнушка по твоему запросу, шалунишка...'
+        self.Reply(self.UserApi,R_args)
+        return True
+    def e926(self,args):
+        R_args = {}
+        print(args)
+        R_args['peer_id'] = args['args']['peer_id']
+        tags = args['tags'].split(';')
+        n = int(args['n'])
+        imgs = e6.getSafe(tags = tags,n = n)
+        atts = self.UploadPhoto(args,imgs)
+        R_args['attachment'] = atts
+        R_args['v'] = 5.38
+        R_args['message'] = 'Вот картиночки по твоему запросу'
+        self.Reply(self.UserApi,R_args)
+        return True
     def CheckForCommands(self, data="", StartCommand="!Команда", count=10):
         user = self.GetUserNameById(self.GetUserFormMessage(data['message_id']))
 
@@ -493,6 +530,8 @@ class VK_Bot:
             'пост': [self.MakePost, ['admin', 'editor', 'moderator']],
             'бан': [self.BanUser, ['admin', 'editor', 'moderator']],
             'музыка': [self.Music, ['admin', 'editor', 'moderator', 'user']],
+            'e621': [self.e621, ['admin', 'editor', 'moderator']],
+            'e926': [self.e926, ['admin', 'editor', 'moderator', 'user']],
             #'фото': [self.UploadPhoto, ['admin', 'editor', 'moderator','user']],
             'добавить': [self.AddUser, ['admin']],
             'rss': [self.GetRss, ['admin', 'editor', 'moderator']]
@@ -575,7 +614,7 @@ class VK_Bot:
                             args['message'] = "Недостаточно прав"
                             self.Reply(self.UserApi, args)
                         if ret == True:
-                            args['message'] = "Выполннено"
+                            args['message'] = "Выполнено"
                             self.Reply(self.UserApi, args)
                         else:
                             args['message'] = "Не удалось выполнить"
