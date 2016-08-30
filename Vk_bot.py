@@ -1,6 +1,8 @@
 import json
 import logging
 import logging.config
+import random
+import re
 import sys
 from datetime import datetime, timedelta
 from math import ceil
@@ -9,6 +11,7 @@ from urllib.request import urlopen
 
 import requests
 
+import DA_Api as D_A
 from Mimimi_Api import *
 from tempfile_ import *
 # import VK_bot_GUI as GUI
@@ -18,7 +21,8 @@ import e621_Api as e6
 from vk.exceptions import VkAuthError, VkAPIError
 from vk.logs import LOGGING_CONFIG
 from vk.utils import stringify_values, json_iter_parse, LoggingSession, str_type
-
+import queue
+import threading
 V = 3.0
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger('vk')
@@ -185,12 +189,22 @@ class Request(object):
     def __call__(self, **method_args):
         self._method_args = method_args
         return self._api._session.make_request(self)
-
-
 class VK_Bot:
-    def __init__(self):
+    def __init__(self, threads=4):
+        self.Checkqueue = queue.Queue()
+        self.Replyqueue = queue.Queue()
         print('Loading')
         self.LoadConfig()
+        for _ in range(threads):
+            self.t = threading.Thread(target=self.CheckForCommands)
+            self.t.setDaemon(True)
+            self.t.start()
+            print('Поток обработки сообщений создан')
+        self.y = threading.Thread(target=self.Reply)
+        self.y.setDaemon(True)
+        self.y.start()
+        print('Поток обработки ответов создан')
+
         self.Group = self.Settings['Group']
         self.GroupDomain = self.Settings['Domain']
         self.GroupAccess_token = self.Settings['GroupAccess_token']
@@ -201,13 +215,16 @@ class VK_Bot:
         self.GroupApi = API(self.GroupSession)
         self.MyUId = self.UserApi.users.get()[0]['uid']
         self.MyName = self.GetUserNameById(self.MyUId)
-
+        self.hello = re.compile(
+            '(прив(|а|ет(|ик)(|ствую))|ку(|(-| )ку|)|х(а|е)й|зд((о|а)ров(а|)|ра(е|ь)|вствуй(|те)))|добр(ое|ый) (день|утро|вечер)')
+        self.oldMsg = ""
     def GetChatName(self, id):
         url = 'https://api.vk.com/method/{}?{}&access_token={}'.format('messages.getChat', 'chat_id={}'.format(id),
                                                                        self.Settings['UserAccess_token'])
         resp = requests.get(url).json()
 
         return resp['response']
+
     def ClearPosts(self, Posts=None, treshholdTime=10, treshholdLikes=10):
         if Posts == None:
             Posts = self.CheckWall(self.GroupDomain)
@@ -379,7 +396,8 @@ class VK_Bot:
             MArgs['message'] = userName['first_name'] + ' ' + userName['last_name'] + ' был добавлен как ' + Group
             MArgs['v'] = 5.38
             print('Adduser reply: ', MArgs)
-            self.Reply(self.UserApi, MArgs)
+            # self.Reply(self.UserApi, MArgs)
+            self.Replyqueue.put(MArgs)
             self.SaveConfig()
 
             return True
@@ -412,58 +430,64 @@ class VK_Bot:
                     pass
                 msg += r['img']
                 Margs['message'] = msg
-                self.Reply(self.UserApi, Margs)
+                # self.Reply(self.UserApi, Margs)
+                self.Replyqueue.put(Margs)
                 sleep(0.25)
 
-    def Reply(self, api, args):
-        print('Reply:', args)
-        sleep(0.2)
-        try:
-            rep = api.messages.send(**args)
-        except Exception as Ex:
-            print("error couldn't send message:", Ex)
-            pass
+    def Reply(self):
+        print('Unfinished Reply tasks:', self.Replyqueue.unfinished_tasks)
+        while True:
+            args = self.Replyqueue.get()
+            print('Reply:', args)
+            sleep(1)
+            try:
+                self.UserApi.messages.send(**args)
+            except Exception as Ex:
+                print("error couldn't send message:", Ex)
+                args['message'] += '\nФлудконтроль:{}'.format(randint(0, 255))
+                self.Replyqueue.put(args)
+            self.Replyqueue.task_done()
+
 
     def GetUploadServer(self):
         return self.UserApi.photos.getMessagesUploadServer()
 
-    def UploadPhoto(self, args, urls):
+    def UploadPhoto(self, urls):
         atts = []
-        hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-       'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-       'Accept-Encoding': 'none',
-       'Accept-Language': 'en-US,en;q=0.8',
-       'Connection': 'keep-alive'}
-        if type(urls) != type(['1','2']):
+        hdr = {
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+            'Accept-Encoding': 'none',
+            'Accept-Language': 'en-US,en;q=0.8',
+            'Connection': 'keep-alive'}
+        if type(urls) != type(['1', '2']):
             urls = [urls]
         i = 0
         for url in urls:
-            i +=1
+            i += 1
             server = self.GetUploadServer()['upload_url']
             req = urllib.request.Request(url, headers=hdr)
             img = urlopen(req).read()
             Tmp = TempFile(img, 'jpg')
             args = {}
             args['server'] = server
-            # print('uploading')
-
+            print('uploading')
             req = requests.post(server, files={'photo': open(Tmp.file_(), 'rb')})
+            print('Uploaded')
             Tmp.rem()
 
             # req = requests.post(server,files = {'photo':img})
             if req.status_code == requests.codes.ok:
-                    # print('req',req.json())
-                    photo = 'photo'+str(i)
-                    try:
-                        params = {'server': req.json()['server'], 'photo': req.json()['photo'], 'hash': req.json()['hash']}
-                        photos = self.UserApi.photos.saveMessagesPhoto(**params)
-                        for photo in photos:
-                            atts.append(photo['id'])
-                    except:
-                        continue
-
-
+                # print('req',req.json())
+                photo = 'photo' + str(i)
+                try:
+                    params = {'server': req.json()['server'], 'photo': req.json()['photo'], 'hash': req.json()['hash']}
+                    photos = self.UserApi.photos.saveMessagesPhoto(**params)
+                    for photo in photos:
+                        atts.append(photo['id'])
+                except:
+                    continue
         return atts
 
     def Music(self, args):
@@ -486,176 +510,265 @@ class VK_Bot:
 
         R_args['attachment'] = atts
         # print('ats',atts)
-        self.Reply(self.UserApi, R_args)
+        # self.Reply(self.UserApi, R_args)
+        self.Replyqueue.put(R_args)
+
         return True
-        #print(tracks)
-    def e621(self,args):
+        # print(tracks)
+
+    def e621(self, args):
         R_args = {}
         print(args)
         R_args['peer_id'] = args['args']['peer_id']
         tags = args['tags'].split(';')
         n = int(args['n'])
-        imgs = e6.get(tags = tags,n = n)
-        atts = self.UploadPhoto(args,imgs)
+        try:
+            page = int(args['page'])
+        except:
+            page = 1
+        try:
+            sort_ = args['sort']
+        except:
+            sort_ = 'random'
+        imgs = e6.get(tags=tags, n=n, page=page, sort_=sort_)
+        atts = self.UploadPhoto(imgs)
         R_args['attachment'] = atts
         R_args['v'] = 5.38
         R_args['message'] = 'Вот порнушка по твоему запросу, шалунишка...'
-        self.Reply(self.UserApi,R_args)
+        # self.Reply(self.UserApi, R_args)
+        self.Replyqueue.put(R_args)
+
         return True
-    def e926(self,args):
+
+    def D_A(self, args):
+        R_args = {}
+        R_args['peer_id'] = args['args']['peer_id']
+        R_args['v'] = 5.38
+        try:
+            try:
+                tag = args['tag'].split(';')
+            except:
+                tag = args['user']
+        except:
+            return False
+        try:
+            n = int(args['n'])
+        except:
+            n = 5
+
+        try:
+            func = args['func']
+        except:
+            funk = 'search'
+        if func == "search":
+            imgs, _ = D_A.search(tag)
+            R_args['message'] = 'Фото по тэгу {} с сайта Deviantart'.format(' '.join(tag))
+        elif funk == 'user':
+            imgs, _ = D_A.user(tag)
+            R_args['message'] = 'Фото от пользователя {} с сайта Deviantart'.format(' '.join(tag))
+        print(imgs)
+        atts = self.UploadPhoto(imgs[:n])
+        R_args['attachment'] = atts
+        # self.Reply(self.UserApi,R_args)
+        self.Replyqueue.put(args)
+        return True
+
+    def e926(self, args):
         R_args = {}
         print(args)
         R_args['peer_id'] = args['args']['peer_id']
         tags = args['tags'].split(';')
         n = int(args['n'])
-        imgs = e6.getSafe(tags = tags,n = n)
-        atts = self.UploadPhoto(args,imgs)
+        try:
+            page = int(args['page'])
+        except:
+            page = 1
+        try:
+            sort_ = args['sort']
+        except:
+            sort_ = 'random'
+
+        imgs = e6.getSafe(tags=tags, n=n, page=page, sort_=sort_)
+        atts = self.UploadPhoto(imgs)
+
+
         R_args['attachment'] = atts
         R_args['v'] = 5.38
-        R_args['message'] = 'Вот картиночки по твоему запросу'
-        self.Reply(self.UserApi,R_args)
+        R_args['message'] = 'Вот картиночки по твоему запросу:\n'
+        for img in imgs:
+            R_args['message'] += '{}\n'.format(img)
+        # self.Reply(self.UserApi, R_args)
+        self.Replyqueue.put(R_args)
+
         return True
-    def CheckForCommands(self, data="", StartCommand="!Команда", count=10):
-        user = self.GetUserNameById(self.GetUserFormMessage(data['message_id']))
 
-        try:
-            self.toPrint = user['first_name'] + ' ' + user['last_name'] + " : " + str(
-                data['message']) + '\n' + 'message_id : ' + str(data['message_id']) + '  peer_id : ' + str(
-                data['peer_id'])
-            print(self.toPrint)
-        except:
-            pass
-
-        Commands = {
-            'пост': [self.MakePost, ['admin', 'editor', 'moderator']],
-            'бан': [self.BanUser, ['admin', 'editor', 'moderator']],
-            'музыка': [self.Music, ['admin', 'editor', 'moderator', 'user']],
-            'e621': [self.e621, ['admin', 'editor', 'moderator']],
-            'e926': [self.e926, ['admin', 'editor', 'moderator', 'user']],
-            #'фото': [self.UploadPhoto, ['admin', 'editor', 'moderator','user']],
-            'добавить': [self.AddUser, ['admin']],
-            'rss': [self.GetRss, ['admin', 'editor', 'moderator']]
-        }
-        CommandDict = {}
-        args = {}
-        # if data == '':
-        #    Dialogs = self.GroupApi.messages.getDialogs(count=count)
-        #    for Dialog in Dialogs[1:]:
-        #        # print(Dialog)
-        #        if StartCommand in Dialog['body']:
-        #            user_id = Dialog["uid"]
-        #            args['user_id'] = user_id
-        #            args['peer_id'] = self.Group
-        #            args['v'] = '5.38'
-        #            User_group = 'user'
-        #            comm = Dialog["body"]
-        #            comm = comm.split("<br>")
-        #            for C in comm:
-        #                C = C.split(":")
-        #                CommandDict[C[0].replace(" ", "").lower()] = C[1]
-        #                CommandDict['args'] = args
-        #            print(CommandDict)
-        #            if CommandDict["!команда"].replace(" ", "") in Commands:
-        #                for group in self.UserGroups:
-        #                    if int(user_id) in self.UserGroups[group]:
-        #                        User_group = group
-        #                if User_group in Commands[CommandDict["!команда"].replace(" ", "")][1] or 'all' in \
-        #                        Commands[CommandDict["!команда"].replace(" ", "")][1]:
-        #                    ret = self.ExecCommand(Commands[CommandDict["!команда"].replace(" ", "")][0], CommandDict)
-        #                else:
-        #                    ret = False
-        #                    args['message'] = "!Недостаточно прав"
-        #                    self.Reply(self.GroupApi, args)
-        #                    # self.GroupApi.messages.send(user_id=user_id, peer_id=self.Group, message="!Недостаточно прав",v="5.38")
-        #                if ret == True:
-        #                    args['message'] = "!Выполннено"
-        #                    self.Reply(self.GroupApi, args)
-        #                    # self.GroupApi.messages.send(user_id=user_id, peer_id=self.Group, message="!Выполннено",v="5.38")
-        #                else:
-        #                    args['message'] = "!Не удалось выполнить"
-        #                    self.Reply(self.GroupApi, args)
-        #                    # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group, message="!Не удалось выполнить",v="5.38")
-        #            else:
-        #                args['message'] = "!Команда не распознана"
-        #                self.Reply(self.GroupApi, args)
-        #                # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group,message="Команда не распознана", v="5.38")
-        if data != '':
+    def CheckForCommands(self):
+        while True:
+            print('Unfinished Check tasks:', self.Checkqueue.unfinished_tasks)
+            sleep(1)
+            data = self.Checkqueue.get()
+            user = self.GetUserNameById(self.GetUserFormMessage(data['message_id']))
 
             try:
-                if '!команда' in data['message']:
+                self.toPrint = user['first_name'] + ' ' + user['last_name'] + " : " + str(
+                    data['message']) + '\n' + 'message_id : ' + str(data['message_id']) + '  peer_id : ' + str(
+                    data['peer_id'])
+                print(self.toPrint)
+            except:
+                pass
+
+            Commands = {
+                'пост': [self.MakePost, ['admin', 'editor', 'moderator']],
+                'бан': [self.BanUser, ['admin', 'editor', 'moderator']],
+                'музыка': [self.Music, ['admin', 'editor', 'moderator', 'user']],
+                'e621': [self.e621, ['admin', 'editor', 'moderator']],
+                'e926': [self.e926, ['admin', 'editor', 'moderator', 'user']],
+                'd_a': [self.D_A, ['admin', 'editor', 'moderator', 'user']],
+                # 'фото': [self.UploadPhoto, ['admin', 'editor', 'moderator','user']],
+                'добавить': [self.AddUser, ['admin']],
+                'rss': [self.GetRss, ['admin', 'editor', 'moderator']]
+            }
+            CommandDict = {}
+            args = {}
+            # if data == '':
+            #    Dialogs = self.GroupApi.messages.getDialogs(count=count)
+            #    for Dialog in Dialogs[1:]:
+            #        # print(Dialog)
+            #        if StartCommand in Dialog['body']:
+            #            user_id = Dialog["uid"]
+            #            args['user_id'] = user_id
+            #            args['peer_id'] = self.Group
+            #            args['v'] = '5.38'
+            #            User_group = 'user'
+            #            comm = Dialog["body"]
+            #            comm = comm.split("<br>")
+            #            for C in comm:
+            #                C = C.split(":")
+            #                CommandDict[C[0].replace(" ", "").lower()] = C[1]
+            #                CommandDict['args'] = args
+            #            print(CommandDict)
+            #            if CommandDict["!команда"].replace(" ", "") in Commands:
+            #                for group in self.UserGroups:
+            #                    if int(user_id) in self.UserGroups[group]:
+            #                        User_group = group
+            #                if User_group in Commands[CommandDict["!команда"].replace(" ", "")][1] or 'all' in \
+            #                        Commands[CommandDict["!команда"].replace(" ", "")][1]:
+            #                    ret = self.ExecCommand(Commands[CommandDict["!команда"].replace(" ", "")][0], CommandDict)
+            #                else:
+            #                    ret = False
+            #                    args['message'] = "!Недостаточно прав"
+            #                    self.Reply(self.GroupApi, args)
+            #                    # self.GroupApi.messages.send(user_id=user_id, peer_id=self.Group, message="!Недостаточно прав",v="5.38")
+            #                if ret == True:
+            #                    args['message'] = "!Выполннено"
+            #                    self.Reply(self.GroupApi, args)
+            #                    # self.GroupApi.messages.send(user_id=user_id, peer_id=self.Group, message="!Выполннено",v="5.38")
+            #                else:
+            #                    args['message'] = "!Не удалось выполнить"
+            #                    self.Reply(self.GroupApi, args)
+            #                    # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group, message="!Не удалось выполнить",v="5.38")
+            #            else:
+            #                args['message'] = "!Команда не распознана"
+            #                self.Reply(self.GroupApi, args)
+            #                # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group,message="Команда не распознана", v="5.38")
+            if data != '':
+
+                try:
+                    if '!команда' in data['message']:
+                        args['peer_id'] = data['peer_id']
+                        args['v'] = 5.38
+                        comm = data["message"]
+                        comm = comm.split("<br>")
+                        User_group = 'user'
+                        for C in comm:
+                            C = C.split(":")
+                            CommandDict[C[0].replace(" ", "").lower()] = ':'.join(C[1:])
+                        Cmd = CommandDict['!команда'].replace(" ", "").lower()
+                        print('Command - ', Cmd)
+                        CommandDict['args'] = args
+                        print(CommandDict)
+                        if CommandDict["!команда"].replace(" ", "").lower() in Commands:
+                            for group in self.UserGroups.keys():
+
+                                if int(self.GetUserFormMessage(data['message_id'])) in self.UserGroups[group]:
+                                    print('user check - True')
+                                    User_group = group
+                                    print('User group - ', User_group)
+                                else:
+                                    continue
+                            Command_Users = Commands[Cmd][1]
+                            print('Users groups for command -', Cmd, ' - ', Command_Users)
+                            print('access check of user - ', User_group, ' - ', User_group in Command_Users)
+                            if (User_group in Command_Users) or ('all' in Command_Users):
+                                ret = self.ExecCommand(Commands[Cmd][0], CommandDict)
+                            else:
+                                ret = False
+                                args['message'] = "Недостаточно прав"
+                                # self.Reply(self.UserApi, args)
+                                self.Replyqueue.put(args)
+                            if ret == True:
+                                args['message'] = "Выполнено"
+                                # self.Reply(self.UserApi, args)
+                                self.Replyqueue.put(args)
+                                self.Checkqueue.task_done()
+                                continue
+                            else:
+                                args['message'] = "Не удалось выполнить"
+                                # self.Reply(self.UserApi, args)
+                                self.Replyqueue.put(args)
+                        else:
+                            args['message'] = "Команда не распознана"
+                            # self.Reply(self.UserApi, args)
+                            self.Replyqueue.put(args)
+
+                    try:
+                        if (self.MyName['first_name'].lower() in data['message'].lower()):
+                            if self.hello.search(data['message'], re.IGNORECASE):
+                                args['peer_id'] = data['peer_id']
+                                args['v'] = 5.38
+                                replies = ["Здравствуй {}", "Хай {}", "Здравия {}", "привет {}"]
+                                msg = random.choice(replies)
+
+                                while self.oldMsg == msg:
+                                    msg = random.choice(replies)
+
+                                args['message'] = msg.format(self.GetUserNameById(data['user_id'])['first_name'])
+                                # self.Reply(self.UserApi, args)
+                                self.Replyqueue.put(args)
+                                self.oldMsg = msg
+                    except:
+                        pass
+                    try:
+                        if (self.MyName['first_name'] + ',котики').lower().replace(' ', '') in data[
+                            'message'].lower().replace(' ', ''):
+                            args['peer_id'] = data['peer_id']
+                            args['v'] = 5.38
+                            args['message'] = 'мимими, '
+                            Kotik = mimimi()
+                            att = self.UploadPhoto(Kotik)
+                            args['attachment'] = att
+                            # self.Reply(self.UserApi, args)
+                            self.Replyqueue.put(args)
+                    except:
+                        pass
+                except Exception as Ex:
                     args['peer_id'] = data['peer_id']
                     args['v'] = 5.38
-                    comm = data["message"]
-                    comm = comm.split("<br>")
-                    User_group = 'user'
-                    for C in comm:
-                        C = C.split(":")
-                        CommandDict[C[0].replace(" ", "").lower()] = C[1]
-                    Cmd = CommandDict['!команда'].replace(" ", "").lower()
-                    print('Command - ', Cmd)
-                    CommandDict['args'] = args
-                    print(CommandDict)
-                    if CommandDict["!команда"].replace(" ", "") in Commands:
-                        for group in self.UserGroups.keys():
-
-                            if int(self.GetUserFormMessage(data['message_id'])) in self.UserGroups[group]:
-                                print('user check - True')
-                                User_group = group
-                                print('User group - ', User_group)
-                            else:
-                                continue
-                        Command_Users = Commands[Cmd][1]
-                        print('Users groups for command -', Cmd, ' - ', Command_Users)
-                        print('access check of user - ', User_group, ' - ', User_group in Command_Users)
-                        if (User_group in Command_Users) or ('all' in Command_Users):
-                            ret = self.ExecCommand(Commands[Cmd][0], CommandDict)
-                        else:
-                            ret = False
-                            args['message'] = "Недостаточно прав"
-                            self.Reply(self.UserApi, args)
-                        if ret == True:
-                            args['message'] = "Выполнено"
-                            self.Reply(self.UserApi, args)
-                        else:
-                            args['message'] = "Не удалось выполнить"
-                            self.Reply(self.UserApi, args)
-                    else:
-                        args['message'] = "Команда не распознана"
-                        self.Reply(self.UserApi, args)
-
-                try:
-                    if (self.MyName['first_name'] + ',привет').lower().replace(' ', '') in data[
-                        'message'].lower().replace(' ', ''):
-                        args['peer_id'] = data['peer_id']
-                        args['v'] = 5.38
-                        args['message'] = 'Здравствуй, ' + self.GetUserNameById(data['user_id'])['first_name']
-                        self.Reply(self.UserApi, args)
-                except:
-                    pass
-                try:
-                    if (self.MyName['first_name'] + ',котики').lower().replace(' ', '') in data[
-                        'message'].lower().replace(' ', ''):
-                        args['peer_id'] = data['peer_id']
-                        args['v'] = 5.38
-                        args['message'] = 'мимими, '
-                        Kotik = mimimi()
-                        att = self.UploadPhoto(data, Kotik)
-                        args['attachment'] = att
-                        self.Reply(self.UserApi, args)
-                except:
-                    pass
-            except Exception as Ex:
+                    print(sys.exc_info())
+                    sleep(1)
+                    if 'many requests per second' in str(Ex):
+                        self.Checkqueue.put(data)
+                        continue
+                    args['message'] = "Не удалось выполнить, ошибка: " + str(Ex)
+                    # self.Reply(self.UserApi, args)
+                    self.Replyqueue.put(args)
+            if '!команды' in data['message']:
                 args['peer_id'] = data['peer_id']
                 args['v'] = 5.38
-                print(sys.exc_info())
-                sleep(1)
-                args['message'] = "Не удалось выполнить, ошибка: " + str(Ex)
-                self.Reply(self.UserApi, args)
-        if '!команды' in data['message']:
-            args['peer_id'] = data['peer_id']
-            args['v'] = 5.38
-            args['message'] = Commands
-            self.Reply(self.UserApi, args)
+                args['message'] = str(Commands)
+                # self.Reply(self.UserApi, args)
+                self.Replyqueue.put(args)
+            self.Checkqueue.task_done()
 
     def getMus(self):
         music = self.UserApi.audio.get(count=6000)
@@ -685,7 +798,7 @@ class VK_Bot:
         print('done')
 
         while True:
-            #print(time.time())
+            # print(time.time())
             if (server == ''):
                 results = self.UserApi.messages.getLongPollServer()
                 key = results['key']
@@ -734,8 +847,9 @@ class VK_Bot:
                         # user =self.GetUserNameById(args['user_id'])
                         # print(user['first_name'],user['second_name'],' : ',text)
                         # if args['user_id'] != self.MyUId:
-                        #GUI.Gui.UpdateGUI(args)
-                        self.CheckForCommands(args)
+                        # GUI.Gui.UpdateGUI(args)
+                        self.Checkqueue.put(args)
+                        #self.CheckForCommands(args)
                         # self.Reply(self.UserApi,args)
                         # return from_id,text,subject
                     except KeyError:
@@ -743,14 +857,15 @@ class VK_Bot:
                 elif code == 8:
                     try:
                         user = self.GetUserNameById(s[1] * -1)
-                        if user['sex'] == 2:
-                            sex = 'Вошел'
-                        elif user['sex'] == 1:
-                            sex = 'Вошла'
-                        else:
+                        try:
+                            if user['sex'] == 2:
+                                sex = 'Вошел'
+                            elif user['sex'] == 1:
+                                sex = 'Вошла'
+                        except:
                             sex = 'Вошло'
                         print(user['first_name'], user['last_name'], ' {} в сеть'.format(sex))
-                    except:
+                    except KeyError:
                         continue
                 elif code == 9:
                     try:
@@ -765,12 +880,18 @@ class VK_Bot:
 
                         except:
                             sex = 'Вышло'
-                        print(user['first_name'], user['last_name'], ' {} из сети'.format(sex))
+                        try:
+                            print(user['first_name'], user['last_name'], ' {} из сети'.format(sex))
+                        except:
+                            print('Что-то пошло не так при выходе из сети')
                     except KeyError:
                         continue
                 elif code == 61:
-                    user = self.GetUserNameById(s[1])
-                    print(user['first_name'], user['last_name'], 'Набирает сообщение')
+                    try:
+                        user = self.GetUserNameById(s[1])
+                        print(user['first_name'], user['last_name'], 'Набирает сообщение')
+                    except:
+                        continue
                 elif code == 62:
                     user = self.GetUserNameById(s[1])
 
@@ -783,7 +904,10 @@ class VK_Bot:
                         chat = {}
                         chat['title'] = 'Хз чё, но тута ошибка'
 
-                    print(user['first_name'], user['last_name'], 'Набирает сообщение в беседе', chat['title'])
+                    try:
+                        print(user['first_name'], user['last_name'], 'Набирает сообщение в беседе', chat['title'])
+                    except:
+                        continue
                 try:
                     sflags = ''
                     if flags & 1:
@@ -810,14 +934,10 @@ class VK_Bot:
                     continue
 
 
-
-
-
-
 A = VK_Bot()
 # print(A.CheckWall("5nights"))
-#A.ClearPosts()
+# A.ClearPosts()
 
 A.ContiniousMessageCheck()
 # print(A.getMus())
-#print(A.GetChats())
+# print(A.GetChats())
