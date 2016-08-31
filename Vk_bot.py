@@ -1,3 +1,4 @@
+import atexit
 import json
 import logging
 import logging.config
@@ -191,6 +192,7 @@ class Request(object):
         return self._api._session.make_request(self)
 class VK_Bot:
     def __init__(self, threads=4):
+
         self.Checkqueue = queue.Queue()
         self.Replyqueue = queue.Queue()
         print('Loading')
@@ -218,6 +220,11 @@ class VK_Bot:
         self.hello = re.compile(
             '(прив(|а|ет(|ик)(|ствую))|ку(|(-| )ку|)|х(а|е)й|зд((о|а)ров(а|)|ра(е|ь)|вствуй(|те)))|добр(ое|ый) (день|утро|вечер)')
         self.oldMsg = ""
+        self.OldStat = self.UserApi.status.get()['text']
+        self.UserApi.status.set(text="Bot online")
+
+        print(self.OldStat)
+
     def GetChatName(self, id):
         url = 'https://api.vk.com/method/{}?{}&access_token={}'.format('messages.getChat', 'chat_id={}'.format(id),
                                                                        self.Settings['UserAccess_token'])
@@ -472,9 +479,9 @@ class VK_Bot:
             Tmp = TempFile(img, 'jpg')
             args = {}
             args['server'] = server
-            print('uploading')
+            print('uploading photo №{}'.format(i))
             req = requests.post(server, files={'photo': open(Tmp.file_(), 'rb')})
-            print('Uploaded')
+            print('Done')
             Tmp.rem()
 
             # req = requests.post(server,files = {'photo':img})
@@ -559,18 +566,18 @@ class VK_Bot:
         try:
             func = args['func']
         except:
-            funk = 'search'
+            func = 'search'
         if func == "search":
             imgs, _ = D_A.search(tag)
             R_args['message'] = 'Фото по тэгу {} с сайта Deviantart'.format(' '.join(tag))
-        elif funk == 'user':
+        elif func == 'user':
             imgs, _ = D_A.user(tag)
             R_args['message'] = 'Фото от пользователя {} с сайта Deviantart'.format(' '.join(tag))
         print(imgs)
         atts = self.UploadPhoto(imgs[:n])
         R_args['attachment'] = atts
         # self.Reply(self.UserApi,R_args)
-        self.Replyqueue.put(args)
+        self.Replyqueue.put(R_args)
         return True
 
     def e926(self, args):
@@ -630,47 +637,6 @@ class VK_Bot:
             }
             CommandDict = {}
             args = {}
-            # if data == '':
-            #    Dialogs = self.GroupApi.messages.getDialogs(count=count)
-            #    for Dialog in Dialogs[1:]:
-            #        # print(Dialog)
-            #        if StartCommand in Dialog['body']:
-            #            user_id = Dialog["uid"]
-            #            args['user_id'] = user_id
-            #            args['peer_id'] = self.Group
-            #            args['v'] = '5.38'
-            #            User_group = 'user'
-            #            comm = Dialog["body"]
-            #            comm = comm.split("<br>")
-            #            for C in comm:
-            #                C = C.split(":")
-            #                CommandDict[C[0].replace(" ", "").lower()] = C[1]
-            #                CommandDict['args'] = args
-            #            print(CommandDict)
-            #            if CommandDict["!команда"].replace(" ", "") in Commands:
-            #                for group in self.UserGroups:
-            #                    if int(user_id) in self.UserGroups[group]:
-            #                        User_group = group
-            #                if User_group in Commands[CommandDict["!команда"].replace(" ", "")][1] or 'all' in \
-            #                        Commands[CommandDict["!команда"].replace(" ", "")][1]:
-            #                    ret = self.ExecCommand(Commands[CommandDict["!команда"].replace(" ", "")][0], CommandDict)
-            #                else:
-            #                    ret = False
-            #                    args['message'] = "!Недостаточно прав"
-            #                    self.Reply(self.GroupApi, args)
-            #                    # self.GroupApi.messages.send(user_id=user_id, peer_id=self.Group, message="!Недостаточно прав",v="5.38")
-            #                if ret == True:
-            #                    args['message'] = "!Выполннено"
-            #                    self.Reply(self.GroupApi, args)
-            #                    # self.GroupApi.messages.send(user_id=user_id, peer_id=self.Group, message="!Выполннено",v="5.38")
-            #                else:
-            #                    args['message'] = "!Не удалось выполнить"
-            #                    self.Reply(self.GroupApi, args)
-            #                    # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group, message="!Не удалось выполнить",v="5.38")
-            #            else:
-            #                args['message'] = "!Команда не распознана"
-            #                self.Reply(self.GroupApi, args)
-            #                # self.GroupApi.messages.send(user_id=Dialog["uid"], peer_id=self.Group,message="Команда не распознана", v="5.38")
             if data != '':
 
                 try:
@@ -695,7 +661,7 @@ class VK_Bot:
                                     User_group = group
                                     print('User group - ', User_group)
                                 else:
-                                    continue
+                                    User_group = 'user'
                             Command_Users = Commands[Cmd][1]
                             print('Users groups for command -', Cmd, ' - ', Command_Users)
                             print('access check of user - ', User_group, ' - ', User_group in Command_Users)
@@ -765,7 +731,10 @@ class VK_Bot:
             if '!команды' in data['message']:
                 args['peer_id'] = data['peer_id']
                 args['v'] = 5.38
-                args['message'] = str(Commands)
+                a = ""
+                for command in Commands.keys():
+                    a += '{}\n'.format(command)
+                args['message'] = str(a)
                 # self.Reply(self.UserApi, args)
                 self.Replyqueue.put(args)
             self.Checkqueue.task_done()
@@ -933,11 +902,13 @@ class VK_Bot:
                 except:
                     continue
 
+    def status(self):
+        self.UserApi.status.set(text=self.OldStat)
 
 A = VK_Bot()
 # print(A.CheckWall("5nights"))
 # A.ClearPosts()
-
+atexit.register(A.status)
 A.ContiniousMessageCheck()
 # print(A.getMus())
 # print(A.GetChats())
