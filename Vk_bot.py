@@ -534,7 +534,7 @@ class VK_Bot:
         except:
             page = 1
         try:
-            sort_ = args['sort']
+            sort_ = args['sort'].replace(' ', '')
         except:
             sort_ = 'random'
         imgs = e6.get(tags=tags, n=n, page=page, sort_=sort_)
@@ -553,26 +553,23 @@ class VK_Bot:
         R_args['v'] = 5.38
         try:
             try:
-                tag = args['tag'].split(';')
+                tag = args['tag'].replace(' ', '').split(';')
+                func = 'search'
             except:
-                tag = args['user']
+                tag = args['user'].replace(" ", "")
+                func = 'user'
         except:
             return False
         try:
             n = int(args['n'])
         except:
             n = 5
-
-        try:
-            func = args['func']
-        except:
-            func = 'search'
         if func == "search":
             imgs, _ = D_A.search(tag)
             R_args['message'] = 'Фото по тэгу {} с сайта Deviantart'.format(' '.join(tag))
         elif func == 'user':
             imgs, _ = D_A.user(tag)
-            R_args['message'] = 'Фото от пользователя {} с сайта Deviantart'.format(' '.join(tag))
+            R_args['message'] = 'Фото от пользователя {} с сайта Deviantart'.format(tag)
         print(imgs)
         atts = self.UploadPhoto(imgs[:n])
         R_args['attachment'] = atts
@@ -591,7 +588,7 @@ class VK_Bot:
         except:
             page = 1
         try:
-            sort_ = args['sort']
+            sort_ = args['sort'].replace(' ', '')
         except:
             sort_ = 'random'
 
@@ -625,35 +622,52 @@ class VK_Bot:
                 pass
 
             Commands = {
-                'пост': [self.MakePost, ['admin', 'editor', 'moderator']],
-                'бан': [self.BanUser, ['admin', 'editor', 'moderator']],
-                'музыка': [self.Music, ['admin', 'editor', 'moderator', 'user']],
-                'e621': [self.e621, ['admin', 'editor', 'moderator']],
-                'e926': [self.e926, ['admin', 'editor', 'moderator', 'user']],
-                'd_a': [self.D_A, ['admin', 'editor', 'moderator', 'user']],
+                '!пост': [self.MakePost, ['admin', 'editor', 'moderator'], "постит в группе ваш текст"],
+                '!бан': [self.BanUser, ['admin', 'editor', 'moderator'], ',Банит'],
+                '!музыка': [self.Music, ['admin', 'editor', 'moderator', 'user'], "Ищет музыку"],
+                '!e621': [self.e621, ['admin', 'editor', 'moderator'], "Ищет пикчи на e621"],
+                '!e926': [self.e926, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на e926"],
+                '!d_a': [self.D_A, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на DA"],
                 # 'фото': [self.UploadPhoto, ['admin', 'editor', 'moderator','user']],
-                'добавить': [self.AddUser, ['admin']],
-                'rss': [self.GetRss, ['admin', 'editor', 'moderator']]
+                '!добавить': [self.AddUser, ['admin'], "Не для вас"],
+                '!rss': [self.GetRss, ['admin', 'editor', 'moderator'], "РСС парсит"]
             }
             CommandDict = {}
             args = {}
             if data != '':
 
                 try:
-                    if '!команда' in data['message']:
+                    if data['message'].startswith('!помощь'):
+                        Command_ = data['message'].split(':')
+                        args['peer_id'] = data['peer_id']
+                        args['v'] = 5.38
+                        args['message'] = Commands[Command_[1]][2]
+                        self.Replyqueue.put(args)
+                        continue
+                    if '!команды' in data['message']:
+                        args['peer_id'] = data['peer_id']
+                        args['v'] = 5.38
+                        a = ""
+                        for command in Commands.keys():
+                            a += 'Команда: {},{}\n'.format(command, Commands[command][2])
+                        args['message'] = str(a)
+                        # self.Reply(self.UserApi, args)
+                        self.Replyqueue.put(args)
+                        continue
+                    if data['message'].startswith('!'):
                         args['peer_id'] = data['peer_id']
                         args['v'] = 5.38
                         comm = data["message"]
                         comm = comm.split("<br>")
                         User_group = 'user'
-                        for C in comm:
+                        for C in comm[1:]:
                             C = C.split(":")
                             CommandDict[C[0].replace(" ", "").lower()] = ':'.join(C[1:])
-                        Cmd = CommandDict['!команда'].replace(" ", "").lower()
-                        print('Command - ', Cmd)
+                        Command = comm[0].replace(" ", "").lower()
+                        print('Command - ', Command)
                         CommandDict['args'] = args
                         print(CommandDict)
-                        if CommandDict["!команда"].replace(" ", "").lower() in Commands:
+                        if Command in Commands:
                             for group in self.UserGroups.keys():
 
                                 if int(self.GetUserFormMessage(data['message_id'])) in self.UserGroups[group]:
@@ -662,11 +676,13 @@ class VK_Bot:
                                     print('User group - ', User_group)
                                 else:
                                     User_group = 'user'
-                            Command_Users = Commands[Cmd][1]
-                            print('Users groups for command -', Cmd, ' - ', Command_Users)
+                            Command_Users = Commands[Command][1]
+                            print('Users groups for command -', Command, ' - ', Command_Users)
                             print('access check of user - ', User_group, ' - ', User_group in Command_Users)
                             if (User_group in Command_Users) or ('all' in Command_Users):
-                                ret = self.ExecCommand(Commands[Cmd][0], CommandDict)
+                                args['message'] = "Выполняю, подождите"
+                                self.Replyqueue.put(args)
+                                ret = self.ExecCommand(Commands[Command][0], CommandDict)
                             else:
                                 ret = False
                                 args['message'] = "Недостаточно прав"
@@ -728,15 +744,7 @@ class VK_Bot:
                     args['message'] = "Не удалось выполнить, ошибка: " + str(Ex)
                     # self.Reply(self.UserApi, args)
                     self.Replyqueue.put(args)
-            if '!команды' in data['message']:
-                args['peer_id'] = data['peer_id']
-                args['v'] = 5.38
-                a = ""
-                for command in Commands.keys():
-                    a += '{}\n'.format(command)
-                args['message'] = str(a)
-                # self.Reply(self.UserApi, args)
-                self.Replyqueue.put(args)
+
             self.Checkqueue.task_done()
 
     def getMus(self):
@@ -817,13 +825,14 @@ class VK_Bot:
                         # print(user['first_name'],user['second_name'],' : ',text)
                         # if args['user_id'] != self.MyUId:
                         # GUI.Gui.UpdateGUI(args)
-                        self.Checkqueue.put(args)
+                        self.Checkqueue.put(args, timeout=60)
                         #self.CheckForCommands(args)
                         # self.Reply(self.UserApi,args)
                         # return from_id,text,subject
                     except KeyError:
                         continue
                 elif code == 8:
+                    continue
                     try:
                         user = self.GetUserNameById(s[1] * -1)
                         try:
@@ -837,6 +846,7 @@ class VK_Bot:
                     except KeyError:
                         continue
                 elif code == 9:
+                    continue
                     try:
 
                         user = self.GetUserNameById(s[1] * -1)
@@ -856,12 +866,14 @@ class VK_Bot:
                     except KeyError:
                         continue
                 elif code == 61:
+                    continue
                     try:
                         user = self.GetUserNameById(s[1])
                         print(user['first_name'], user['last_name'], 'Набирает сообщение')
                     except:
                         continue
                 elif code == 62:
+                    continue
                     user = self.GetUserNameById(s[1])
 
                     arg = {}
