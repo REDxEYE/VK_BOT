@@ -13,6 +13,9 @@ class TempFile:
             os.mkdir('tmp')
         self.name = 'tempfile_{}.{}'.format(randint(0, 255), ras)
         self.path_ = './tmp/{}'.format(self.name)
+        while isdir(self.path_):
+            self.name = 'tempfile_{}.{}'.format(randint(0, 255), ras)
+            self.path_ = './tmp/{}'.format(self.name)
         # print(self.path_)
         self.file = open(self.path_, 'wb')
         self.file.write(data)
@@ -24,5 +27,3 @@ class TempFile:
 
     def rem(self):
         os.remove(self.path_)
-        # a = TempFile(b'asd')
-        # print(a.file_())
