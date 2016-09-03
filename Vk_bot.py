@@ -2,28 +2,28 @@ import atexit
 import json
 import logging
 import logging.config
+import queue
 import random
 import re
 import sys
+import threading
 from datetime import datetime, timedelta
 from math import ceil
 from time import sleep
 from urllib.request import urlopen
 
 import requests
-
-import DA_Api as D_A
-from Mimimi_Api import *
-from tempfile_ import *
-# import VK_bot_GUI as GUI
-import Vk_bot_RssModule
-import e621_Api as e6
-# import vk
 from vk.exceptions import VkAuthError, VkAPIError
 from vk.logs import LOGGING_CONFIG
 from vk.utils import stringify_values, json_iter_parse, LoggingSession, str_type
-import queue
-import threading
+
+import DA_Api as D_A
+import Vk_bot_RssModule
+import YT_Api as YT_
+import e621_Api as e6
+from Mimimi_Api import *
+from tempfile_ import *
+
 V = 3.0
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger('vk')
@@ -260,44 +260,44 @@ class VK_Bot:
 
     def GetCommentsFromPost(self, GroupId, PostId, count):
         comments = []
-        комментарии = []
+        comms = []
         for _ in range(0, ceil(count / 100)):
             sleep(0.25)
             for Com in self.UserApi.wall.getComments(owner_id=GroupId, post_id=PostId, count=100)[1:]:
                 comments.append(Com)
         for comment in comments:
-            комментарии.append([self.GetUserNameById(comment['uid']), comment['text']])
-        Вывод = ""
-        for комментарий in комментарии:
-            Вывод += комментарий[0] + " : " + комментарий[1] + "\n"
-        return Вывод
+            comms.append([self.GetUserNameById(comment['uid']), comment['text']])
+        Out = ""
+        for comm in comms:
+            Out += comm[0] + " : " + comm[1] + "\n"
+        return Out
 
     def CheckWall(self, GroupDomain):
         # bans = api.groups.getBanned(group_id="75615891")
         self.Wall = self.UserApi.wall.get(domain=GroupDomain, filter="others", count=10)
         self.posts = self.Wall[1:]
-        Вывод = ""
+        Out = ""
         # print(self.posts[1])
         for I in self.posts:
-            # Комментарии = self.GetCommentsFromPost(I['to_id'],I['id'],I['reply_count'])
+            # comms = self.GetCommentsFromPost(I['to_id'],I['id'],I['reply_count'])
             # print(I)
             sleep(0.25)
-            self.Дата = datetime.fromtimestamp(I['date'])
+            self.Data = datetime.fromtimestamp(I['date'])
             self.LikeCount = I['likes']['count']
             # print("Кол-во лайков: ",LikeCount)
             if I['text']:
-                Текст = I['text']
+                Text = I['text']
             else:
-                Текст = "Без текста"
-            ФиоПользователя = self.GetUserNameById(I["from_id"])
-            IdПользователя = I["from_id"]
-            Вывод += ФиоПользователя + " : " + str(IdПользователя) + "\n"
-            Вывод += Текст + '\n'
-            Вывод += "Кол-во лайков: " + str(self.LikeCount) + "\n"
-            Вывод += "Дата: " + str(self.Дата) + "\n"
-            # Вывод += "Комментарии:\n" +Комментарии+"\n"
-            Вывод += '\n\n'
-        return Вывод
+                Text = "Без текста"
+            FIO = self.GetUserNameById(I["from_id"])
+            ID = I["from_id"]
+            Out += FIO + " : " + str(ID) + "\n"
+            Out += Text + '\n'
+            Out += "Кол-во лайков: " + str(self.LikeCount) + "\n"
+            Out += "Дата: " + str(self.Data) + "\n"
+            # Out += "Комментарии:\n" +Комментарии+"\n"
+            Out += '\n\n'
+        return Out
 
     def GetChats(self):
         self.messages = self.UserApi.messages.get()
@@ -606,12 +606,54 @@ class VK_Bot:
 
         return True
 
+    def YT(self, args):
+        try:
+            text = args['text'].split(' ')
+        except:
+            pass
+        m = ""
+        R_args = {}
+        R_args['v'] = 5.38
+        R_args['peer_id'] = args['data']['peer_id']
+        videos, titles = YT_.search(text)
+        for i in range(len(titles)):
+            m += "{}.{}\n".format(i, titles[i])
+        R_args['message'] = m
+        self.Replyqueue.put(R_args)
+        ans = self.WaitForMSG(3, args)
+        R_args['message'] = videos[ans]
+        self.Replyqueue.put(R_args)
+        return True
+        # YT_.search()
+
+    def WaitForMSG(self, timer, args):
+        print('WFM', args)
+        user = args['data']['user_id']
+        peer_id = args['data']['peer_id']
+        for _ in range(timer):
+            sleep(3)
+            hist = self.UserApi.messages.getHistory(**{"peer_id": peer_id, "user_id": user, "count": 50, 'v': 5.38})
+            for msg in hist['items']:
+                # print(msg)
+                # print(int(msg['from_id'])==int(user),';',msg['date']==args['data']['date'])
+                try:
+                    if (int(msg['from_id']) == int(user)) and (msg['body'].startswith('!')):
+                        if msg['date'] == args['data']['date']:
+                            break
+                        # print(msg)
+                        # print(msg['body'][1:])
+                        ans = int(msg['body'][1:])
+                        return ans
+
+                except:
+                    continue
+
     def CheckForCommands(self):
         while True:
             print('Unfinished Check tasks:', self.Checkqueue.unfinished_tasks)
             sleep(1)
             data = self.Checkqueue.get()
-            user = self.GetUserNameById(self.GetUserFormMessage(data['message_id']))
+            user = self.GetUserNameById(data['user_id'])
 
             try:
                 self.toPrint = user['first_name'] + ' ' + user['last_name'] + " : " + str(
@@ -628,6 +670,7 @@ class VK_Bot:
                 '!e621': [self.e621, ['admin', 'editor', 'moderator'], "Ищет пикчи на e621"],
                 '!e926': [self.e926, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на e926"],
                 '!d_a': [self.D_A, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на DA"],
+                '!yt': [self.YT, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на DA"],
                 # 'фото': [self.UploadPhoto, ['admin', 'editor', 'moderator','user']],
                 '!добавить': [self.AddUser, ['admin'], "Не для вас"],
                 '!rss': [self.GetRss, ['admin', 'editor', 'moderator'], "РСС парсит"]
@@ -666,11 +709,12 @@ class VK_Bot:
                         Command = comm[0].replace(" ", "").lower()
                         print('Command - ', Command)
                         CommandDict['args'] = args
+                        CommandDict['data'] = data
                         print(CommandDict)
                         if Command in Commands:
                             for group in self.UserGroups.keys():
 
-                                if int(self.GetUserFormMessage(data['message_id'])) in self.UserGroups[group]:
+                                if int(data['user_id']) in self.UserGroups[group]:
                                     print('user check - True')
                                     User_group = group
                                     print('User group - ', User_group)
@@ -689,6 +733,7 @@ class VK_Bot:
                                 # self.Reply(self.UserApi, args)
                                 self.Replyqueue.put(args)
                             if ret == True:
+                                continue
                                 args['message'] = "Выполнено"
                                 # self.Reply(self.UserApi, args)
                                 self.Replyqueue.put(args)
@@ -699,6 +744,8 @@ class VK_Bot:
                                 # self.Reply(self.UserApi, args)
                                 self.Replyqueue.put(args)
                         else:
+                            if (data['message'][1:]).isdigit():
+                                continue
                             args['message'] = "Команда не распознана"
                             # self.Reply(self.UserApi, args)
                             self.Replyqueue.put(args)
@@ -819,6 +866,7 @@ class VK_Bot:
                         args['peer_id'] = from_id
                         args["message"] = text
                         args['message_id'] = message_id
+                        args['date'] = timestamp
                         args['user_id'] = self.GetUserFormMessage(message_id)
                         args['v'] = 5.38
                         # user =self.GetUserNameById(args['user_id'])
