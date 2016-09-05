@@ -1,10 +1,15 @@
 import urllib.request
 
 from bs4 import BeautifulSoup
+from httplib2 import iri2uri
 
 
+def iri_to_uri(iri):
+    """Transform a unicode iri into a ascii uri."""
+    return bytes(iri2uri(iri))
 def search(text):
-    url = 'https://www.youtube.com/results?search_query={}'.format('+'.join(text))
+    url = u'https://www.youtube.com/results?search_query={}'.format((u'+'.join(text)))
+    url = iri2uri(url)
     print(url)
     yt = urllib.request.urlopen(url).read()
     soup = BeautifulSoup(yt, 'html.parser')

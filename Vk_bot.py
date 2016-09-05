@@ -445,7 +445,7 @@ class VK_Bot:
         print('Unfinished Reply tasks:', self.Replyqueue.unfinished_tasks)
         while True:
             args = self.Replyqueue.get()
-            print('Reply:', args)
+            # print('Reply:', args)
             sleep(1)
             try:
                 self.UserApi.messages.send(**args)
@@ -473,10 +473,12 @@ class VK_Bot:
         i = 0
         for url in urls:
             i += 1
+            print('downloading photo№{}'.format(i))
             server = self.GetUploadServer()['upload_url']
             req = urllib.request.Request(url, headers=hdr)
             img = urlopen(req).read()
             Tmp = TempFile(img, 'jpg')
+
             args = {}
             args['server'] = server
             print('uploading photo №{}'.format(i))
@@ -620,7 +622,7 @@ class VK_Bot:
             m += "{}.{}\n".format(i, titles[i])
         R_args['message'] = m
         self.Replyqueue.put(R_args)
-        ans = self.WaitForMSG(3, args)
+        ans = self.WaitForMSG(5, args)
         R_args['message'] = videos[ans]
         self.Replyqueue.put(R_args)
         return True
@@ -670,7 +672,7 @@ class VK_Bot:
                 '!e621': [self.e621, ['admin', 'editor', 'moderator'], "Ищет пикчи на e621"],
                 '!e926': [self.e926, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на e926"],
                 '!d_a': [self.D_A, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на DA"],
-                '!yt': [self.YT, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на DA"],
+                '!yt': [self.YT, ['admin', 'editor', 'moderator', 'user'], "Ищет видео на Ютубе"],
                 # 'фото': [self.UploadPhoto, ['admin', 'editor', 'moderator','user']],
                 '!добавить': [self.AddUser, ['admin'], "Не для вас"],
                 '!rss': [self.GetRss, ['admin', 'editor', 'moderator'], "РСС парсит"]
@@ -714,62 +716,61 @@ class VK_Bot:
                         if Command in Commands:
                             for group in self.UserGroups.keys():
 
-                                if int(data['user_id']) in self.UserGroups[group]:
+                                if int(data['user_id']) not in self.UserGroups[group]:
+
+                                    User_group = 'user'
+                                    print('User group - ', User_group)
+                                    break
+                                elif int(data['user_id']) in self.UserGroups[group]:
                                     print('user check - True')
                                     User_group = group
                                     print('User group - ', User_group)
-                                else:
-                                    User_group = 'user'
+                                    break
+
                             Command_Users = Commands[Command][1]
                             print('Users groups for command -', Command, ' - ', Command_Users)
                             print('access check of user - ', User_group, ' - ', User_group in Command_Users)
-                            if (User_group in Command_Users) or ('all' in Command_Users):
+                            access = User_group in Command_Users
+                            if access:
                                 args['message'] = "Выполняю, подождите"
                                 self.Replyqueue.put(args)
                                 ret = self.ExecCommand(Commands[Command][0], CommandDict)
-                            else:
+                            elif not access:
                                 ret = False
                                 args['message'] = "Недостаточно прав"
-                                # self.Reply(self.UserApi, args)
                                 self.Replyqueue.put(args)
+
                             if ret == True:
+                                self.Checkqueue.task_done()
                                 continue
                                 args['message'] = "Выполнено"
-                                # self.Reply(self.UserApi, args)
                                 self.Replyqueue.put(args)
                                 self.Checkqueue.task_done()
                                 continue
                             else:
                                 args['message'] = "Не удалось выполнить"
-                                # self.Reply(self.UserApi, args)
                                 self.Replyqueue.put(args)
                         else:
                             if (data['message'][1:]).isdigit():
                                 continue
                             args['message'] = "Команда не распознана"
-                            # self.Reply(self.UserApi, args)
                             self.Replyqueue.put(args)
+                    if (self.MyName['first_name'].lower() in data['message'].lower()):
 
-                    try:
-                        if (self.MyName['first_name'].lower() in data['message'].lower()):
-                            if self.hello.search(data['message'], re.IGNORECASE):
-                                args['peer_id'] = data['peer_id']
-                                args['v'] = 5.38
-                                replies = ["Здравствуй {}", "Хай {}", "Здравия {}", "привет {}"]
+                        if self.hello.search(data['message'], re.IGNORECASE):
+                            args['peer_id'] = data['peer_id']
+                            args['v'] = 5.38
+                            replies = ["Здравствуй {}", "Хай {}", "Здравия {}", "привет {}"]
+                            msg = random.choice(replies)
+
+                            while self.oldMsg == msg:
                                 msg = random.choice(replies)
 
-                                while self.oldMsg == msg:
-                                    msg = random.choice(replies)
-
-                                args['message'] = msg.format(self.GetUserNameById(data['user_id'])['first_name'])
-                                # self.Reply(self.UserApi, args)
-                                self.Replyqueue.put(args)
-                                self.oldMsg = msg
-                    except:
-                        pass
-                    try:
-                        if (self.MyName['first_name'] + ',котики').lower().replace(' ', '') in data[
-                            'message'].lower().replace(' ', ''):
+                            args['message'] = msg.format(user['first_name'])
+                            # self.Reply(self.UserApi, args)
+                            self.Replyqueue.put(args)
+                            self.oldMsg = msg
+                        if (',котики').lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
                             args['message'] = 'мимими, '
@@ -778,8 +779,61 @@ class VK_Bot:
                             args['attachment'] = att
                             # self.Reply(self.UserApi, args)
                             self.Replyqueue.put(args)
-                    except:
-                        pass
+                        if ',где'.lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
+                            args['peer_id'] = data['peer_id']
+                            args['v'] = 5.38
+                            args['forward_messages'] = data['message_id']
+                            replies = ["Под столом", "На кровати", "Сзади", "На столе"]
+                            msg = random.choice(replies)
+
+                            while self.oldMsg == msg:
+                                msg = random.choice(replies)
+
+                            args['message'] = msg
+                            # self.Reply(self.UserApi, args)
+                            self.Replyqueue.put(args)
+                            self.oldMsg = msg
+                        if ',кто'.lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
+                            args['peer_id'] = data['peer_id']
+                            args['v'] = 5.38
+                            args['forward_messages'] = data['message_id']
+                            if not str(data['peer_id']).startswith('200'):
+                                args['message'] = "Это точно ты"
+                                self.Replyqueue.put(args)
+                            else:
+                                chat = int(data['peer_id']) - 2000000000
+                                users = self.UserApi.messages.getChatUsers(chat_id=chat, fields='nickname')
+                                user = random.choice(users)
+                                if user['id'] == self.MyUId:
+                                    args['message'] = 'Определённо я'
+                                    self.Replyqueue.put(args)
+                                    continue
+                                name = '{} {}'.format(user['first_name'], user['last_name'])
+                                replies = ["Определённо это {}", "Это точно {}", "Я уверен что это {}", "Это {}"]
+                                msg = random.choice(replies)
+
+                                while self.oldMsg == msg:
+                                    msg = random.choice(replies)
+
+                                args['message'] = msg.format(name)
+                                # self.Reply(self.UserApi, args)
+                                self.Replyqueue.put(args)
+                                self.oldMsg = msg
+                        if ',вероятность'.lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
+                            args['peer_id'] = data['peer_id']
+                            args['v'] = 5.38
+                            a = data['message'].split(' ')
+                            if 'вероятность' in a[1]:
+                                a = a[2:]
+                            else:
+                                a = a[1:]
+                            args['forward_messages'] = data['message_id']
+                            msg = "Вероятность того, что {}, равна {}%".format(' '.join(a), randint(0, 100))
+
+                            args['message'] = msg
+                            # self.Reply(self.UserApi, args)
+                            self.Replyqueue.put(args)
+
                 except Exception as Ex:
                     args['peer_id'] = data['peer_id']
                     args['v'] = 5.38
