@@ -33,7 +33,9 @@ class RssParser:
 
     def Parse(self):
         rss = []
-        url = self.url
+        url = 'http://' + self.url
+        if 'www.' not in url:
+            url.replace('http://', 'http://www.')
         # python_wiki_rss_url = "http://www.oszone.net/rss-cat-2.xml"
         feed = feedparser.parse('http://' + url)
         for I in feed['entries']:
@@ -43,15 +45,15 @@ class RssParser:
             text = self.strip_tags(I['summary_detail']['value']).replace(I['title'], "")
             title = I['title']
             # print(I)
-            print("Date: ", self.ConvertTime(I.published_parsed))
+            # print("Date: ", self.ConvertTime(I.published_parsed))
             rssE['date'] = self.ConvertTime(I.published_parsed)
-            print('Title:', title)
+            #print('Title:', title)
             rssE['title'] = title
-            print('Text:', text)
+            #print('Text:', text)
             rssE['text'] = text
-            print('Img: ', img)
+            #print('Img: ', img)
             rssE['img'] = img
-            print('Link:', I['link'], '\n')
+            #print('Link:', I['link'], '\n')
             rssE['ling'] = I['link']
             rss.append(rssE)
 

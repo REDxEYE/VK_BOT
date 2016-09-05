@@ -418,28 +418,30 @@ class VK_Bot:
 
     def GetRss(self, args):
         print('GetRss ', args)
-        comm = args['rss'].replace(" ", "").lower()
+        # comm = args['rss'].replace(" ", "").lower()
         url = args['url']
         rss = Vk_bot_RssModule.RssParser(url=url)
-        news = rss.Parse()
+        news = rss.Parse()[:5]
         # rss = RssBot.Parse()
-        if comm == 'новости':
-            for r in news:
-                print(r)
-                Margs = {}
-                Margs['v'] = 5.38
-                Margs['peer_id'] = args['args']['peer_id']
-                msg = str(r['date']) + '\n'
-                msg += r['title'] + '\n'
-                try:
-                    msg += r['link']
-                except:
-                    pass
-                msg += r['img']
-                Margs['message'] = msg
-                # self.Reply(self.UserApi, Margs)
-                self.Replyqueue.put(Margs)
-                sleep(0.25)
+
+        for r in news:
+            # print(r)
+            Margs = {}
+            Margs['v'] = 5.38
+            Margs['peer_id'] = args['args']['peer_id']
+            msg = str(r['date']) + '\n'
+            msg += r['title'] + '\n'
+            try:
+                msg += r['link']
+            except:
+                pass
+            atts = self.UploadPhoto(r['img'])
+            Margs['attachment'] = atts
+            Margs['message'] = msg
+            # self.Reply(self.UserApi, Margs)
+            self.Replyqueue.put(Margs)
+            sleep(1)
+        return True
 
     def Reply(self):
         print('Unfinished Reply tasks:', self.Replyqueue.unfinished_tasks)
@@ -675,7 +677,7 @@ class VK_Bot:
                 '!yt': [self.YT, ['admin', 'editor', 'moderator', 'user'], "Ищет видео на Ютубе"],
                 # 'фото': [self.UploadPhoto, ['admin', 'editor', 'moderator','user']],
                 '!добавить': [self.AddUser, ['admin'], "Не для вас"],
-                '!rss': [self.GetRss, ['admin', 'editor', 'moderator'], "РСС парсит"]
+                '!rss': [self.GetRss, ['admin', 'editor', 'moderator', 'user'], "РСС парсит"]
             }
             CommandDict = {}
             args = {}
@@ -716,16 +718,17 @@ class VK_Bot:
                         if Command in Commands:
                             for group in self.UserGroups.keys():
 
-                                if int(data['user_id']) not in self.UserGroups[group]:
-
-                                    User_group = 'user'
-                                    print('User group - ', User_group)
-                                    break
-                                elif int(data['user_id']) in self.UserGroups[group]:
+                                if int(data['user_id']) in self.UserGroups[group]:
                                     print('user check - True')
                                     User_group = group
                                     print('User group - ', User_group)
                                     break
+                                elif int(data['user_id']) not in self.UserGroups[group]:
+
+                                    User_group = 'user'
+                                    print('User group - ', User_group)
+                                    break
+
 
                             Command_Users = Commands[Command][1]
                             print('Users groups for command -', Command, ' - ', Command_Users)
