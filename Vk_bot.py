@@ -5,7 +5,6 @@ import logging.config
 import queue
 import random
 import re
-import sys
 import threading
 from datetime import datetime, timedelta
 from math import ceil
@@ -522,6 +521,7 @@ class VK_Bot:
         R_args['attachment'] = atts
         # print('ats',atts)
         # self.Reply(self.UserApi, R_args)
+        args['forward_messages'] = args['data']['message_id']
         self.Replyqueue.put(R_args)
 
         return True
@@ -547,6 +547,7 @@ class VK_Bot:
         R_args['v'] = 5.38
         R_args['message'] = 'Вот порнушка по твоему запросу, шалунишка...'
         # self.Reply(self.UserApi, R_args)
+        args['forward_messages'] = args['data']['message_id']
         self.Replyqueue.put(R_args)
 
         return True
@@ -578,6 +579,7 @@ class VK_Bot:
         atts = self.UploadPhoto(imgs[:n])
         R_args['attachment'] = atts
         # self.Reply(self.UserApi,R_args)
+        args['forward_messages'] = args['data']['message_id']
         self.Replyqueue.put(R_args)
         return True
 
@@ -606,6 +608,7 @@ class VK_Bot:
         for img in imgs:
             R_args['message'] += '{}\n'.format(img)
         # self.Reply(self.UserApi, R_args)
+        args['forward_messages'] = args['data']['message_id']
         self.Replyqueue.put(R_args)
 
         return True
@@ -626,7 +629,9 @@ class VK_Bot:
         self.Replyqueue.put(R_args)
         ans = self.WaitForMSG(5, args)
         R_args['message'] = videos[ans]
+        R_args['forward_messages'] = args['data']['message_id']
         self.Replyqueue.put(R_args)
+
         return True
         # YT_.search()
 
@@ -652,6 +657,39 @@ class VK_Bot:
                 except:
                     continue
 
+    def Likes(self, args):
+        R_args = {}
+        R_args['forward_messages'] = args['data']['message_id']
+        R_args['v'] = 5.38
+        R_args['peer_id'] = args['data']['peer_id']
+        owner_id = int(args['id'])
+        user = self.GetUserNameById(owner_id)
+        try:
+            n = int(args['n'])
+        except:
+            n = 5
+        try:
+            count = int(args['count'])
+        except:
+            count = 20
+        b = 0
+        Wall = self.UserApi.wall.get(owner_id=owner_id, count=count, v=5.53)
+        print('Wall hooked')
+        sleep(1)
+        for post in Wall['items']:
+            L = int(
+                self.UserApi.likes.isLiked(owner_id=post['owner_id'], type='post', item_id=post['id'], v=5.53)['liked'])
+            if L == 0:
+                print(b)
+                if b == n:
+                    break
+                b += 1
+                a = self.UserApi.likes.add(owner_id=post['owner_id'], type='post', item_id=post['id'], v=5.53)
+            sleep(1)
+        R_args['message'] = 'Пользователю {} пролайкано {} постов'.format(
+            ' '.join([user['first_name'], user['last_name']]), b)
+        self.Replyqueue.put(R_args)
+        return True
     def CheckForCommands(self):
         while True:
             print('Unfinished Check tasks:', self.Checkqueue.unfinished_tasks)
@@ -677,6 +715,7 @@ class VK_Bot:
                 '!yt': [self.YT, ['admin', 'editor', 'moderator', 'user'], "Ищет видео на Ютубе"],
                 # 'фото': [self.UploadPhoto, ['admin', 'editor', 'moderator','user']],
                 '!добавить': [self.AddUser, ['admin'], "Не для вас"],
+                '!likes': [self.Likes, ['admin'], "Тоже не для вас"],
                 '!rss': [self.GetRss, ['admin', 'editor', 'moderator', 'user'], "РСС парсит"]
             }
             CommandDict = {}
@@ -716,18 +755,17 @@ class VK_Bot:
                         CommandDict['data'] = data
                         print(CommandDict)
                         if Command in Commands:
-                            for group in self.UserGroups.keys():
 
-                                if int(data['user_id']) in self.UserGroups[group]:
+                            for group in self.UserGroups.keys():
+                                if data['user_id'] in self.UserGroups[group]:
                                     print('user check - True')
                                     User_group = group
                                     print('User group - ', User_group)
                                     break
-                                elif int(data['user_id']) not in self.UserGroups[group]:
+                                elif data['user_id'] not in self.UserGroups[group]:
 
                                     User_group = 'user'
                                     print('User group - ', User_group)
-                                    break
 
 
                             Command_Users = Commands[Command][1]
@@ -773,7 +811,7 @@ class VK_Bot:
                             # self.Reply(self.UserApi, args)
                             self.Replyqueue.put(args)
                             self.oldMsg = msg
-                        if (',котики').lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
+                        elif (',котики').lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
                             args['message'] = 'мимими, '
@@ -782,11 +820,11 @@ class VK_Bot:
                             args['attachment'] = att
                             # self.Reply(self.UserApi, args)
                             self.Replyqueue.put(args)
-                        if ',где'.lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
+                        elif ',где'.lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
                             args['forward_messages'] = data['message_id']
-                            replies = ["Под столом", "На кровати", "Сзади", "На столе"]
+                            replies = ["Под столом", "На кровати", "За спиной", "На столе"]
                             msg = random.choice(replies)
 
                             while self.oldMsg == msg:
@@ -796,23 +834,23 @@ class VK_Bot:
                             # self.Reply(self.UserApi, args)
                             self.Replyqueue.put(args)
                             self.oldMsg = msg
-                        if ',кто'.lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
+                        elif ',кто'.lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
                             args['forward_messages'] = data['message_id']
-                            if not str(data['peer_id']).startswith('200'):
+                            if int(data['peer_id']) <= 2000000000:
                                 args['message'] = "Это точно ты"
                                 self.Replyqueue.put(args)
                             else:
                                 chat = int(data['peer_id']) - 2000000000
-                                users = self.UserApi.messages.getChatUsers(chat_id=chat, fields='nickname')
+                                users = self.UserApi.messages.getChatUsers(chat_id=chat, fields='nickname', v=5.38)
                                 user = random.choice(users)
                                 if user['id'] == self.MyUId:
                                     args['message'] = 'Определённо я'
                                     self.Replyqueue.put(args)
                                     continue
                                 name = '{} {}'.format(user['first_name'], user['last_name'])
-                                replies = ["Определённо это {}", "Это точно {}", "Я уверен что это {}", "Это {}"]
+                                replies = ["Определённо это {}", "Это точно {}", "Я уверен, что это {}", "Это {}"]
                                 msg = random.choice(replies)
 
                                 while self.oldMsg == msg:
@@ -822,7 +860,34 @@ class VK_Bot:
                                 # self.Reply(self.UserApi, args)
                                 self.Replyqueue.put(args)
                                 self.oldMsg = msg
-                        if ',вероятность'.lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
+                        elif ',кого'.lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
+                            args['peer_id'] = data['peer_id']
+                            args['v'] = 5.38
+                            args['forward_messages'] = data['message_id']
+                            if int(data['peer_id']) <= 2000000000:
+                                args['message'] = "Тебя"
+                                self.Replyqueue.put(args)
+                            else:
+                                chat = int(data['peer_id']) - 2000000000
+                                users = self.UserApi.messages.getChatUsers(chat_id=chat, fields='nickname', v=5.38,
+                                                                           name_case='acc')
+                                user = random.choice(users)
+                                if user['id'] == self.MyUId:
+                                    args['message'] = 'Определённо меня'
+                                    self.Replyqueue.put(args)
+                                    continue
+                                name = '{} {}'.format(user['first_name'], user['last_name'])
+                                replies = ["Определённо {}", "Точно {}", "Я уверен что его -  {}"]
+                                msg = random.choice(replies)
+
+                                while self.oldMsg == msg:
+                                    msg = random.choice(replies)
+
+                                args['message'] = msg.format(name)
+                                # self.Reply(self.UserApi, args)
+                                self.Replyqueue.put(args)
+                                self.oldMsg = msg
+                        elif ',вероятность'.lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
                             a = data['message'].split(' ')
@@ -838,14 +903,16 @@ class VK_Bot:
                             self.Replyqueue.put(args)
 
                 except Exception as Ex:
+
                     args['peer_id'] = data['peer_id']
                     args['v'] = 5.38
-                    print(sys.exc_info())
+                    print(Ex.__traceback__)
                     sleep(1)
                     if 'many requests per second' in str(Ex):
-                        self.Checkqueue.put(data)
+                        print('Too many requests per second')
+                        # self.Checkqueue.put(data,timeout=5)
                         continue
-                    args['message'] = "Не удалось выполнить, ошибка: " + str(Ex)
+                    args['message'] = "Не удалось выполнить, ошибка:{} {} ".format(str(Ex), str(Ex.__traceback__))
                     # self.Reply(self.UserApi, args)
                     self.Replyqueue.put(args)
 
@@ -930,6 +997,8 @@ class VK_Bot:
                         # print(user['first_name'],user['second_name'],' : ',text)
                         # if args['user_id'] != self.MyUId:
                         # GUI.Gui.UpdateGUI(args)
+                        if text == '!':
+                            continue
                         self.Checkqueue.put(args, timeout=60)
                         #self.CheckForCommands(args)
                         # self.Reply(self.UserApi,args)
@@ -1016,6 +1085,7 @@ class VK_Bot:
                         sflags = sflags + 'FIXED '
                     if flags & 512:
                         sflags = sflags + 'MEDIA '
+
                 except:
                     continue
 
