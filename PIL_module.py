@@ -70,8 +70,61 @@ class WigglyBlocks():
         return image
 
 
-def Glitch(file, blockSize=16, sigma=0.01, iterations=300, random_=True):
+class Glitch2():
+    @staticmethod
+    def get_random_start_and_end_points_in_file(file_data):
+        start_point = random.randint(0, len(file_data))
+        end_point = start_point + random.randint(0, len(file_data) - start_point)
+
+        return start_point, end_point
+
+    @staticmethod
+    def splice_a_chunk_in_a_file(file_data):
+        start_point, end_point = Glitch2.get_random_start_and_end_points_in_file(file_data)
+        section = file_data[start_point:end_point]
+        repeated = b''
+
+        for i in range(1, random.randint(1, 10)):
+            repeated += section
+
+        new_start_point, new_end_point = Glitch2.get_random_start_and_end_points_in_file(file_data)
+        file_data = file_data[:new_start_point] + repeated + file_data[new_end_point:]
+        return file_data
+
+    @staticmethod
+    def glitch_an_image(local_image):
+        file_handler = open(local_image, 'r+b')
+        file_data = file_handler.read()
+        file_handler.close()
+
+        for i in range(1, random.randint(1, 10)):
+            file_data = Glitch2.splice_a_chunk_in_a_file(file_data)
+
+        file_handler = open(local_image, 'w+b')
+        file_handler.write(file_data)
+        file_handler.close
+
+        return local_image
+
+
+def Glitch(file, blockSize=16, sigma=0.01, iterations=300, random_=True, Glitch_=False):
     im = Image.open(file)
     a = WigglyBlocks(blockSize, sigma, iterations, random_)
-    im = a.render(im)
+    if Glitch_:
+        R = Image.new("RGB", im.size)
+        G = Image.new("RGB", im.size)
+        B = Image.new("RGB", im.size)
+
+        R.putdata(im.getdata(0))
+        G.putdata(im.getdata(1))
+        B.putdata(im.getdata(2))
+        R = a.render(R).convert('L')
+        G = a.render(G).convert('L')
+        B = a.render(B).convert('L')
+
+        im = Image.merge('RGB', (R, G, B))
+        im = im.point(lambda p: p * 3.5)
+    else:
+
+        im = a.render(im)
     im.save(file, 'JPEG')

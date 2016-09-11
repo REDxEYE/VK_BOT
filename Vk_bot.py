@@ -5,6 +5,7 @@ import logging.config
 import queue
 import random
 import re
+import subprocess
 import threading
 from datetime import datetime, timedelta
 from math import ceil
@@ -21,7 +22,7 @@ import Vk_bot_RssModule
 import YT_Api as YT_
 import e621_Api as e6
 from Mimimi_Api import *
-from PIL_module import kok, kek, Glitch
+from PIL_module import kok, kek, Glitch, Glitch2
 from tempfile_ import *
 
 V = 3.0
@@ -718,10 +719,14 @@ class VK_Bot:
         iter = int(args['iter'])
         size = int(args['size'])
         try:
+            Glitch_ = bool(args['color'])
+        except:
+            Glitch_ = False
+        try:
             random_ = bool(args['rand'])
         except:
             random_ = False
-        print(random_)
+
         hdr = {
             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -729,8 +734,6 @@ class VK_Bot:
             'Accept-Encoding': 'none',
             'Accept-Language': 'en-US,en;q=0.8',
             'Connection': 'keep-alive'}
-        R_args['peer_id'] = args['data']['peer_id']
-        args['v'] = 5.38
         att = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments'][0]['photo']
         try:
             photo = att['src_xxxbig']
@@ -749,7 +752,60 @@ class VK_Bot:
         req = urllib.request.Request(photo, headers=hdr)
         img = urlopen(req).read()
         Tmp = TempFile(img, 'jpg')
-        Glitch(file=Tmp.path_, sigma=sigma, blockSize=size, iterations=iter, random_=random_)
+        Glitch(file=Tmp.path_, sigma=sigma, blockSize=size, iterations=iter, random_=random_, Glitch_=Glitch_)
+        att = self.UploadFromDisk(Tmp.path_)
+        Tmp.rem()
+        R_args['attachment'] = att
+        self.Replyqueue.put(R_args)
+        return True
+
+    def Prism(self, args):
+        R_args = {}
+        R_args['v'] = 5.38
+        R_args['peer_id'] = args['data']['peer_id']
+        hdr = {
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+            'Accept-Encoding': 'none',
+            'Accept-Language': 'en-US,en;q=0.8',
+            'Connection': 'keep-alive'}
+        att = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments'][0]['photo']
+        try:
+            photo = att['src_xxxbig']
+        except:
+            try:
+                photo = att["src_xxbig"]
+            except:
+                try:
+                    photo = att["src_xbig"]
+                except:
+                    try:
+                        photo = att["src_big"]
+                    except:
+                        return False
+
+        req = urllib.request.Request(photo, headers=hdr)
+        img = urlopen(req).read()
+        Tmp = TempFile(img, 'jpg')
+        cmds = " "
+        try:
+            BLOCKS = int(args['blocks'])
+            cmds += '-b {} '.format(BLOCKS)
+        except:
+            pass
+        try:
+            DITHER = bool(args['dither'])
+            cmds += '-d {} '.format(DITHER)
+
+        except:
+            pass
+        try:
+            INTENSITY = int(args['intensity'])
+            cmds += '-i {} '.format(INTENSITY)
+        except:
+            pass
+        subprocess.call('python prismsort.py {} {}'.format(Tmp.path_, cmds))
         att = self.UploadFromDisk(Tmp.path_)
         Tmp.rem()
         R_args['attachment'] = att
@@ -782,6 +838,7 @@ class VK_Bot:
                 '!d_a': [self.D_A, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на DA", ''],
                 '!yt': [self.YT, ['admin', 'editor', 'moderator', 'user'], "Ищет видео на Ютубе", ''],
                 '!глюк': [self.Glitch, ['admin', 'editor', 'moderator', 'user'], "Глючная обработка фото", ''],
+                '!prism': [self.Prism, ['admin', 'editor', 'moderator', 'user'], "Глючная обработка фото", ''],
                 # 'фото': [self.UploadPhoto, ['admin', 'editor', 'moderator','user']],
                 '!добавить': [self.AddUser, ['admin'], "Не для вас", ''],
                 '!likes': [self.Likes, ['admin'], "Тоже не для вас", ''],
@@ -1004,6 +1061,42 @@ class VK_Bot:
                                 kok(Tmp.path_)
                             if 'кек' in toCheck:
                                 kek(Tmp.path_)
+                            att = self.UploadFromDisk(Tmp.path_)
+                            Tmp.rem()
+                            args['attachment'] = att
+                            self.Replyqueue.put(args)
+
+                        elif (',глюк' in toCheck):
+                            hdr = {
+                                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+                                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                                'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+                                'Accept-Encoding': 'none',
+                                'Accept-Language': 'en-US,en;q=0.8',
+                                'Connection': 'keep-alive'}
+                            args['peer_id'] = data['peer_id']
+                            args['v'] = 5.38
+                            att = self.UserApi.messages.getById(message_id=data['message_id'])[1]['attachments'][0][
+                                'photo']
+                            print(att)
+                            try:
+                                photo = att['src_xxxbig']
+                            except:
+                                try:
+                                    photo = att["src_xxbig"]
+                                except:
+                                    try:
+                                        photo = att["src_xbig"]
+                                    except:
+                                        try:
+                                            photo = att["src_big"]
+                                        except:
+                                            return False
+                            print(photo)
+                            req = urllib.request.Request(photo, headers=hdr)
+                            img = urlopen(req).read()
+                            Tmp = TempFile(img, 'jpg')
+                            Glitch2.glitch_an_image(Tmp.path_)
                             att = self.UploadFromDisk(Tmp.path_)
                             Tmp.rem()
                             args['attachment'] = att
