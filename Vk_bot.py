@@ -21,6 +21,7 @@ import Vk_bot_RssModule
 import YT_Api as YT_
 import e621_Api as e6
 from Mimimi_Api import *
+from PIL_module import kok, kek, Glitch
 from tempfile_ import *
 
 V = 3.0
@@ -217,7 +218,7 @@ class VK_Bot:
         self.MyUId = self.UserApi.users.get()[0]['uid']
         self.MyName = self.GetUserNameById(self.MyUId)
         self.hello = re.compile(
-            '(прив(|а|ет(|ик)(|ствую))|ку(|(-| )ку|)|х(а|е)й|зд((о|а)ров(а|)|ра(е|ь)|вствуй(|те)))|добр(ое|ый) (день|утро|вечер)')
+            '(прив(|а|ет(|ик)(|ствую))|х(а|е)й|зд((о|а)ров(а|)|ра(е|ь)|вствуй(|те)))|добр(ое|ый) (день|утро|вечер)')
         self.oldMsg = ""
         self.OldStat = self.UserApi.status.get()['text']
         self.UserApi.status.set(text="Bot online")
@@ -500,6 +501,24 @@ class VK_Bot:
                     continue
         return atts
 
+    def UploadFromDisk(self, file):
+        atts = []
+        server = self.GetUploadServer()['upload_url']
+        args = {}
+        args['server'] = server
+        print('uploading photo №')
+        req = requests.post(server, files={'photo': open(file, 'rb')})
+        print('Done')
+        # req = requests.post(server,files = {'photo':img})
+        if req.status_code == requests.codes.ok:
+            # print('req',req.json())
+            try:
+                params = {'server': req.json()['server'], 'photo': req.json()['photo'], 'hash': req.json()['hash']}
+                photo = self.UserApi.photos.saveMessagesPhoto(**params)[0]
+            except:
+                pass
+
+        return photo['id']
     def Music(self, args):
         name = args['имя']
         T_args = {}
@@ -690,6 +709,52 @@ class VK_Bot:
             ' '.join([user['first_name'], user['last_name']]), b)
         self.Replyqueue.put(R_args)
         return True
+
+    def Glitch(self, args):
+        R_args = {}
+        R_args['v'] = 5.38
+        R_args['peer_id'] = args['data']['peer_id']
+        sigma = int(args['sigma'])
+        iter = int(args['iter'])
+        size = int(args['size'])
+        try:
+            random_ = bool(args['rand'])
+        except:
+            random_ = False
+        print(random_)
+        hdr = {
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+            'Accept-Encoding': 'none',
+            'Accept-Language': 'en-US,en;q=0.8',
+            'Connection': 'keep-alive'}
+        R_args['peer_id'] = args['data']['peer_id']
+        args['v'] = 5.38
+        att = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments'][0]['photo']
+        try:
+            photo = att['src_xxxbig']
+        except:
+            try:
+                photo = att["src_xxbig"]
+            except:
+                try:
+                    photo = att["src_xbig"]
+                except:
+                    try:
+                        photo = att["src_big"]
+                    except:
+                        return False
+
+        req = urllib.request.Request(photo, headers=hdr)
+        img = urlopen(req).read()
+        Tmp = TempFile(img, 'jpg')
+        Glitch(file=Tmp.path_, sigma=sigma, blockSize=size, iterations=iter, random_=random_)
+        att = self.UploadFromDisk(Tmp.path_)
+        Tmp.rem()
+        R_args['attachment'] = att
+        self.Replyqueue.put(R_args)
+        return True
     def CheckForCommands(self):
         while True:
             print('Unfinished Check tasks:', self.Checkqueue.unfinished_tasks)
@@ -706,17 +771,21 @@ class VK_Bot:
                 pass
 
             Commands = {
-                '!пост': [self.MakePost, ['admin', 'editor', 'moderator'], "постит в группе ваш текст"],
-                '!бан': [self.BanUser, ['admin', 'editor', 'moderator'], ',Банит'],
-                '!музыка': [self.Music, ['admin', 'editor', 'moderator', 'user'], "Ищет музыку"],
-                '!e621': [self.e621, ['admin', 'editor', 'moderator'], "Ищет пикчи на e621"],
-                '!e926': [self.e926, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на e926"],
-                '!d_a': [self.D_A, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на DA"],
-                '!yt': [self.YT, ['admin', 'editor', 'moderator', 'user'], "Ищет видео на Ютубе"],
+                '!пост': [self.MakePost, ['admin', 'editor', 'moderator'], "постит в группе ваш текст", ''],
+                '!бан': [self.BanUser, ['admin', 'editor', 'moderator'], 'Банит', ''],
+                '!музыка': [self.Music, ['admin', 'editor', 'moderator', 'user'], 'Ищет музыку',
+                            "Ищет музыку, форма запроса:\n!музыка\nимя:НАЗВАНИЕ"],
+                '!e621': [self.e621, ['admin', 'editor', 'moderator'], "Ищет пикчи на e621",
+                          "Ищет пикчи на e621, форма запроса:\n!e621\ntags:тэги через ;\nsort:fav_count либо score либо вообще не пишите это, если хотите случайных\nn:кол-во артов(максимум 10)\npage:страница на которой искать"],
+                '!e926': [self.e926, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на e926",
+                          "Ищет пикчи на e926, форма запроса:\n!e626\ntags:тэги через ;\nsort:fav_count либо score либо вообще не пишите это, если хотите случайных\nn:кол-во артов(максимум 10)\npage:страница на которой искать"],
+                '!d_a': [self.D_A, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на DA", ''],
+                '!yt': [self.YT, ['admin', 'editor', 'moderator', 'user'], "Ищет видео на Ютубе", ''],
+                '!глюк': [self.Glitch, ['admin', 'editor', 'moderator', 'user'], "Глючная обработка фото", ''],
                 # 'фото': [self.UploadPhoto, ['admin', 'editor', 'moderator','user']],
-                '!добавить': [self.AddUser, ['admin'], "Не для вас"],
-                '!likes': [self.Likes, ['admin'], "Тоже не для вас"],
-                '!rss': [self.GetRss, ['admin', 'editor', 'moderator', 'user'], "РСС парсит"]
+                '!добавить': [self.AddUser, ['admin'], "Не для вас", ''],
+                '!likes': [self.Likes, ['admin'], "Тоже не для вас", ''],
+                '!rss': [self.GetRss, ['admin', 'editor', 'moderator', 'user'], "РСС парсит", '']
             }
             CommandDict = {}
             args = {}
@@ -727,7 +796,7 @@ class VK_Bot:
                         Command_ = data['message'].split(':')
                         args['peer_id'] = data['peer_id']
                         args['v'] = 5.38
-                        args['message'] = Commands[Command_[1]][2]
+                        args['message'] = Commands[Command_[1]][3]
                         self.Replyqueue.put(args)
                         continue
                     if '!команды' in data['message']:
@@ -797,7 +866,7 @@ class VK_Bot:
                             args['message'] = "Команда не распознана"
                             self.Replyqueue.put(args)
                     if (self.MyName['first_name'].lower() in data['message'].lower()):
-
+                        toCheck = data['message'].lower().replace(' ', '')
                         if self.hello.search(data['message'], re.IGNORECASE):
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
@@ -811,7 +880,7 @@ class VK_Bot:
                             # self.Reply(self.UserApi, args)
                             self.Replyqueue.put(args)
                             self.oldMsg = msg
-                        elif (',котики').lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
+                        elif ',котики' in toCheck:
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
                             args['message'] = 'мимими, '
@@ -820,7 +889,7 @@ class VK_Bot:
                             args['attachment'] = att
                             # self.Reply(self.UserApi, args)
                             self.Replyqueue.put(args)
-                        elif ',где'.lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
+                        elif ',где' in toCheck:
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
                             args['forward_messages'] = data['message_id']
@@ -834,7 +903,7 @@ class VK_Bot:
                             # self.Reply(self.UserApi, args)
                             self.Replyqueue.put(args)
                             self.oldMsg = msg
-                        elif ',кто'.lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
+                        elif ',кто' in toCheck:
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
                             args['forward_messages'] = data['message_id']
@@ -860,7 +929,7 @@ class VK_Bot:
                                 # self.Reply(self.UserApi, args)
                                 self.Replyqueue.put(args)
                                 self.oldMsg = msg
-                        elif ',кого'.lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
+                        elif ',кого' in toCheck:
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
                             args['forward_messages'] = data['message_id']
@@ -887,7 +956,7 @@ class VK_Bot:
                                 # self.Reply(self.UserApi, args)
                                 self.Replyqueue.put(args)
                                 self.oldMsg = msg
-                        elif ',вероятность'.lower().replace(' ', '') in data['message'].lower().replace(' ', ''):
+                        elif (',вероятность' in toCheck) or (',инфа' in toCheck):
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
                             a = data['message'].split(' ')
@@ -900,6 +969,44 @@ class VK_Bot:
 
                             args['message'] = msg
                             # self.Reply(self.UserApi, args)
+                            self.Replyqueue.put(args)
+                        elif (',кок' in toCheck) or (',кек' in toCheck):
+                            hdr = {
+                                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+                                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                                'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+                                'Accept-Encoding': 'none',
+                                'Accept-Language': 'en-US,en;q=0.8',
+                                'Connection': 'keep-alive'}
+                            args['peer_id'] = data['peer_id']
+                            args['v'] = 5.38
+                            att = self.UserApi.messages.getById(message_id=data['message_id'])[1]['attachments'][0][
+                                'photo']
+                            print(att)
+                            try:
+                                photo = att['src_xxxbig']
+                            except:
+                                try:
+                                    photo = att["src_xxbig"]
+                                except:
+                                    try:
+                                        photo = att["src_xbig"]
+                                    except:
+                                        try:
+                                            photo = att["src_big"]
+                                        except:
+                                            return False
+                            print(photo)
+                            req = urllib.request.Request(photo, headers=hdr)
+                            img = urlopen(req).read()
+                            Tmp = TempFile(img, 'jpg')
+                            if 'кок' in toCheck:
+                                kok(Tmp.path_)
+                            if 'кек' in toCheck:
+                                kek(Tmp.path_)
+                            att = self.UploadFromDisk(Tmp.path_)
+                            Tmp.rem()
+                            args['attachment'] = att
                             self.Replyqueue.put(args)
 
                 except Exception as Ex:
