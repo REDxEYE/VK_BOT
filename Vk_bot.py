@@ -734,28 +734,31 @@ class VK_Bot:
             'Accept-Encoding': 'none',
             'Accept-Language': 'en-US,en;q=0.8',
             'Connection': 'keep-alive'}
-        att = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments'][0]['photo']
-        try:
-            photo = att['src_xxxbig']
-        except:
+        atts = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments']
+        Topost = []
+        for att in atts:
             try:
-                photo = att["src_xxbig"]
+                photo = att['photo']['src_xxxbig']
             except:
                 try:
-                    photo = att["src_xbig"]
+                    photo = ['photo']["src_xxbig"]
                 except:
                     try:
-                        photo = att["src_big"]
+                        photo = att['photo']["src_xbig"]
                     except:
-                        return False
+                        try:
+                            photo = att['photo']["src_big"]
+                        except:
+                            return False
 
-        req = urllib.request.Request(photo, headers=hdr)
-        img = urlopen(req).read()
-        Tmp = TempFile(img, 'jpg')
-        Glitch(file=Tmp.path_, sigma=sigma, blockSize=size, iterations=iter, random_=random_, Glitch_=Glitch_)
-        att = self.UploadFromDisk(Tmp.path_)
-        Tmp.rem()
-        R_args['attachment'] = att
+            req = urllib.request.Request(photo, headers=hdr)
+            img = urlopen(req).read()
+            Tmp = TempFile(img, 'jpg')
+            Glitch(file=Tmp.path_, sigma=sigma, blockSize=size, iterations=iter, random_=random_, Glitch_=Glitch_)
+            att = self.UploadFromDisk(Tmp.path_)
+            Topost.append(att)
+            Tmp.rem()
+        R_args['attachment'] = Topost
         self.Replyqueue.put(R_args)
         return True
 
@@ -1076,30 +1079,31 @@ class VK_Bot:
                                 'Connection': 'keep-alive'}
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
-                            att = self.UserApi.messages.getById(message_id=data['message_id'])[1]['attachments'][0][
-                                'photo']
-                            print(att)
-                            try:
-                                photo = att['src_xxxbig']
-                            except:
+                            atts = self.UserApi.messages.getById(message_id=data['message_id'])[1]['attachments']
+                            Topost = []
+
+                            for att in atts:
                                 try:
-                                    photo = att["src_xxbig"]
+                                    photo = att['photo']['src_xxxbig']
                                 except:
                                     try:
-                                        photo = att["src_xbig"]
+                                        photo = att['photo']["src_xxbig"]
                                     except:
                                         try:
-                                            photo = att["src_big"]
+                                            photo = att['photo']["src_xbig"]
                                         except:
-                                            return False
-                            print(photo)
-                            req = urllib.request.Request(photo, headers=hdr)
-                            img = urlopen(req).read()
-                            Tmp = TempFile(img, 'jpg')
-                            Glitch2.glitch_an_image(Tmp.path_)
-                            att = self.UploadFromDisk(Tmp.path_)
-                            Tmp.rem()
-                            args['attachment'] = att
+                                            try:
+                                                photo = att['photo']["src_big"]
+                                            except:
+                                                return False
+                                req = urllib.request.Request(photo, headers=hdr)
+                                img = urlopen(req).read()
+                                Tmp = TempFile(img, 'jpg')
+                                Glitch2.glitch_an_image(Tmp.path_)
+                                att = self.UploadFromDisk(Tmp.path_)
+                                Topost.append(att)
+                                Tmp.rem()
+                            args['attachment'] = Topost
                             self.Replyqueue.put(args)
 
                 except Exception as Ex:
