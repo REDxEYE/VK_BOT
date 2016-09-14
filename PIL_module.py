@@ -1,7 +1,9 @@
 import math
 import random
 
-from PIL import Image
+import imageio
+import numpy as np
+from PIL import Image, ImageSequence
 
 
 def kok(file):
@@ -107,6 +109,29 @@ class Glitch2():
         return local_image
 
 
+def GlitchRet(im, blockSize=16, sigma=5, iterations=300, random_=True, Glitch_=False):
+    # im = Image.open(file)
+    im = im.convert('RGB')
+    a = WigglyBlocks(blockSize, sigma, iterations, random_)
+    if Glitch_:
+        R = Image.new("RGB", im.size)
+        G = Image.new("RGB", im.size)
+        B = Image.new("RGB", im.size)
+
+        R.putdata(im.getdata(0))
+        G.putdata(im.getdata(1))
+        B.putdata(im.getdata(2))
+        R = a.render(R).convert('L')
+        G = a.render(G).convert('L')
+        B = a.render(B).convert('L')
+
+        im = Image.merge('RGB', (R, G, B))
+        im = im.point(lambda p: p * 3.5)
+    else:
+
+        im = a.render(im)
+    # im.save(file, 'JPEG')
+    return im
 def Glitch(file, blockSize=16, sigma=0.01, iterations=300, random_=True, Glitch_=False):
     im = Image.open(file)
     a = WigglyBlocks(blockSize, sigma, iterations, random_)
@@ -128,3 +153,23 @@ def Glitch(file, blockSize=16, sigma=0.01, iterations=300, random_=True, Glitch_
 
         im = a.render(im)
     im.save(file, 'JPEG')
+
+
+def GlitchGif(gif, blockSize=16, sigma=10, iterations=300, random_=True, Glitch_=False):
+    im = Image.open(gif)
+    nFrames = []
+    glitchVar = 0
+    path = '/'.join(gif.split('/')[:-1])
+    name = gif.split('/')[-1]
+    path += '/glitch_' + name
+    print(path)
+    for frame in ImageSequence.Iterator(im):
+        if random.randint(0, 15) >= 10 and glitchVar == 0:
+            glitchVar = random.randint(1, sigma)
+        if glitchVar != 0:
+            frame = GlitchRet(frame.convert('RGB'), Glitch_=True, sigma=glitchVar, blockSize=blockSize,
+                              iterations=iterations, random_=random_)
+            glitchVar -= 1
+        nFrames.append(np.asarray(frame.convert('RGB')))
+    imageio.mimwrite(path, nFrames)
+    return path
