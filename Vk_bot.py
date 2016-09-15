@@ -10,8 +10,11 @@ from datetime import datetime, timedelta
 from math import ceil
 from time import sleep
 from urllib.request import urlopen
+from urllib.request import urlopen
 
+import giphypop
 import requests
+from bs4 import BeautifulSoup
 from vk.exceptions import VkAuthError, VkAPIError
 from vk.logs import LOGGING_CONFIG
 from vk.utils import stringify_values, json_iter_parse, LoggingSession, str_type
@@ -195,7 +198,13 @@ class Request(object):
 
 class VK_Bot:
     def __init__(self, threads=4):
-
+        self.hdr = {
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+            'Accept-Encoding': 'none',
+            'Accept-Language': 'en-US,en;q=0.8',
+            'Connection': 'keep-alive'}
         self.Checkqueue = queue.Queue()
         self.Replyqueue = queue.Queue()
         print('Loading')
@@ -470,13 +479,7 @@ class VK_Bot:
 
     def UploadPhoto(self, urls):
         atts = []
-        hdr = {
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-            'Accept-Encoding': 'none',
-            'Accept-Language': 'en-US,en;q=0.8',
-            'Connection': 'keep-alive'}
+
         if type(urls) != type(['1', '2']):
             urls = [urls]
         i = 0
@@ -484,7 +487,7 @@ class VK_Bot:
             i += 1
             print('downloading photo№{}'.format(i))
             server = self.GetUploadServer()['upload_url']
-            req = urllib.request.Request(url, headers=hdr)
+            req = urllib.request.Request(url, headers=self.hdr)
             img = urlopen(req).read()
             Tmp = TempFile(img, 'jpg')
 
@@ -539,10 +542,8 @@ class VK_Bot:
         # req = requests.post(server,files = {'photo':img})
         if req.status_code == requests.codes.ok:
             # print('req',req.json())
-            print(req.json())
             params = {'file': req.json()['file'], 'title': name, 'v': 5.53}
             doc = self.UserApi.docs.save(**params)[0]
-            print(doc)
 
         return 'doc{}_{}'.format(doc['owner_id'], doc['id']), doc
 
@@ -752,13 +753,7 @@ class VK_Bot:
         except:
             random_ = False
 
-        hdr = {
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-            'Accept-Encoding': 'none',
-            'Accept-Language': 'en-US,en;q=0.8',
-            'Connection': 'keep-alive'}
+
         atts = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments']
         Topost = []
         for att in atts:
@@ -777,7 +772,7 @@ class VK_Bot:
                             except:
                                 return False
 
-                req = urllib.request.Request(photo, headers=hdr)
+                req = urllib.request.Request(photo, headers=self.hdr)
                 img = urlopen(req).read()
                 Tmp = TempFile(img, 'jpg')
                 Glitch(file=Tmp.path_, sigma=sigma, blockSize=size, iterations=iter, random_=random_, Glitch_=Glitch_)
@@ -791,7 +786,7 @@ class VK_Bot:
                         gif = att['doc']['url']
                     except:
                         return False
-                    req = urllib.request.Request(gif, headers=hdr)
+                    req = urllib.request.Request(gif, headers=self.hdr)
                     img = urlopen(req).read()
                     Tmp = TempFile(img, 'gif')
                     file = GlitchGif(Tmp.path_, sigma=sigma, blockSize=size, iterations=iter, random_=random_,
@@ -810,13 +805,7 @@ class VK_Bot:
         R_args = {}
         R_args['v'] = 5.38
         R_args['peer_id'] = args['data']['peer_id']
-        hdr = {
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-            'Accept-Encoding': 'none',
-            'Accept-Language': 'en-US,en;q=0.8',
-            'Connection': 'keep-alive'}
+
         att = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments'][0]['photo']
         try:
             photo = att['src_xxxbig']
@@ -832,7 +821,7 @@ class VK_Bot:
                     except:
                         return False
 
-        req = urllib.request.Request(photo, headers=hdr)
+        req = urllib.request.Request(photo, headers=self.hdr)
         img = urlopen(req).read()
         Tmp = TempFile(img, 'jpg')
         cmds = " "
@@ -993,6 +982,20 @@ class VK_Bot:
                             args['attachment'] = att
                             # self.Reply(self.UserApi, args)
                             self.Replyqueue.put(args)
+                        elif ',пикча' in toCheck:
+                            args['peer_id'] = data['peer_id']
+                            args['v'] = 5.38
+                            a = data['message'].split(' ')
+                            if ('пикча' in a[1]):
+                                a = ' '.join(a[2:])
+                            else:
+                                a = ' '.join(a[1:])
+                            # results = random.choice(google.search_images(a))
+                            print(results)
+                            att = self.UploadPhoto()
+                            args['attachment'] = att
+                            # self.Reply(self.UserApi, args)
+                            self.Replyqueue.put(args)
                         elif ',где' in toCheck:
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
@@ -1074,14 +1077,38 @@ class VK_Bot:
                             args['message'] = msg
                             # self.Reply(self.UserApi, args)
                             self.Replyqueue.put(args)
+                        elif (',гифка' in toCheck) or (',гиф' in toCheck):
+                            args['peer_id'] = data['peer_id']
+                            args['v'] = 5.38
+                            a = data['message'].split(' ')
+                            if ('гифка' in a[1]) or ('гиф' in a[1]):
+                                a = ' '.join(a[2:])
+                            else:
+                                a = ' '.join(a[1:])
+                            args['forward_messages'] = data['message_id']
+                            # msg = "Вероятность того, что {}, равна {}%".format(' '.join(a), randint(0, 100))
+                            g = giphypop.Giphy(api_key='dc6zaTOxFJmzC')
+                            results = [x for x in g.search(a)]
+                            if results:
+                                gif = random.choice(results)
+                                page = urllib.request.Request(gif, headers=self.hdr)
+                                giphy = urlopen(page).read()
+                                soup = BeautifulSoup(giphy, 'html.parser')
+                                gif = soup.find_all('meta', {'itemprop': "contentUrl"})[0].get('content')
+
+                                req = urllib.request.Request(gif, headers=self.hdr)
+                                img = urlopen(req).read()
+                                Tmp = TempFile(img, 'gif')
+                                doc = self.UploadDocFromDisk(Tmp.path_)
+                                Tmp.rem()
+                                args['attachment'] = doc
+                            else:
+
+                                args['message'] = "Ничего не найдено по запросу {}".format(a)
+                            # self.Reply(self.UserApi, args)
+                            self.Replyqueue.put(args)
                         elif (',кок' in toCheck) or (',кек' in toCheck):
-                            hdr = {
-                                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-                                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                                'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-                                'Accept-Encoding': 'none',
-                                'Accept-Language': 'en-US,en;q=0.8',
-                                'Connection': 'keep-alive'}
+
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
                             att = self.UserApi.messages.getById(message_id=data['message_id'])[1]['attachments'][0][
@@ -1101,7 +1128,7 @@ class VK_Bot:
                                         except:
                                             return False
                             print(photo)
-                            req = urllib.request.Request(photo, headers=hdr)
+                            req = urllib.request.Request(photo, headers=self.hdr)
                             img = urlopen(req).read()
                             Tmp = TempFile(img, 'jpg')
                             if 'кок' in toCheck:
@@ -1114,13 +1141,7 @@ class VK_Bot:
                             self.Replyqueue.put(args)
 
                         elif (',глюк' in toCheck):
-                            hdr = {
-                                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-                                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                                'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-                                'Accept-Encoding': 'none',
-                                'Accept-Language': 'en-US,en;q=0.8',
-                                'Connection': 'keep-alive'}
+
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
                             atts = self.UserApi.messages.getById(message_id=data['message_id'])[1]['attachments']
@@ -1143,7 +1164,7 @@ class VK_Bot:
                                                     photo = att['photo']["src"]
                                                 except:
                                                     return False
-                                req = urllib.request.Request(photo, headers=hdr)
+                                req = urllib.request.Request(photo, headers=self.hdr)
                                 img = urlopen(req).read()
                                 Tmp = TempFile(img, 'jpg')
                                 Glitch2.glitch_an_image(Tmp.path_)
@@ -1154,13 +1175,7 @@ class VK_Bot:
                             self.Replyqueue.put(args)
 
                         elif (',соедени' in toCheck):
-                            hdr = {
-                                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-                                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                                'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-                                'Accept-Encoding': 'none',
-                                'Accept-Language': 'en-US,en;q=0.8',
-                                'Connection': 'keep-alive'}
+
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
                             atts = self.UserApi.messages.getById(message_id=data['message_id'])[1]['attachments']
@@ -1202,8 +1217,8 @@ class VK_Bot:
                                                 photo1 = atts[1]['photo']["src"]
                                             except:
                                                 return False
-                            req = urllib.request.Request(photo, headers=hdr)
-                            req1 = urllib.request.Request(photo1, headers=hdr)
+                            req = urllib.request.Request(photo, headers=self.hdr)
+                            req1 = urllib.request.Request(photo1, headers=self.hdr)
                             img = urlopen(req).read()
                             img1 = urlopen(req1).read()
                             Tmp = TempFile(img, 'jpg')
