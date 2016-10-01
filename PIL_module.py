@@ -99,7 +99,7 @@ class Glitch2():
         file_data = file_handler.read()
         file_handler.close()
 
-        for i in range(1, random.randint(1, 10)):
+        for i in range(1, random.randint(3, 13)):
             file_data = Glitch2.splice_a_chunk_in_a_file(file_data)
 
         file_handler = open(local_image, 'w+b')
@@ -132,6 +132,8 @@ def GlitchRet(im, blockSize=16, sigma=5, iterations=300, random_=True, Glitch_=F
         im = a.render(im)
     # im.save(file, 'JPEG')
     return im
+
+
 def Glitch(file, blockSize=16, sigma=0.01, iterations=300, random_=True, Glitch_=False):
     im = Image.open(file)
     a = WigglyBlocks(blockSize, sigma, iterations, random_)
@@ -155,10 +157,36 @@ def Glitch(file, blockSize=16, sigma=0.01, iterations=300, random_=True, Glitch_
     im.save(file, 'JPEG')
 
 
+def MakeGlitchGif(image, len_=60, blockSize=16, sigma=10, iterations=300, random_=True, Glitch_=False):
+    im = Image.open(image)
+    nFrames = []
+    glitchVar = 0
+
+    path = '/'.join(image.split('/')[:-1])
+    name = image.split('/')[-1]
+    fname = name.split('.')[0]
+    path += '/glitch_' + fname + '.gif'
+
+    frames = [im.copy() for a in range(len_)]
+    for frame in frames:
+
+        if random.randint(0, 15) >= 10 and glitchVar == 0:
+            glitchVar = random.randint(1, sigma)
+        if glitchVar != 0:
+            frame = GlitchRet(frame.convert('RGB'), Glitch_=True, sigma=glitchVar, blockSize=blockSize,
+                              iterations=iterations, random_=random_)
+            glitchVar -= 1
+        nFrames.append(np.asarray(frame.convert('RGB')))
+
+    imageio.mimwrite(path, nFrames, )
+    return path
+
+
 def GlitchGif(gif, blockSize=16, sigma=10, iterations=300, random_=True, Glitch_=False):
     im = Image.open(gif)
     nFrames = []
     glitchVar = 0
+    original_duration = im.info['duration']
     path = '/'.join(gif.split('/')[:-1])
     name = gif.split('/')[-1]
     path += '/glitch_' + name
@@ -171,5 +199,7 @@ def GlitchGif(gif, blockSize=16, sigma=10, iterations=300, random_=True, Glitch_
                               iterations=iterations, random_=random_)
             glitchVar -= 1
         nFrames.append(np.asarray(frame.convert('RGB')))
-    imageio.mimwrite(path, nFrames)
+    fps = (original_duration) / 1000
+    print(fps)
+    imageio.mimwrite(path, nFrames, **{'duration': fps})
     return path

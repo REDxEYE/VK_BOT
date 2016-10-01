@@ -10,11 +10,9 @@ from datetime import datetime, timedelta
 from math import ceil
 from time import sleep
 from urllib.request import urlopen
-from urllib.request import urlopen
 
 import giphypop
 import requests
-from bs4 import BeautifulSoup
 from vk.exceptions import VkAuthError, VkAPIError
 from vk.logs import LOGGING_CONFIG
 from vk.utils import stringify_values, json_iter_parse, LoggingSession, str_type
@@ -459,19 +457,21 @@ class VK_Bot:
         return True
 
     def Reply(self):
-        print('Unfinished Reply tasks:', self.Replyqueue.unfinished_tasks)
+
         while True:
             args = self.Replyqueue.get()
-            # print('Reply:', args)
+            print('Unfinished Reply tasks:', self.Replyqueue.unfinished_tasks)
+            print('Reply:', args)
             sleep(1)
-
             try:
                 self.UserApi.messages.send(**args)
             except Exception as Ex:
                 print("error couldn't send message:", Ex)
-                args['message'] += '\nФлудконтроль:{}'.format(randint(0, 255))
+                try:
+                    args['message'] += '\nФлудконтроль:{}'.format(randint(0, 255))
+                except:
+                    args['message'] = '\nФлудконтроль:{}'.format(randint(0, 255))
                 self.Replyqueue.put(args)
-
             self.Replyqueue.task_done()
 
     def GetUploadServer(self):
@@ -529,7 +529,6 @@ class VK_Bot:
                 pass
 
         return photo['id']
-
     def UploadDocFromDisk(self, file):
         atts = []
         server = self.UserApi.docs.getUploadServer()['upload_url']
@@ -545,7 +544,8 @@ class VK_Bot:
             params = {'file': req.json()['file'], 'title': name, 'v': 5.53}
             doc = self.UserApi.docs.save(**params)[0]
 
-        return 'doc{}_{}'.format(doc['owner_id'], doc['id']), doc
+            return 'doc{}_{}'.format(doc['owner_id'], doc['id']), doc
+        return None, None
 
     def Music(self, args):
         name = args['имя']
@@ -795,9 +795,62 @@ class VK_Bot:
                     Tmp.rem()
                     os.remove(file)
                     Topost.append(doc)
-
+        R_args['message'] = ':D'
         R_args['attachment'] = Topost
 
+        self.Replyqueue.put(R_args)
+        return True
+
+    def GifFromPhoto(self, args):
+        R_args = {}
+        R_args['v'] = 5.38
+        R_args['peer_id'] = args['data']['peer_id']
+        sigma = int(args['sigma'])
+        iter = int(args['iter'])
+        size = int(args['size'])
+        try:
+            Glitch_ = bool(args['color'])
+        except:
+            Glitch_ = False
+        try:
+            random_ = bool(args['rand'])
+        except:
+            random_ = False
+        try:
+            len_ = int(args['len'])
+        except:
+            len_ = 60
+
+        atts = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments']
+        Topost = []
+        for att in atts:
+            if att['type'] == 'photo':
+                try:
+                    photo = att['photo']['src_xxxbig']
+                except:
+                    try:
+                        photo = ['photo']["src_xxbig"]
+                    except:
+                        try:
+                            photo = att['photo']["src_xbig"]
+                        except:
+                            try:
+                                photo = att['photo']["src_big"]
+                            except:
+                                return False
+
+                req = urllib.request.Request(photo, headers=self.hdr)
+                img = urlopen(req).read()
+                Tmp = TempFile(img, 'jpg')
+                file = MakeGlitchGif(image=Tmp.path_, len_=len_, sigma=sigma, blockSize=size, iterations=iter,
+                                     random_=random_, Glitch_=Glitch_)
+                doc, t = self.UploadDocFromDisk(file)
+                os.remove(file)
+                Topost.append(doc)
+                Tmp.rem()
+
+        R_args['attachment'] = Topost
+        R_args['message'] = ':D'
         self.Replyqueue.put(R_args)
         return True
 
@@ -845,6 +898,7 @@ class VK_Bot:
         att = self.UploadFromDisk(Tmp.path_)
         Tmp.rem()
         R_args['attachment'] = att
+        R_args['message'] = ':D'
         self.Replyqueue.put(R_args)
         return True
 
@@ -875,6 +929,8 @@ class VK_Bot:
                 '!d_a': [self.D_A, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на DA", ''],
                 '!yt': [self.YT, ['admin', 'editor', 'moderator', 'user'], "Ищет видео на Ютубе", ''],
                 '!глюк': [self.Glitch, ['admin', 'editor', 'moderator', 'user'], "Глючная обработка фото", ''],
+                '!сделайглюк': [self.GifFromPhoto, ['admin', 'editor', 'moderator', 'user'],
+                                "Создаёт глючную гифку из фото", ''],
                 '!prism': [self.Prism, ['admin', 'editor', 'moderator', 'user'], "Глючная обработка фото", ''],
                 # 'фото': [self.UploadPhoto, ['admin', 'editor', 'moderator','user']],
                 '!добавить': [self.AddUser, ['admin'], "Не для вас", ''],
@@ -956,9 +1012,10 @@ class VK_Bot:
                         else:
                             if (data['message'][1:]).isdigit():
                                 continue
-                            args['message'] = "Команда не распознана"
-                            self.Replyqueue.put(args)
-                    if (self.MyName['first_name'].lower() in data['message'].lower()):
+
+                                # args['message'] = "Команда не распознана"
+                                # self.Replyqueue.put(args)
+                    if (self.MyName['first_name'].lower() in data['message'].lower()) or ('ред' in data['message'].lower()):
                         toCheck = data['message'].lower().replace(' ', '')
                         if self.hello.search(data['message'], re.IGNORECASE):
                             args['peer_id'] = data['peer_id']
@@ -1111,23 +1168,12 @@ class VK_Bot:
 
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
-                            att = self.UserApi.messages.getById(message_id=data['message_id'])[1]['attachments'][0][
-                                'photo']
-                            print(att)
                             try:
-                                photo = att['src_xxxbig']
+                                att = data['attachments'][0]
+                                photo = self.GetBiggesPic(att)
+
                             except:
-                                try:
-                                    photo = att["src_xxbig"]
-                                except:
-                                    try:
-                                        photo = att["src_xbig"]
-                                    except:
-                                        try:
-                                            photo = att["src_big"]
-                                        except:
                                             return False
-                            print(photo)
                             req = urllib.request.Request(photo, headers=self.hdr)
                             img = urlopen(req).read()
                             Tmp = TempFile(img, 'jpg')
@@ -1149,21 +1195,10 @@ class VK_Bot:
 
                             for att in atts:
                                 try:
-                                    photo = att['photo']['src_xxxbig']
+                                    att = data['attachments'][0]
+                                    photo = self.GetBiggesPic(att)
                                 except:
-                                    try:
-                                        photo = att['photo']["src_xxbig"]
-                                    except:
-                                        try:
-                                            photo = att['photo']["src_xbig"]
-                                        except:
-                                            try:
-                                                photo = att['photo']["src_big"]
-                                            except:
-                                                try:
-                                                    photo = att['photo']["src"]
-                                                except:
-                                                    return False
+                                    return False
                                 req = urllib.request.Request(photo, headers=self.hdr)
                                 img = urlopen(req).read()
                                 Tmp = TempFile(img, 'jpg')
@@ -1178,7 +1213,7 @@ class VK_Bot:
 
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.38
-                            atts = self.UserApi.messages.getById(message_id=data['message_id'])[1]['attachments']
+                            atts = data['attachments']
                             print(atts)
                             if len(atts) < 2:
                                 args['message'] = 'Нужны 2 файла'
@@ -1186,37 +1221,15 @@ class VK_Bot:
                             Topost = []
 
                             try:
-                                photo = atts[0]['photo']['src_xxxbig']
+                                att = atts[0]
+                                photo = self.GetBiggesPic(att)
                             except:
-                                try:
-                                    photo = atts[0]['photo']["src_xxbig"]
-                                except:
-                                    try:
-                                        photo = atts[0]['photo']["src_xbig"]
-                                    except:
-                                        try:
-                                            photo = atts[0]['photo']["src_big"]
-                                        except:
-                                            try:
-                                                photo = atts[0]['photo']["src"]
-                                            except:
-                                                return False
+                                return False
                             try:
-                                photo1 = atts[1]['photo']['src_xxxbig']
+                                att = atts[1]
+                                photo1 = self.GetBiggesPic(att)
                             except:
-                                try:
-                                    photo1 = atts[1]['photo']["src_xxbig"]
-                                except:
-                                    try:
-                                        photo1 = atts[1]['photo']["src_xbig"]
-                                    except:
-                                        try:
-                                            photo1 = atts[1]['photo']["src_big"]
-                                        except:
-                                            try:
-                                                photo1 = atts[1]['photo']["src"]
-                                            except:
-                                                return False
+                                return False
                             req = urllib.request.Request(photo, headers=self.hdr)
                             req1 = urllib.request.Request(photo1, headers=self.hdr)
                             img = urlopen(req).read()
@@ -1230,6 +1243,7 @@ class VK_Bot:
                             Tmp1.rem()
                             args['attachment'] = Topost
                             self.Replyqueue.put(args)
+
 
                 except Exception as Ex:
 
@@ -1251,6 +1265,16 @@ class VK_Bot:
         music = self.UserApi.audio.get(count=6000)
         print(music)
 
+    def GetBiggesPic(self, att):
+        data = self.UserApi.photos.getById(photos=att, v=5.57)[0]
+
+        sizes = re.findall(r'(?P<photo>photo_\d+)', str(data))
+
+        sizesToSort = {int(size.split('_')[1]): size for size in sizes}
+
+        sizesSorted = sorted(sizesToSort, reverse=True)[0]
+        size = sizesToSort[sizesSorted]
+        return data[sizesToSort[sizesSorted]]
     def LongPool(self, key, server, ts):
         url = 'http://' + server + '?act=a_check&key=' + key + '&ts=' + str(ts) + '&wait=25&mode=2'
         try:
@@ -1316,6 +1340,20 @@ class VK_Bot:
                         timestamp = s[4]
                         subject = s[5]
                         text = s[6]
+                        atts = s[7]
+                        attatchments = []
+                        try:
+                            for att in atts:
+
+                                if re.match(r'attach.+_type', att):
+                                    if atts[att] == 'photo':
+                                        temp = re.search(r'(?P<attach>attach.)', str(atts))
+                                        attatchments.append(atts[str(temp.group())])
+                            args['attachments'] = attatchments
+                        except:
+                            pass
+
+
                         args['peer_id'] = from_id
                         args["message"] = text
                         args['message_id'] = message_id
