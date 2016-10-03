@@ -3,7 +3,7 @@ import random
 
 import imageio
 import numpy as np
-from PIL import Image, ImageSequence
+from PIL import Image, ImageSequence, ImageChops
 
 
 def kok(file):
@@ -203,3 +203,16 @@ def GlitchGif(gif, blockSize=16, sigma=10, iterations=300, random_=True, Glitch_
     print(fps)
     imageio.mimwrite(path, nFrames, **{'duration': fps})
     return path
+
+
+def add(im1F, im2F):
+    path1 = '/'.join(im1F.split('/')[:-1])
+    name1 = im1F.split('/')[-1]
+    fname1 = name1.split('.')[0]
+    name2 = im2F.split('/')[-1]
+    fname2 = name2.split('.')[0]
+    im1 = Image.open(im1F)
+    im2 = Image.open(im2F)
+    im2 = im2.resize(im1.size)
+    im3 = ImageChops.add(im1, im2)
+    im3.save(im1F)
