@@ -1379,7 +1379,7 @@ class VK_Bot:
                                 args['message'] = answ
                             self.Replyqueue.put(args)
 
-                    if re.search(r'(В|в)сем (привет|здравия|хай)', data['message']):
+                    if re.search(r'(В|в)сем (привет|здравия|хай)|((З|з)драсте)', data['message']):
                         args['peer_id'] = data['peer_id']
                         args['v'] = 5.38
                         answ = choice(['И тебе привет', 'Привет', "Здравия", "Хай"])
