@@ -8,13 +8,13 @@
     * Cartoonizer
 """
 
+from multiprocessing.pool import ThreadPool
+
 import cv2
 import numpy as np
 from PIL import Image, ImageOps
 from scipy.interpolate import UnivariateSpline
 
-__author__ = "Michael Beyeler"
-__license__ = "GNU GPL 3.0 or later"
 xrange = range
 
 
@@ -218,3 +218,34 @@ class AutoContrast:
         im = Image.open(img)
         im = ImageOps.autocontrast(im, 5)
         im.save(img, 'PNG')
+
+
+class Neural:
+    def __init__(self):
+        pass
+
+    def render(self, im):
+        img = cv2.imread(im)
+        filters = self.build_filters()
+        res2 = self.process_threaded(img, filters)
+        cv2.imwrite(im, res2)
+
+    def build_filters(self):
+        filters = []
+        ksize = 150
+        for theta in np.arange(0, np.pi, np.pi / 16):
+            kern = cv2.getGaborKernel((ksize, ksize), 4.0, theta, 10.0, 0.7, 0, ktype=cv2.CV_32F)
+            kern /= 1.5 * kern.sum()
+            filters.append(kern)
+        return filters
+
+    def process_threaded(self, img, filters, threadn=8):
+        accum = np.zeros_like(img)
+
+        def f(kern):
+            return cv2.filter2D(img, cv2.CV_8UC3, kern)
+
+        pool = ThreadPool(processes=threadn)
+        for fimg in pool.imap_unordered(f, filters):
+            np.maximum(accum, fimg, accum)
+        return accum
