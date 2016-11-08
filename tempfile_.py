@@ -8,7 +8,7 @@ def getpath():
 
 
 class TempFile:
-    def __init__(self, data, ras):
+    def __init__(self, data, ras, file=None):
         if not isdir('tmp'):
             os.mkdir('tmp')
         self.name = 'tempfile_{}.{}'.format(randint(0, 255), ras)
@@ -21,9 +21,17 @@ class TempFile:
         self.file.write(data)
         self.file.seek(0)
         self.file.close()
-
     def file_(self):
         return str(self.path_)
 
     def rem(self):
         os.remove(self.path_)
+
+    @staticmethod
+    def generatePath(ras):
+        name = 'tempfile_{}.{}'.format(randint(0, 255), ras)
+        path_ = './tmp/{}'.format(name)
+        while isdir(path_):
+            name = 'tempfile_{}.{}'.format(randint(0, 255), ras)
+            path_ = './tmp/{}'.format(name)
+        return path_

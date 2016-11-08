@@ -1,12 +1,16 @@
 import atexit
+import calendar
+import datetime
 import json
 import logging
 import logging.config
 import queue
 import re
 import subprocess
+import sys
 import threading
-from datetime import datetime, timedelta
+import traceback
+from datetime import timedelta
 from math import ceil
 from time import sleep
 from urllib.request import urlopen
@@ -15,6 +19,7 @@ import aiml
 import giphypop
 import pyowm
 import requests
+from PIL import ImageDraw, ImageFont
 from vk.exceptions import VkAuthError, VkAPIError
 from vk.logs import LOGGING_CONFIG
 from vk.utils import stringify_values, json_iter_parse, LoggingSession, str_type
@@ -200,14 +205,16 @@ class Request(object):
 class VK_Bot:
     def __init__(self, threads=4):
         self.kernel = aiml.Kernel()
-        if os.path.isfile("bot_brain.brn"):
-            pass
-            self.kernel.bootstrap(brainFile="bot_brain.brn")
-        else:
-            pass
-            self.kernel.bootstrap(learnFiles="startup.xml")
-            self.kernel.bootstrap(learnFiles="1.xml")
-            self.kernel.saveBrain("bot_brain.brn")
+        # if os.path.isfile("bot_brain.brn"):
+        #    pass
+        #    self.kernel.bootstrap(brainFile="bot_brain.brn")
+        # else:
+        #    pass
+        #    self.kernel.bootstrap(learnFiles="startup.xml")
+        #    self.kernel.bootstrap(learnFiles="1.xml")
+        #    self.kernel.saveBrain("bot_brain.brn")
+        self.kernel.bootstrap(learnFiles="startup.xml")
+        self.kernel.bootstrap(learnFiles="1.xml")
         self.kernel.setTextEncoding('utf-8')
         self.hdr = {
             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
@@ -254,6 +261,41 @@ class VK_Bot:
             print(friend)
             self.UserApi.friends.add(user_id=friend)
         print(self.OldStat)
+        self.Commands = {
+            '!пост': [self.MakePost, ['admin', 'editor', 'moderator'], "постит в группе ваш текст", '', False],
+            '!бан': [self.BanUser, ['admin', 'editor', 'moderator'], 'Банит', '', False],
+            '!музыка': [self.Music, ['admin', 'editor', 'moderator', 'user'], 'Ищет музыку',
+                        "Ищет музыку, форма запроса:\n!музыка\nимя:НАЗВАНИЕ", False],
+            '!e621': [self.e621, ['admin', 'editor', 'moderator'], "Ищет пикчи на e621",
+                      "Ищет пикчи на e621, форма запроса:\n!e621\ntags:тэги через ;\nsort:fav_count либо score либо вообще не пишите это, если хотите случайных\nn:кол-во артов(максимум 10)\npage:страница на которой искать",
+                      False],
+            '!e926': [self.e926, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на e926",
+                      "Ищет пикчи на e926, форма запроса:\n!e626\ntags:тэги через ;\nsort:fav_count либо score либо вообще не пишите это, если хотите случайных\nn:кол-во артов(максимум 10)\npage:страница на которой искать",
+                      False],
+            '!d_a': [self.D_A, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на DA", '', False],
+            '!yt': [self.YT, ['admin', 'editor', 'moderator', 'user'], "Ищет видео на Ютубе", '', False],
+            '!глюк': [self.Glitch, ['admin', 'editor', 'moderator', 'user'], "Глючная обработка фото", '', False],
+            '!сделайглюк': [self.GifFromPhoto, ['admin', 'editor', 'moderator', 'user'],
+                            "Создаёт глючную гифку из фото", '', False],
+            '!сделайглюкvsh': [self.GifFromPhotoVSH, ['admin', 'editor', 'moderator', 'user'],
+                               "Создаёт глючную гифку из фото", '', False],
+            '!prism': [self.Prism, ['admin', 'editor', 'moderator', 'user'], "Глючная обработка фото", '', False],
+            # 'фото': [self.UploadPhoto, ['admin', 'editor', 'moderator','user']],
+            '!добавить': [self.AddUser, ['admin'], "Не для вас", '', False],
+            '!likes': [self.Likes, ['admin'], "Тоже не для вас", '', False],
+            '!rss': [self.GetRss, ['admin', 'editor', 'moderator', 'user'], "РСС парсит", '', False],
+            '!lockname': [self.LockName, ['admin', 'editor', 'moderator', 'user'], "РСС парсит", '', True],
+            '!5nights': [self.JoinFiveNigths, ['admin', 'editor', 'moderator', 'user'], "Добавляет в общую беседу",
+                         '', True],
+            '!roll': [self.rollRows, ['admin', 'editor', 'moderator', 'user'], "kok", '', True],
+            '!rollrandom': [self.rollRowsrand, ['admin', 'editor', 'moderator', 'user'], "kok", '', True],
+            '!rollsmart': [self.rollRowssmart, ['admin', 'editor', 'moderator', 'user'], "kok", '', True],
+            '!чс': [self.Blacklist, ['admin', 'editor', 'moderator', 'user'], "kok", '', True],
+            '!выполни': [self.ExecCode, ['admin', 'editor'], "kok", '', True],
+            '!wanted': [self.WantedFunk, ['admin', 'editor', 'moderator', 'user'], "kok", '', True],
+            '!jontron': [self.JonTronFunk, ['admin', 'editor', 'moderator', 'user'], "kok", '', True],
+            '!saymax': [self.SayMaxFunk, ['admin', 'editor', 'moderator', 'user'], "kok", '', True]
+        }
 
     def GetChatName(self, id):
         url = 'https://api.vk.com/method/{}?{}&access_token={}'.format('messages.getChat', 'chat_id={}'.format(id),
@@ -262,6 +304,12 @@ class VK_Bot:
 
         return resp['response']
 
+    def Blacklist(self, args):
+        try:
+            self.Settings['blacklist'].append(args['id'])
+        except:
+            self.Settings['blacklist'] = [args['id']]
+        self.SaveConfig()
     def ClearPosts(self, Posts=None, treshholdTime=10, treshholdLikes=10):
         if Posts == None:
             Posts = self.CheckWall(self.GroupDomain)
@@ -431,7 +479,7 @@ class VK_Bot:
 
             userName = self.GetUserNameById(args['id'])
             MArgs['message'] = userName['first_name'] + ' ' + userName['last_name'] + ' был добавлен как ' + Group
-            MArgs['v'] = 5.38
+            MArgs['v'] = 5.45
             print('Adduser reply: ', MArgs)
             # self.Reply(self.UserApi, MArgs)
             self.Replyqueue.put(MArgs)
@@ -457,7 +505,7 @@ class VK_Bot:
         for r in news:
             # print(r)
             Margs = {}
-            Margs['v'] = 5.38
+            Margs['v'] = 5.45
             Margs['peer_id'] = args['args']['peer_id']
             msg = str(r['date']) + '\n'
             msg += r['title'] + '\n'
@@ -477,6 +525,7 @@ class VK_Bot:
 
         while True:
             args = self.Replyqueue.get()
+            args['random_id'] = randint(0, 500000)
             print('Unfinished Reply tasks:', self.Replyqueue.unfinished_tasks)
             print('Reply:', args)
             sleep(1)
@@ -575,7 +624,7 @@ class VK_Bot:
         atts = []
         R_args['peer_id'] = args['args']['peer_id']
         # print(R_args)
-        R_args['v'] = 5.38
+        R_args['v'] = 5.45
         R_args['message'] = 'Песни по запросу {}'.format(name)
         print(tracks[0])
         for track in tracks:
@@ -610,10 +659,10 @@ class VK_Bot:
         print(imgs)
         atts = self.UploadPhoto(imgs)
         R_args['attachment'] = atts
-        R_args['v'] = 5.38
+        R_args['v'] = 5.45
         R_args['message'] = 'Вот порнушка по твоему запросу, шалунишка...'
         # self.Reply(self.UserApi, R_args)
-        args['forward_messages'] = args['data']['message_id']
+        R_args['forward_messages'] = args['data']['message_id']
         self.Replyqueue.put(R_args)
 
         return True
@@ -621,7 +670,7 @@ class VK_Bot:
     def D_A(self, args):
         R_args = {}
         R_args['peer_id'] = args['args']['peer_id']
-        R_args['v'] = 5.38
+        R_args['v'] = 5.45
         try:
             try:
                 tag = args['tag'].replace(' ', '').split(';')
@@ -649,6 +698,102 @@ class VK_Bot:
         self.Replyqueue.put(R_args)
         return True
 
+    def WantedFunk(self, args):
+        args['peer_id'] = args['data']['peer_id']
+        args['v'] = 5.45
+        atts = args['data']['attachments']
+        print(atts)
+        Topost = []
+        if len(atts) != 2:
+            args['message'] = 'Нужно 2 фотографии'
+            self.Replyqueue.put(args)
+            return False
+        try:
+
+            photo = self.GetBiggesPic(atts[0], args['data']['message_id'])
+        except:
+            return False
+        try:
+            photo1 = self.GetBiggesPic(atts[1], args['data']['message_id'])
+        except:
+            return False
+        req = urllib.request.Request(photo, headers=self.hdr)
+        req1 = urllib.request.Request(photo1, headers=self.hdr)
+        img = urlopen(req).read()
+        img1 = urlopen(req1).read()
+        Tmp = TempFile(img, 'jpg')
+        Tmp1 = TempFile(img1, 'jpg')
+        Wanted(Tmp.path_, Tmp1.path_)
+        att = self.UploadFromDisk(Tmp.path_)
+        Topost.append(att)
+        Tmp.rem()
+        Tmp1.rem()
+        args['attachment'] = Topost
+        self.Replyqueue.put(args)
+        return True
+
+    def JonTronFunk(self, args):
+        args['peer_id'] = args['data']['peer_id']
+        args['v'] = 5.45
+        atts = args['data']['attachments']
+        print(atts)
+        Topost = []
+
+        try:
+
+            photo = self.GetBiggesPic(atts[0], args['data']['message_id'])
+        except:
+            return False
+        req = urllib.request.Request(photo, headers=self.hdr)
+
+        img = urlopen(req).read()
+        Tmp = TempFile(img, 'jpg')
+        JonTron(Tmp.path_)
+        att = self.UploadFromDisk(Tmp.path_)
+        Topost.append(att)
+        Tmp.rem()
+        args['attachment'] = Topost
+        self.Replyqueue.put(args)
+        return True
+
+    def SayMaxFunk(self, args):
+        args['peer_id'] = args['data']['peer_id']
+        args['v'] = 5.45
+        atts = args['data']['attachments']
+        print(atts)
+        Topost = []
+
+        try:
+
+            photo = self.GetBiggesPic(atts[0], args['data']['message_id'])
+            req = urllib.request.Request(photo, headers=self.hdr)
+
+            img = urlopen(req).read()
+            Tmp = TempFile(img, 'jpg')
+            SayMax(Tmp.path_)
+            att = self.UploadFromDisk(Tmp.path_)
+            Tmp.rem()
+        except:
+            text = args['text'] if 'text' in args else None
+            size = args['size'] if 'size' in args else 300
+            if text == None:
+                return False
+            text = str(text)
+            im = Image.new('RGB', (1280, 720), color=(255, 255, 255))
+            draw = ImageDraw.Draw(im)
+            font = ImageFont.truetype("times.ttf", int(size))
+            draw.text((100, 200), text, font=font, fill=(0, 0, 0, 255))
+            _path = TempFile.generatePath('png')
+            img = im.save(_path)
+            SayMax(_path)
+            att = self.UploadFromDisk(_path)
+            os.remove(_path)
+            del _path
+        Topost.append(att)
+
+        args['attachment'] = Topost
+        self.Replyqueue.put(args)
+        return True
     def e926(self, args):
         R_args = {}
         print(args)
@@ -668,7 +813,7 @@ class VK_Bot:
         atts = self.UploadPhoto(imgs)
 
         R_args['attachment'] = atts
-        R_args['v'] = 5.38
+        R_args['v'] = 5.45
         R_args['message'] = 'Вот картиночки по твоему запросу:\n'
         for img in imgs:
             R_args['message'] += '{}\n'.format(img)
@@ -678,6 +823,33 @@ class VK_Bot:
 
         return True
 
+    @staticmethod
+    def html_decode(s):
+        htmlCodes = (
+            ("'", '&#39;'),
+            ('"', '&quot;'),
+            ('>', '&gt;'),
+            ('<', '&lt;'),
+            ('&', '&amp;')
+        )
+        for code in htmlCodes:
+            s = s.replace(code[1], code[0])
+        return s
+
+    def ExecCode(self, args):
+        R_args = {}
+        R_args['v'] = 5.45
+        R_args['peer_id'] = args['args']['peer_id']
+        code = self.html_decode(args['data']['message'])
+        code = '\n'.join(code.split('<br>')[1:]).replace('|', '  ')
+        a = compile(code, '<string>', 'exec')
+        l = {'api': self.UserApi, 'self': self}
+        g = {}
+        exec(a, g, l)
+        R_args['message'] = str(l['out'])
+        self.Replyqueue.put(R_args)
+        return True
+
     def YT(self, args):
         try:
             text = args['text'].split(' ')
@@ -685,7 +857,7 @@ class VK_Bot:
             return False
         m = ""
         R_args = {}
-        R_args['v'] = 5.38
+        R_args['v'] = 5.45
         R_args['peer_id'] = args['data']['peer_id']
         videos, titles = YT_.search(text)
         for i in range(len(titles)):
@@ -715,12 +887,9 @@ class VK_Bot:
             hist = self.UserApi.messages.getHistory(**{"peer_id": peer_id, "user_id": user, "count": 50, 'v': 5.38})
 
             for msg in hist['items']:
-                # print(msg)
-                # print(int(msg['from_id'])==int(user),';',msg['date']==args['data']['date'])
                 try:
 
                     if (int(msg['from_id']) == int(user)) and (re.match(r'\d+$', msg['body'])):
-                        # print(msg['body'],msg['date'],args['date'])
                         if old:
                             if msg['date'] == args['data']['date']:
                                 break
@@ -728,8 +897,7 @@ class VK_Bot:
                             if msg['date'] == args['date']:
                                 print('Дошел до старого сообщения')
                                 break
-                        # print(msg)
-                        # print(msg['body'][1:])
+
 
                         ans = int(msg['body'])
                         print(msg['body'])
@@ -741,7 +909,7 @@ class VK_Bot:
     def Likes(self, args):
         R_args = {}
         R_args['forward_messages'] = args['data']['message_id']
-        R_args['v'] = 5.38
+        R_args['v'] = 5.45
         R_args['peer_id'] = args['data']['peer_id']
         owner_id = int(args['id'])
         user = self.GetUserNameById(owner_id)
@@ -774,7 +942,7 @@ class VK_Bot:
 
     def Glitch(self, args):
         R_args = {}
-        R_args['v'] = 5.38
+        R_args['v'] = 5.45
         R_args['peer_id'] = args['data']['peer_id']
         sigma = int(args['sigma'])
         iter = int(args['iter'])
@@ -837,7 +1005,7 @@ class VK_Bot:
 
     def GifFromPhoto(self, args):
         R_args = {}
-        R_args['v'] = 5.38
+        R_args['v'] = 5.45
         R_args['peer_id'] = args['data']['peer_id']
         sigma = int(args['sigma'])
         iter = int(args['iter'])
@@ -888,9 +1056,62 @@ class VK_Bot:
         self.Replyqueue.put(R_args)
         return True
 
+    def GifFromPhotoVSH(self, args):
+        R_args = {}
+        R_args['v'] = 5.45
+        R_args['peer_id'] = args['data']['peer_id']
+        sigma = int(args['sigma'])
+        iter = int(args['iter'])
+        size = int(args['size'])
+        try:
+            Glitch_ = bool(args['color'])
+        except:
+            Glitch_ = False
+        try:
+            random_ = bool(args['rand'])
+        except:
+            random_ = False
+        try:
+            len_ = int(args['len'])
+        except:
+            len_ = 60
+
+        atts = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments']
+        Topost = []
+        for att in atts:
+            if att['type'] == 'photo':
+                try:
+                    photo = att['photo']['src_xxxbig']
+                except:
+                    try:
+                        photo = ['photo']["src_xxbig"]
+                    except:
+                        try:
+                            photo = att['photo']["src_xbig"]
+                        except:
+                            try:
+                                photo = att['photo']["src_big"]
+                            except:
+                                return False
+
+                req = urllib.request.Request(photo, headers=self.hdr)
+                img = urlopen(req).read()
+                Tmp = TempFile(img, 'jpg')
+                file = MakeGlitchGifVSH(image=Tmp.path_, len_=len_, sigma=sigma, blockSize=size, iterations=iter,
+                                        random_=random_, Glitch_=Glitch_)
+                doc, t = self.UploadDocFromDisk(file)
+                os.remove(file)
+                Topost.append(doc)
+                Tmp.rem()
+
+        R_args['attachment'] = Topost
+        R_args['message'] = ':D'
+        self.Replyqueue.put(R_args)
+        return True
+
     def LockName(self, args):
         R_args = {}
-        R_args['v'] = 5.38
+        R_args['v'] = 5.45
         R_args['peer_id'] = args['data']['peer_id']
         id = str(args['data']['peer_id'])
         if id in self.Settings['namelock']:
@@ -908,9 +1129,34 @@ class VK_Bot:
         self.SaveConfig()
         return True
 
+    def JoinFiveNigths(self, args):
+        R_args = {}
+        R_args['v'] = 5.45
+        R_args['peer_id'] = args['data']['peer_id']
+        are_friend = self.UserApi.friends.areFriends(user_ids=[args['data']['user_id']])['friend_status']
+        if int(are_friend) == 3:
+            ans = self.UserApi.messages.addChatUser(chat_id=13, user_id=args['data']['user_id'])
+
+            if int(ans) != 1:
+                R_args['message'] = 'Ошибка добавления'
+
+        else:
+            f = int(self.UserApi.friends.add(user_id=args['data']['user_id'], text='Что б добавить в беседу'))
+            if f == 1 or f == 2:
+
+                ans = self.UserApi.messages.addChatUser(chat_id=13, user_id=args['data']['user_id'])
+                R_args['message'] = 'Примите завяку и снова напишите !5nights'
+                if int(ans) != 1:
+                    R_args['message'] = 'Ошибка добавления'
+
+            else:
+                R_args['message'] = 'Не могу добавить вас в друзья, а значит и не могу добавить в беседу'
+            self.Replyqueue.put(R_args)
+            return True
+
     def Prism(self, args):
         R_args = {}
-        R_args['v'] = 5.38
+        R_args['v'] = 5.45
         R_args['peer_id'] = args['data']['peer_id']
 
         att = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments'][0]['photo']
@@ -956,6 +1202,422 @@ class VK_Bot:
         self.Replyqueue.put(R_args)
         return True
 
+    def rollRows(self, args):
+        R_args = {}
+        R_args['v'] = 5.45
+        R_args['peer_id'] = args['data']['peer_id']
+        delta = int(args['delta'])
+        atts = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments']
+        Topost = []
+        for att in atts:
+            if att['type'] == 'photo':
+                try:
+                    photo = att['photo']['src_xxxbig']
+                except:
+                    try:
+                        photo = ['photo']["src_xxbig"]
+                    except:
+                        try:
+                            photo = att['photo']["src_xbig"]
+                        except:
+                            try:
+                                photo = att['photo']["src_big"]
+                            except:
+                                return False
+
+                req = urllib.request.Request(photo, headers=self.hdr)
+                img = urlopen(req).read()
+                Tmp = TempFile(img, 'jpg')
+                roll(Tmp.path_, delta)
+                att = self.UploadFromDisk(Tmp.path_)
+                Topost.append(att)
+                Tmp.rem()
+        R_args['attachment'] = Topost
+        R_args['message'] = ':D'
+        self.Replyqueue.put(R_args)
+        return True
+
+    def rollRowsrand(self, args):
+        R_args = {}
+        R_args['v'] = 5.45
+        R_args['peer_id'] = args['data']['peer_id']
+        atts = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments']
+        Topost = []
+        for att in atts:
+            if att['type'] == 'photo':
+                try:
+                    photo = att['photo']['src_xxxbig']
+                except:
+                    try:
+                        photo = ['photo']["src_xxbig"]
+                    except:
+                        try:
+                            photo = att['photo']["src_xbig"]
+                        except:
+                            try:
+                                photo = att['photo']["src_big"]
+                            except:
+                                return False
+
+                req = urllib.request.Request(photo, headers=self.hdr)
+                img = urlopen(req).read()
+                Tmp = TempFile(img, 'jpg')
+                rollRandom(Tmp.path_)
+                att = self.UploadFromDisk(Tmp.path_)
+                Topost.append(att)
+                Tmp.rem()
+        R_args['attachment'] = Topost
+        R_args['message'] = ':D'
+        self.Replyqueue.put(R_args)
+        return True
+
+    def rollRowssmart(self, args):
+        R_args = {}
+        R_args['v'] = 5.45
+        R_args['peer_id'] = args['data']['peer_id']
+        atts = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments']
+        Topost = []
+        for att in atts:
+            if att['type'] == 'photo':
+                try:
+                    photo = att['photo']['src_xxxbig']
+                except:
+                    try:
+                        photo = ['photo']["src_xxbig"]
+                    except:
+                        try:
+                            photo = att['photo']["src_xbig"]
+                        except:
+                            try:
+                                photo = att['photo']["src_big"]
+                            except:
+                                return False
+
+                req = urllib.request.Request(photo, headers=self.hdr)
+                img = urlopen(req).read()
+                Tmp = TempFile(img, 'jpg')
+                rollsmast(Tmp.path_)
+                att = self.UploadFromDisk(Tmp.path_)
+                Topost.append(att)
+                Tmp.rem()
+        R_args['attachment'] = Topost
+        R_args['message'] = ':D'
+        self.Replyqueue.put(R_args)
+        return True
+
+    def AddImages(self, args, data):
+        args['peer_id'] = data['peer_id']
+        args['v'] = 5.45
+        atts = data['attachments']
+        print(atts)
+        if len(atts) < 2:
+            args['message'] = 'Нужны 2 файла'
+            self.Replyqueue.put(args)
+        Topost = []
+
+        try:
+
+            photo = self.GetBiggesPic(atts[0], data['message_id'])
+        except:
+            return False
+        try:
+            photo1 = self.GetBiggesPic(atts[1], data['message_id'])
+        except:
+            return False
+        req = urllib.request.Request(photo, headers=self.hdr)
+        req1 = urllib.request.Request(photo1, headers=self.hdr)
+        img = urlopen(req).read()
+        img1 = urlopen(req1).read()
+        Tmp = TempFile(img, 'jpg')
+        Tmp1 = TempFile(img1, 'jpg')
+        add(Tmp.path_, Tmp1.path_)
+        att = self.UploadFromDisk(Tmp.path_)
+        Topost.append(att)
+        Tmp.rem()
+        Tmp1.rem()
+        args['attachment'] = Topost
+        self.Replyqueue.put(args)
+
+    def merge(self, args, data):
+        args['peer_id'] = data['peer_id']
+        args['v'] = 5.45
+        atts = data['attachments']
+        print(atts)
+        if len(atts) < 2:
+            args['message'] = 'Нужны 2 файла'
+            self.Replyqueue.put(args)
+        Topost = []
+        try:
+            photo = self.GetBiggesPic(atts[0], data['message_id'])
+        except:
+            return False
+        try:
+            photo1 = self.GetBiggesPic(atts[1], data['message_id'])
+        except:
+            return False
+        req = urllib.request.Request(photo, headers=self.hdr)
+        req1 = urllib.request.Request(photo1, headers=self.hdr)
+        img = urlopen(req).read()
+        img1 = urlopen(req1).read()
+        Tmp = TempFile(img, 'jpg')
+        Tmp1 = TempFile(img1, 'jpg')
+        Merge(Tmp.path_, Tmp1.path_)
+        att = self.UploadFromDisk(Tmp.path_)
+        Topost.append(att)
+        Tmp.rem()
+        Tmp1.rem()
+        args['attachment'] = Topost
+        self.Replyqueue.put(args)
+
+    def KokKek(self, args, data, toCheck):
+        args['peer_id'] = data['peer_id']
+        args['v'] = 5.45
+        try:
+            att = data['attachments'][0]
+            print(att)
+            photo = self.GetBiggesPic(att, data['message_id'])
+        except:
+            return False
+        req = urllib.request.Request(photo, headers=self.hdr)
+        img = urlopen(req).read()
+        Tmp = TempFile(img, 'jpg')
+        if 'кок' in toCheck:
+            kok(Tmp.path_)
+        if 'кек' in toCheck:
+            kek(Tmp.path_)
+        att = self.UploadFromDisk(Tmp.path_)
+        Tmp.rem()
+        args['attachment'] = att
+        self.Replyqueue.put(args)
+
+    def Filter(self, args, data):
+        args['peer_id'] = data['peer_id']
+        args['v'] = 5.45
+        atts = self.UserApi.messages.getById(message_id=data['message_id'])[1]['attachments']
+        Topost = []
+
+        for att in atts:
+            try:
+                att = data['attachments'][0]
+                photo = self.GetBiggesPic(att, data['message_id'])
+            except:
+                return False
+            req = urllib.request.Request(photo, headers=self.hdr)
+            img = urlopen(req).read()
+            Tmp = TempFile(img, 'jpg')
+            m = ''
+            FiltersArray = [Cartoonizer, CoolingFilter, PencilSketch, WarmingFilter, Equal,
+                            AutoContrast, Neural, Tlen]
+
+            for i in range(len(FiltersArray)):
+                m += "{}.{}\n".format(i + 1, FiltersArray[i].__name__)
+            args['message'] = 'Список фильтров:\n' + m
+            args['forward_messages'] = data['message_id']
+            self.Replyqueue.put(args)
+            ans = self.WaitForMSG(5, data)
+            print('used filter {}'.format(ans - 1))
+            ImgF = FiltersArray[ans - 1]()
+            ImgF.render(Tmp.path_)
+            args['message'] = 'Фильтр {}'.format(FiltersArray[ans - 1].__name__)
+            att = self.UploadFromDisk(Tmp.path_)
+
+            Topost.append(att)
+            Tmp.rem()
+        args['attachment'] = Topost
+        args['forward_messages'] = data['message_id']
+        self.Replyqueue.put(args)
+
+    def GlitchImg(self, args, data):
+        args['peer_id'] = data['peer_id']
+        args['v'] = 5.45
+        atts = self.UserApi.messages.getById(message_id=data['message_id'])[1]['attachments']
+        Topost = []
+
+        for att in atts:
+            try:
+                att = data['attachments'][0]
+                photo = self.GetBiggesPic(att, data['message_id'])
+            except:
+                return False
+            req = urllib.request.Request(photo, headers=self.hdr)
+            img = urlopen(req).read()
+            Tmp = TempFile(img, 'jpg')
+            Glitch2.glitch_an_image(Tmp.path_)
+            att = self.UploadFromDisk(Tmp.path_)
+            Topost.append(att)
+            Tmp.rem()
+        args['attachment'] = Topost
+        self.Replyqueue.put(args)
+
+    def Gif(self, args, data):
+        args['peer_id'] = data['peer_id']
+        args['v'] = 5.45
+        a = data['message'].split(' ')
+        if ('гифка' in a[1]) or ('гиф' in a[1]):
+            a = ' '.join(a[2:])
+        else:
+            a = ' '.join(a[1:])
+        args['forward_messages'] = data['message_id']
+        # msg = "Вероятность того, что {}, равна {}%".format(' '.join(a), randint(0, 100))
+        g = giphypop.Giphy(api_key='dc6zaTOxFJmzC')
+        results = [x for x in g.search(a)]
+        if results:
+            gif = random.choice(results)
+            page = urllib.request.Request(gif, headers=self.hdr)
+            giphy = urlopen(page).read()
+            soup = BeautifulSoup(giphy, 'html.parser')
+            gif = soup.find_all('meta', {'itemprop': "contentUrl"})[0].get('content')
+
+            req = urllib.request.Request(gif, headers=self.hdr)
+            img = urlopen(req).read()
+            Tmp = TempFile(img, 'gif')
+            doc = self.UploadDocFromDisk(Tmp.path_)
+            Tmp.rem()
+            args['attachment'] = doc
+        else:
+
+            args['message'] = "Ничего не найдено по запросу {}".format(a)
+        # self.Reply(self.UserApi, args)
+        self.Replyqueue.put(args)
+
+    def Who(self, args, data):
+        args['peer_id'] = data['peer_id']
+        args['v'] = 5.45
+        args['forward_messages'] = data['message_id']
+        if int(data['peer_id']) <= 2000000000:
+            args['message'] = "Тебя"
+            self.Replyqueue.put(args)
+        else:
+            chat = int(data['peer_id']) - 2000000000
+            users = self.UserApi.messages.getChatUsers(chat_id=chat, fields='nickname', v=5.38,
+                                                       name_case='acc')
+            user = random.choice(users)
+            if user['id'] == self.MyUId:
+                args['message'] = 'Определённо меня'
+                self.Replyqueue.put(args)
+            name = '{} {}'.format(user['first_name'], user['last_name'])
+            replies = ["Определённо {}", "Точно {}", "Я уверен что его -  {}"]
+            msg = random.choice(replies)
+
+            while self.oldMsg == msg:
+                msg = random.choice(replies)
+
+            args['message'] = msg.format(name)
+            # self.Reply(self.UserApi, args)
+            self.Replyqueue.put(args)
+            self.oldMsg = msg
+
+    def prob(self, args, data):
+        args['peer_id'] = data['peer_id']
+        args['v'] = 5.45
+        a = data['message'].split(' ')
+        if 'вероятность' in a[1]:
+            a = a[2:]
+        else:
+            a = a[1:]
+        args['forward_messages'] = data['message_id']
+        msg = "Вероятность того, что {}, равна {}%".format(' '.join(a), randint(0, 100))
+
+        args['message'] = msg
+        # self.Reply(self.UserApi, args)
+        self.Replyqueue.put(args)
+
+    def Where(self, args, data):
+        args['peer_id'] = data['peer_id']
+        args['v'] = 5.45
+        args['forward_messages'] = data['message_id']
+        replies = ["Под столом", "На кровати", "За спиной", "На столе"]
+        msg = random.choice(replies)
+        while self.oldMsg == msg:
+            msg = random.choice(replies)
+        args['message'] = msg
+        # self.Reply(self.UserApi, args)
+        self.Replyqueue.put(args)
+        self.oldMsg = msg
+        # elif ',кто' in toCheck:
+        #    args['peer_id'] = data['peer_id']
+        #    args['v'] = 5.45
+        #    args['forward_messages'] = data['message_id']
+        #    if int(data['peer_id']) <= 2000000000:
+        #        args['message'] = "Это точно ты"
+        #        self.Replyqueue.put(args)
+        #    else:
+        #        chat = int(data['peer_id']) - 2000000000
+        #        users = self.UserApi.messages.getChatUsers(chat_id=chat, fields='nickname', v=5.38)
+        #        user = random.choice(users)
+        #        if user['id'] == self.MyUId:
+        #            args['message'] = 'Определённо я'
+        #            self.Replyqueue.put(args)
+        #            continue
+        #        name = '{} {}'.format(user['first_name'], user['last_name'])
+        #        replies = ["Определённо это {}", "Это точно {}", "Я уверен, что это {}", "Это {}"]
+        #        msg = random.choice(replies)
+        #
+        #        while self.oldMsg == msg:
+        #            msg = random.choice(replies)
+        #
+        #        args['message'] = msg.format(name)
+        #        # self.Reply(self.UserApi, args)
+        #        self.Replyqueue.put(args)
+        #        self.oldMsg = msg
+
+    def fullmerge(self, args, data):
+        args['peer_id'] = data['peer_id']
+        args['v'] = 5.45
+        atts = data['attachments']
+        print(atts)
+        if len(atts) < 2:
+            args['message'] = 'Нужны 2 файла'
+            self.Replyqueue.put(args)
+        Topost = []
+
+        try:
+
+            photo = self.GetBiggesPic(atts[0], data['message_id'])
+        except:
+            return False
+        try:
+            photo1 = self.GetBiggesPic(atts[1], data['message_id'])
+        except:
+            return False
+        req = urllib.request.Request(photo, headers=self.hdr)
+        req1 = urllib.request.Request(photo1, headers=self.hdr)
+        img = urlopen(req).read()
+        img1 = urlopen(req1).read()
+        Tmp = TempFile(img, 'jpg')
+        Tmp1 = TempFile(img1, 'jpg')
+        FullMerge(Tmp.path_, Tmp1.path_)
+        att = self.UploadFromDisk(Tmp.path_)
+        Topost.append(att)
+        Tmp.rem()
+        Tmp1.rem()
+        args['attachment'] = Topost
+        self.Replyqueue.put(args)
+
+    def resend(self, args, data):
+        args['peer_id'] = data['peer_id']
+        args['v'] = 5.45
+        atts = data['attachments']
+
+        Topost = []
+        print('resend', atts)
+        for att in atts:
+            try:
+
+                photo = self.GetBiggesPic(att, data['message_id'])
+            except:
+                return False
+
+            req = urllib.request.Request(photo, headers=self.hdr)
+
+            img = urlopen(req).read()
+
+            Tmp = TempFile(img, 'jpg')
+            att = self.UploadFromDisk(Tmp.path_)
+            Topost.append(att)
+            Tmp.rem()
+        args['attachment'] = Topost
+        self.Replyqueue.put(args)
     def CheckForCommands(self):
         while True:
             print('Unfinished Check tasks:', self.Checkqueue.unfinished_tasks)
@@ -971,45 +1633,28 @@ class VK_Bot:
             except:
                 pass
 
-            Commands = {
-                '!пост': [self.MakePost, ['admin', 'editor', 'moderator'], "постит в группе ваш текст", '', False],
-                '!бан': [self.BanUser, ['admin', 'editor', 'moderator'], 'Банит', '', False],
-                '!музыка': [self.Music, ['admin', 'editor', 'moderator', 'user'], 'Ищет музыку',
-                            "Ищет музыку, форма запроса:\n!музыка\nимя:НАЗВАНИЕ", False],
-                '!e621': [self.e621, ['admin', 'editor', 'moderator'], "Ищет пикчи на e621",
-                          "Ищет пикчи на e621, форма запроса:\n!e621\ntags:тэги через ;\nsort:fav_count либо score либо вообще не пишите это, если хотите случайных\nn:кол-во артов(максимум 10)\npage:страница на которой искать",
-                          False],
-                '!e926': [self.e926, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на e926",
-                          "Ищет пикчи на e926, форма запроса:\n!e626\ntags:тэги через ;\nsort:fav_count либо score либо вообще не пишите это, если хотите случайных\nn:кол-во артов(максимум 10)\npage:страница на которой искать",
-                          False],
-                '!d_a': [self.D_A, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на DA", '', False],
-                '!yt': [self.YT, ['admin', 'editor', 'moderator', 'user'], "Ищет видео на Ютубе", '', False],
-                '!глюк': [self.Glitch, ['admin', 'editor', 'moderator', 'user'], "Глючная обработка фото", '', False],
-                '!сделайглюк': [self.GifFromPhoto, ['admin', 'editor', 'moderator', 'user'],
-                                "Создаёт глючную гифку из фото", '', False],
-                '!prism': [self.Prism, ['admin', 'editor', 'moderator', 'user'], "Глючная обработка фото", '', False],
-                # 'фото': [self.UploadPhoto, ['admin', 'editor', 'moderator','user']],
-                '!добавить': [self.AddUser, ['admin'], "Не для вас", '', False],
-                '!likes': [self.Likes, ['admin'], "Тоже не для вас", '', False],
-                '!rss': [self.GetRss, ['admin', 'editor', 'moderator', 'user'], "РСС парсит", '', False],
-                '!lockname': [self.LockName, ['admin', 'editor', 'moderator', 'user'], "РСС парсит", '', True]
-            }
+            Commands = self.Commands
             CommandDict = {}
             args = {}
-
+            try:
+                if str(data['user_id']) in self.Settings['blacklist']:
+                    self.Checkqueue.task_done()
+                    continue
+            except:
+                pass
             if data != '':
 
                 try:
                     if data['message'].startswith('!помощь'):
                         Command_ = data['message'].split(':')
                         args['peer_id'] = data['peer_id']
-                        args['v'] = 5.38
+                        args['v'] = 5.45
                         args['message'] = Commands[Command_[1]][3]
                         self.Replyqueue.put(args)
                         continue
                     if '!команды' in data['message']:
                         args['peer_id'] = data['peer_id']
-                        args['v'] = 5.38
+                        args['v'] = 5.45
                         a = ""
                         for command in Commands.keys():
                             a += 'Команда: {},{}\n'.format(command, Commands[command][2])
@@ -1017,9 +1662,10 @@ class VK_Bot:
                         # self.Reply(self.UserApi, args)
                         self.Replyqueue.put(args)
                         continue
+
                     if data['message'].startswith('!'):
                         args['peer_id'] = data['peer_id']
-                        args['v'] = 5.38
+                        args['v'] = 5.45
                         comm = data["message"]
                         comm = comm.split("<br>")
                         User_group = 'user'
@@ -1053,16 +1699,14 @@ class VK_Bot:
                                     args['message'] = "Выполняю, подождите"
                                     self.Replyqueue.put(args)
                                 ret = self.ExecCommand(Commands[Command][0], CommandDict)
-                            elif not access:
-                                ret = False
+                            else:
+
                                 args['message'] = "Недостаточно прав"
                                 self.Replyqueue.put(args)
-
-                            if ret == True:
                                 self.Checkqueue.task_done()
                                 continue
-                                args['message'] = "Выполнено"
-                                self.Replyqueue.put(args)
+
+                            if ret == True:
                                 self.Checkqueue.task_done()
                                 continue
                             else:
@@ -1080,7 +1724,7 @@ class VK_Bot:
                         toCheck = data['message'].lower().replace(' ', '')
                         if self.hello.search(data['message'], re.IGNORECASE):
                             args['peer_id'] = data['peer_id']
-                            args['v'] = 5.38
+                            args['v'] = 5.45
                             replies = ["Здравствуй {}", "Хай {}", "Здравия {}", "привет {}"]
                             msg = random.choice(replies)
 
@@ -1093,321 +1737,43 @@ class VK_Bot:
                             self.oldMsg = msg
                         elif ',котики' in toCheck:
                             args['peer_id'] = data['peer_id']
-                            args['v'] = 5.38
+                            args['v'] = 5.45
                             args['message'] = 'мимими, '
                             Kotik = mimimi()
                             att = self.UploadPhoto(Kotik)
                             args['attachment'] = att
                             # self.Reply(self.UserApi, args)
                             self.Replyqueue.put(args)
-                        elif ',пикча' in toCheck:
-                            args['peer_id'] = data['peer_id']
-                            args['v'] = 5.38
-                            a = data['message'].split(' ')
-                            if ('пикча' in a[1]):
-                                a = ' '.join(a[2:])
-                            else:
-                                a = ' '.join(a[1:])
-                            # results = random.choice(google.search_images(a))
-                            print(results)
-                            att = self.UploadPhoto()
-                            args['attachment'] = att
-                            # self.Reply(self.UserApi, args)
-                            self.Replyqueue.put(args)
                         elif ',где' in toCheck:
-                            args['peer_id'] = data['peer_id']
-                            args['v'] = 5.38
-                            args['forward_messages'] = data['message_id']
-                            replies = ["Под столом", "На кровати", "За спиной", "На столе"]
-                            msg = random.choice(replies)
-
-                            while self.oldMsg == msg:
-                                msg = random.choice(replies)
-
-                            args['message'] = msg
-                            # self.Reply(self.UserApi, args)
-                            self.Replyqueue.put(args)
-                            self.oldMsg = msg
-                            # elif ',кто' in toCheck:
-                            #    args['peer_id'] = data['peer_id']
-                            #    args['v'] = 5.38
-                            #    args['forward_messages'] = data['message_id']
-                            #    if int(data['peer_id']) <= 2000000000:
-                            #        args['message'] = "Это точно ты"
-                            #        self.Replyqueue.put(args)
-                            #    else:
-                            #        chat = int(data['peer_id']) - 2000000000
-                            #        users = self.UserApi.messages.getChatUsers(chat_id=chat, fields='nickname', v=5.38)
-                            #        user = random.choice(users)
-                            #        if user['id'] == self.MyUId:
-                            #            args['message'] = 'Определённо я'
-                            #            self.Replyqueue.put(args)
-                            #            continue
-                            #        name = '{} {}'.format(user['first_name'], user['last_name'])
-                            #        replies = ["Определённо это {}", "Это точно {}", "Я уверен, что это {}", "Это {}"]
-                            #        msg = random.choice(replies)
-                        #
-                        #        while self.oldMsg == msg:
-                        #            msg = random.choice(replies)
-                        #
-                        #        args['message'] = msg.format(name)
-                        #        # self.Reply(self.UserApi, args)
-                        #        self.Replyqueue.put(args)
-                        #        self.oldMsg = msg
+                            self.Where(args, data)
                         elif ',кого' in toCheck:
-                            args['peer_id'] = data['peer_id']
-                            args['v'] = 5.38
-                            args['forward_messages'] = data['message_id']
-                            if int(data['peer_id']) <= 2000000000:
-                                args['message'] = "Тебя"
-                                self.Replyqueue.put(args)
-                            else:
-                                chat = int(data['peer_id']) - 2000000000
-                                users = self.UserApi.messages.getChatUsers(chat_id=chat, fields='nickname', v=5.38,
-                                                                           name_case='acc')
-                                user = random.choice(users)
-                                if user['id'] == self.MyUId:
-                                    args['message'] = 'Определённо меня'
-                                    self.Replyqueue.put(args)
-                                    continue
-                                name = '{} {}'.format(user['first_name'], user['last_name'])
-                                replies = ["Определённо {}", "Точно {}", "Я уверен что его -  {}"]
-                                msg = random.choice(replies)
-
-                                while self.oldMsg == msg:
-                                    msg = random.choice(replies)
-
-                                args['message'] = msg.format(name)
-                                # self.Reply(self.UserApi, args)
-                                self.Replyqueue.put(args)
-                                self.oldMsg = msg
+                            self.Who(args, data)
                         elif (',вероятность' in toCheck) or (',инфа' in toCheck):
-                            args['peer_id'] = data['peer_id']
-                            args['v'] = 5.38
-                            a = data['message'].split(' ')
-                            if 'вероятность' in a[1]:
-                                a = a[2:]
-                            else:
-                                a = a[1:]
-                            args['forward_messages'] = data['message_id']
-                            msg = "Вероятность того, что {}, равна {}%".format(' '.join(a), randint(0, 100))
-
-                            args['message'] = msg
-                            # self.Reply(self.UserApi, args)
-                            self.Replyqueue.put(args)
+                            self.prob(args, data)
                         elif (',гифка' in toCheck) or (',гиф' in toCheck):
-                            args['peer_id'] = data['peer_id']
-                            args['v'] = 5.38
-                            a = data['message'].split(' ')
-                            if ('гифка' in a[1]) or ('гиф' in a[1]):
-                                a = ' '.join(a[2:])
-                            else:
-                                a = ' '.join(a[1:])
-                            args['forward_messages'] = data['message_id']
-                            # msg = "Вероятность того, что {}, равна {}%".format(' '.join(a), randint(0, 100))
-                            g = giphypop.Giphy(api_key='dc6zaTOxFJmzC')
-                            results = [x for x in g.search(a)]
-                            if results:
-                                gif = random.choice(results)
-                                page = urllib.request.Request(gif, headers=self.hdr)
-                                giphy = urlopen(page).read()
-                                soup = BeautifulSoup(giphy, 'html.parser')
-                                gif = soup.find_all('meta', {'itemprop': "contentUrl"})[0].get('content')
-
-                                req = urllib.request.Request(gif, headers=self.hdr)
-                                img = urlopen(req).read()
-                                Tmp = TempFile(img, 'gif')
-                                doc = self.UploadDocFromDisk(Tmp.path_)
-                                Tmp.rem()
-                                args['attachment'] = doc
-                            else:
-
-                                args['message'] = "Ничего не найдено по запросу {}".format(a)
-                            # self.Reply(self.UserApi, args)
-                            self.Replyqueue.put(args)
+                            self.Gif(args, data)
                         elif (',кок' in toCheck) or (',кек' in toCheck):
-
-                            args['peer_id'] = data['peer_id']
-                            args['v'] = 5.38
-                            try:
-                                att = data['attachments'][0]
-                                print(att)
-                                photo = self.GetBiggesPic(att, data['message_id'])
-
-                            except:
-                                return False
-                            req = urllib.request.Request(photo, headers=self.hdr)
-                            img = urlopen(req).read()
-                            Tmp = TempFile(img, 'jpg')
-                            if 'кок' in toCheck:
-                                kok(Tmp.path_)
-                            if 'кек' in toCheck:
-                                kek(Tmp.path_)
-                            att = self.UploadFromDisk(Tmp.path_)
-                            Tmp.rem()
-                            args['attachment'] = att
-                            self.Replyqueue.put(args)
-
+                            self.KokKek(args, data, toCheck)
                         elif (',глюк' in toCheck):
-
-                            args['peer_id'] = data['peer_id']
-                            args['v'] = 5.38
-                            atts = self.UserApi.messages.getById(message_id=data['message_id'])[1]['attachments']
-                            Topost = []
-
-                            for att in atts:
-                                try:
-                                    att = data['attachments'][0]
-                                    photo = self.GetBiggesPic(att, data['message_id'])
-                                except:
-                                    return False
-                                req = urllib.request.Request(photo, headers=self.hdr)
-                                img = urlopen(req).read()
-                                Tmp = TempFile(img, 'jpg')
-                                Glitch2.glitch_an_image(Tmp.path_)
-                                att = self.UploadFromDisk(Tmp.path_)
-                                Topost.append(att)
-                                Tmp.rem()
-                            args['attachment'] = Topost
-                            self.Replyqueue.put(args)
-
+                            self.GlitchImg(args, data)
                         elif (',обработай' in toCheck):
-
-                            args['peer_id'] = data['peer_id']
-                            args['v'] = 5.38
-                            atts = self.UserApi.messages.getById(message_id=data['message_id'])[1]['attachments']
-                            Topost = []
-
-                            for att in atts:
-                                try:
-                                    att = data['attachments'][0]
-                                    photo = self.GetBiggesPic(att, data['message_id'])
-                                except:
-                                    return False
-                                req = urllib.request.Request(photo, headers=self.hdr)
-                                img = urlopen(req).read()
-                                Tmp = TempFile(img, 'jpg')
-                                m = ''
-                                FiltersArray = [Cartoonizer, CoolingFilter, PencilSketch, WarmingFilter, Equal,
-                                                AutoContrast, Neural]
-
-                                for i in range(len(FiltersArray)):
-                                    m += "{}.{}\n".format(i + 1, FiltersArray[i].__name__)
-                                args['message'] = 'Список фильтров:\n' + m
-                                self.Replyqueue.put(args)
-                                ans = self.WaitForMSG(5, data)
-                                print('used filter {}'.format(ans-1))
-                                ImgF = FiltersArray[ans - 1]()
-                                ImgF.render(Tmp.path_)
-                                args['message'] = 'Фильтр {}'.format(FiltersArray[ans - 1].__name__)
-                                att = self.UploadFromDisk(Tmp.path_)
-
-                                Topost.append(att)
-                                Tmp.rem()
-                            args['attachment'] = Topost
-                            self.Replyqueue.put(args)
-
+                            self.Filter(args, data)
                         elif (',соедини' in toCheck):
-
-                            args['peer_id'] = data['peer_id']
-                            args['v'] = 5.38
-                            atts = data['attachments']
-                            print(atts)
-                            if len(atts) < 2:
-                                args['message'] = 'Нужны 2 файла'
-                                self.Replyqueue.put(args)
-                            Topost = []
-
-                            try:
-
-                                photo = self.GetBiggesPic(atts[0], data['message_id'])
-                            except:
-                                return False
-                            try:
-                                photo1 = self.GetBiggesPic(atts[1], data['message_id'])
-                            except:
-                                return False
-                            req = urllib.request.Request(photo, headers=self.hdr)
-                            req1 = urllib.request.Request(photo1, headers=self.hdr)
-                            img = urlopen(req).read()
-                            img1 = urlopen(req1).read()
-                            Tmp = TempFile(img, 'jpg')
-                            Tmp1 = TempFile(img1, 'jpg')
-                            add(Tmp.path_, Tmp1.path_)
-                            att = self.UploadFromDisk(Tmp.path_)
-                            Topost.append(att)
-                            Tmp.rem()
-                            Tmp1.rem()
-                            args['attachment'] = Topost
-                            self.Replyqueue.put(args)
+                            self.AddImages(args, data)
                         elif (',совмести' in toCheck):
-
-                            args['peer_id'] = data['peer_id']
-                            args['v'] = 5.38
-                            atts = data['attachments']
-                            print(atts)
-                            if len(atts) < 2:
-                                args['message'] = 'Нужны 2 файла'
-                                self.Replyqueue.put(args)
-                            Topost = []
-
-                            try:
-
-                                photo = self.GetBiggesPic(atts[0], data['message_id'])
-                            except:
-                                return False
-                            try:
-                                photo1 = self.GetBiggesPic(atts[1], data['message_id'])
-                            except:
-                                return False
-                            req = urllib.request.Request(photo, headers=self.hdr)
-                            req1 = urllib.request.Request(photo1, headers=self.hdr)
-                            img = urlopen(req).read()
-                            img1 = urlopen(req1).read()
-                            Tmp = TempFile(img, 'jpg')
-                            Tmp1 = TempFile(img1, 'jpg')
-                            Merge(Tmp.path_, Tmp1.path_)
-                            att = self.UploadFromDisk(Tmp.path_)
-                            Topost.append(att)
-                            Tmp.rem()
-                            Tmp1.rem()
-                            args['attachment'] = Topost
-                            self.Replyqueue.put(args)
+                            self.merge(args, data)
                         elif (',fullmerge' in toCheck):
-
-                            args['peer_id'] = data['peer_id']
-                            args['v'] = 5.38
-                            atts = data['attachments']
-                            print(atts)
-                            if len(atts) < 2:
-                                args['message'] = 'Нужны 2 файла'
-                                self.Replyqueue.put(args)
-                            Topost = []
-
-                            try:
-
-                                photo = self.GetBiggesPic(atts[0], data['message_id'])
-                            except:
-                                return False
-                            try:
-                                photo1 = self.GetBiggesPic(atts[1], data['message_id'])
-                            except:
-                                return False
-                            req = urllib.request.Request(photo, headers=self.hdr)
-                            req1 = urllib.request.Request(photo1, headers=self.hdr)
-                            img = urlopen(req).read()
-                            img1 = urlopen(req1).read()
-                            Tmp = TempFile(img, 'jpg')
-                            Tmp1 = TempFile(img1, 'jpg')
-                            FullMerge(Tmp.path_, Tmp1.path_)
-                            att = self.UploadFromDisk(Tmp.path_)
-                            Topost.append(att)
-                            Tmp.rem()
-                            Tmp1.rem()
-                            args['attachment'] = Topost
-                            self.Replyqueue.put(args)
-                        elif ('save memory' in toCheck):
+                            self.fullmerge(args, data)
+                        elif ('savememory' in toCheck):
                             self.kernel.saveBrain("bot_brain.brn")
+                        elif ('перешли' in toCheck):
+                            self.resend(args, data)
+                        elif "когда" in toCheck:
+                            args['peer_id'] = data['peer_id']
+                            args['v'] = 5.45
+                            args['forward_messages'] = data['message_id']
+                            args['message'] = self.generate_random_date(2)
+                            self.Replyqueue.put(args)
                         elif (self.MyName['first_name'] in data['message']) or ('ред' in data['message'].lower()):
                             try:
                                 msg = ' '.join(data['message'].split(' ' if ',' in data['message'] else ' ')[1:])
@@ -1417,50 +1783,77 @@ class VK_Bot:
                                     att = self.UploadFromDisk(choice(['Noon1.jpg', 'Noon2.jpg']))
                                     args['attachment'] = att
                                 args['peer_id'] = data['peer_id']
-                                args['v'] = 5.38
-                                args['message'] = answ
+                                args['v'] = 5.45
+                                args['message'] = self.GetUserNameById(data['user_id'])['first_name'] + ', ' + answ
                                 if answ != '':
                                     self.Replyqueue.put(args)
                             except:
                                 pass
-                    if data['peer_id'] == data['user_id']:
-                        try:
-                            answ = self.kernel.respond(data['message'], sessionID=data['user_id'])
-                            if answ == "IT'S HIGH NOON":
-                                att = self.UploadFromDisk(choice(['Noon1.jpg', 'Noon2.jpg']))
-                                args['attachment'] = att
-                            args['peer_id'] = data['peer_id']
-                            args['v'] = 5.38
-                            args['message'] = answ
-                            if answ != '':
-                                self.Replyqueue.put(args)
-                        except:
-                            pass
+                                # if data['peer_id'] == data['user_id']:
+                                #     try:
+                                #         answ = self.kernel.respond(data['message'], sessionID=data['user_id'])
+                                #         if answ == "IT'S HIGH NOON":
+                                #             att = self.UploadFromDisk(choice(['Noon1.jpg', 'Noon2.jpg']))
+                                #             args['attachment'] = att
+                                #         args['peer_id'] = data['peer_id']
+                                #         args['v'] = 5.45
+                                #         args['message'] = answ
+                                #         if answ != '':
+                                #             self.Replyqueue.put(args)
+                                #     except:
+                                #         pass
 
 
 
-                            # if re.search(r'(В|в)сем (привет|здравия|хай)|((З|з)драсте)', data['message']):
-                            #    args['peer_id'] = data['peer_id']
-                            #    args['v'] = 5.38
-                            #    answ = choice(['И тебе привет', 'Привет', "Здравия", "Хай"])
-                            #    args['forward_messages'] = data['message_id']
-                            #    args['message'] = answ
-                            #    self.Replyqueue.put(args)
+                                # if re.search(r'(В|в)сем (привет|здравия|хай)|((З|з)драсте)', data['message']):
+                                #    args['peer_id'] = data['peer_id']
+                                #    args['v'] = 5.45
+                                #    answ = choice(['И тебе привет', 'Привет', "Здравия", "Хай"])
+                                #    args['forward_messages'] = data['message_id']
+                                #    args['message'] = answ
+                                #    self.Replyqueue.put(args)
                 except Exception as Ex:
 
                     args['peer_id'] = data['peer_id']
-                    args['v'] = 5.38
+                    args['v'] = 5.45
                     print(Ex.__traceback__)
+                    print(Ex.__cause__)
                     sleep(1)
                     if 'many requests per second' in str(Ex):
                         print('Too many requests per second')
                         # self.Checkqueue.put(data,timeout=5)
                         continue
-                    args['message'] = "Не удалось выполнить, ошибка:{} {} ".format(str(Ex), str(Ex.__traceback__))
+                    exc_type, exc_value, exc_traceback = sys.exc_info()
+                    TB = traceback.format_tb(exc_traceback)
+                    args['message'] = "Не удалось выполнить, ошибка:{}\n {}\n {} \n {}".format(exc_type, exc_value,
+                                                                                               ''.join(TB),
+                                                                                               "Перешлите это сообение владельцу бота")
                     # self.Reply(self.UserApi, args)
                     self.Replyqueue.put(args)
 
             self.Checkqueue.task_done()
+
+    @staticmethod
+    def generate_random_date(future=True, years=1):
+        today = datetime.date.today()
+
+        # Set the default dates
+        day = today.day
+        year = today.year
+        month = today.month
+
+        if future:
+            year = random.randint(year, year + years)
+            month = random.randint(month, 12)
+
+            date_range = calendar.monthrange(year, month)[1]  # dates possible this month
+            day = random.randint(day + 1, date_range)  # 1 day in the future
+        else:
+            year = random.randint(year, year - years)
+            month = random.randint(1, month)
+            day = random.randint(1, day - 1)
+
+        return datetime.date(year, month, day)
 
     def getMus(self):
         music = self.UserApi.audio.get(count=6000)
@@ -1477,7 +1870,6 @@ class VK_Bot:
 
                 if i['type'] == 'photo' and (int(i['photo']['id']) == int(att.split('_')[1])):
                     key = i['photo']['access_key']
-                    print('kik')
                     data = self.UserApi.photos.getById(photos=att, v=5.57, access_key=key)[0]
 
         print(data)
@@ -1491,11 +1883,13 @@ class VK_Bot:
         return data[sizesToSort[sizesSorted]]
 
     def LongPool(self, key, server, ts):
-        url = 'http://' + server + '?act=a_check&key=' + key + '&ts=' + str(ts) + '&wait=25&mode=2&version=1'
+
+        url = 'https://' + server + '?act=a_check&key=' + key + '&ts=' + str(ts) + '&wait=25&mode=130&version=1'
         try:
 
             request = requests.get(url)
             result = request.json()
+
         except ValueError:
             result = '{ failed: 2}'
         return result
@@ -1560,15 +1954,18 @@ class VK_Bot:
                         subject = s[5]
                         text = s[6]
                         atts = s[7]
+                        print(atts)
                         attatchments = []
-
+                        try:
+                            rand_id = int(atts[-1])
+                        except:
+                            rand_id = None
                         attsFindAll = re.findall(r'attach\d+_type', str(atts))
                         for att in attsFindAll:
 
                             if atts[att] == 'photo':
                                 attatchments.append(atts[att.split('_')[0]])
                         args['attachments'] = attatchments
-
 
                         args['peer_id'] = from_id
                         args["message"] = text
@@ -1578,18 +1975,14 @@ class VK_Bot:
                         args['atts'] = atts
                         print('atts', atts)
                         args['subject'] = subject
-                        args['v'] = 5.38
-                        # user =self.GetUserNameById(args['user_id'])
-                        # print(user['first_name'],user['second_name'],' : ',text)
-                        # if args['user_id'] != self.MyUId:
-                        # GUI.Gui.UpdateGUI(args)
+                        args['v'] = 5.45
                         if text == '!':
                             continue
-                        if args['user_id'] != self.MyUId:
+                        if args['user_id'] != self.MyUId and rand_id == None:
                             self.Checkqueue.put(args, timeout=60)
-                        # self.CheckForCommands(args)
-                        # self.Reply(self.UserApi,args)
-                        # return from_id,text,subject
+                            # self.CheckForCommands(args)
+                            # self.Reply(self.UserApi,args)
+                            # return from_id,text,subject
                     except KeyError:
                         continue
                 elif code == 8:
@@ -1660,10 +2053,9 @@ class VK_Bot:
                             continue
                         self.UserApi.messages.editChat(chat_id=s[1], title=self.Settings['namelock'][id][0], v=5.57)
                         Targs['peer_id'] = id
-                        Targs['v'] = 5.38
+                        Targs['v'] = 5.45
                         Targs['message'] = 'Название беседы менять запрещено'
                         self.Replyqueue.put(Targs)
-
 
     def status(self):
         self.UserApi.status.set(text=self.OldStat)

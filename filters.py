@@ -7,12 +7,12 @@
     * Warming/cooling filters
     * Cartoonizer
 """
-
+import random
 from multiprocessing.pool import ThreadPool
 
 import cv2
 import numpy as np
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageChops
 from scipy.interpolate import UnivariateSpline
 
 xrange = range
@@ -218,6 +218,17 @@ class AutoContrast:
         im = Image.open(img)
         im = ImageOps.autocontrast(im, 5)
         im.save(img, 'PNG')
+
+
+class Tlen:
+    def __init__(self):
+        pass
+
+    def render(self, img):
+        im = Image.open(img).convert('L').convert('RGB')
+        im2 = Image.open(random.choice(['tlen.jpeg', 'tlen2.jpg', 'tlen3.jpg'])).resize(im.size).convert('RGB')
+        im = ImageChops.multiply(im, im2)
+        im.save(img, 'JPEG')
 
 
 class Neural:
