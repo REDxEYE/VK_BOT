@@ -4,7 +4,9 @@ import random
 import cv2
 import imageio
 import numpy as np
-from PIL import Image, ImageSequence, ImageChops
+from PIL import Image, ImageSequence, ImageChops, ImageFont, ImageDraw
+
+from tempfile_ import TempFile
 
 
 def kok(file):
@@ -368,6 +370,15 @@ def Wanted(im1, im2):
     final = Image.fromarray((cv2.cvtColor(wante, cv2.COLOR_BGR2RGB)))
     final.save(im1)
 
+
+def textPlain(text, size, font='times.ttf', x=100, y=200, xsize=1280, ysize=720):
+    im = Image.new('RGB', (xsize, ysize), color=(255, 255, 255))
+    draw = ImageDraw.Draw(im)
+    font = ImageFont.truetype(font, int(size))
+    draw.text((x, y), text, font=font, fill=(0, 0, 0, 255))
+    _path = TempFile.generatePath('png')
+    im.save(_path)
+    return _path
 
 def JonTron(im1):
     JonTron = Image.open('JonTron.png')

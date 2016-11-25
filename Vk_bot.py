@@ -2,8 +2,6 @@ import atexit
 import calendar
 import datetime
 import json
-import logging
-import logging.config
 import queue
 import re
 import subprocess
@@ -19,10 +17,7 @@ import aiml
 import giphypop
 import pyowm
 import requests
-from PIL import ImageDraw, ImageFont
-from vk.exceptions import VkAuthError, VkAPIError
-from vk.logs import LOGGING_CONFIG
-from vk.utils import stringify_values, json_iter_parse, LoggingSession, str_type
+from vk import *
 
 import DA_Api as D_A
 import Vk_bot_RssModule
@@ -34,113 +29,12 @@ from PIL_module import *
 from filters import *
 from tempfile_ import *
 
-V = 3.0
-logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger('vk')
-
 
 def getpath():
     return os.path.dirname(os.path.abspath(__file__))
 
 
-class SessionCapchaFix(object):
-    API_URL = 'https://api.vk.com/method/'
-
-    def __init__(self, access_token=None):
-
-        logger.debug('API.__init__(access_token=%(access_token)r)', {'access_token': access_token})
-
-        self.access_token = access_token
-        self.access_token_is_needed = False
-
-        self.requests_session = LoggingSession()
-        self.requests_session.headers['Accept'] = 'application/json'
-        self.requests_session.headers['Content-Type'] = 'application/x-www-form-urlencoded'
-
-    @property
-    def access_token(self):
-        logger.debug('Check that we need new access token')
-        if self.access_token_is_needed:
-            logger.debug('We need new access token. Try to get it.')
-            self.access_token = self.get_access_token()
-        else:
-            logger.debug('Use old access token')
-        return self._access_token
-
-    @access_token.setter
-    def access_token(self, value):
-        self._access_token = value
-        if isinstance(value, str_type) and len(value) >= 12:
-            self.censored_access_token = '{}***{}'.format(value[:4], value[-4:])
-        else:
-            self.censored_access_token = value
-        logger.debug('access_token = %r', self.censored_access_token)
-        self.access_token_is_needed = not self._access_token
-
-    def get_user_login(self):
-        logger.debug('Do nothing to get user login')
-
-    def get_access_token(self):
-        """
-        Dummy method
-        """
-        logger.debug('API.get_access_token()')
-        return self._access_token
-
-    def make_request(self, method_request, captcha_response=None):
-
-        logger.debug('Prepare API Method request')
-
-        response = self.send_api_request(method_request, captcha_response=captcha_response)
-        # todo Replace with something less exceptional
-        response.raise_for_status()
-
-        # there are may be 2 dicts in one JSON
-        # for example: "{'error': ...}{'response': ...}"
-        for response_or_error in json_iter_parse(response.text):
-            if 'response' in response_or_error:
-                # todo Can we have error and response simultaneously
-                # for error in errors:
-                #     logger.warning(str(error))
-
-                return response_or_error['response']
-
-            elif 'error' in response_or_error:
-                error_data = response_or_error['error']
-                error = VkAPIError(error_data)
-
-                if error.is_captcha_needed():
-                    captcha_key = self.get_captcha_key(error.captcha_img)
-                    if not captcha_key:
-                        raise error
-
-                    captcha_response = {
-                        'sid': error.captcha_sid,
-                        'key': captcha_key,
-                    }
-                    return self.make_request(method_request, captcha_response=captcha_response)
-
-                elif error.is_access_token_incorrect():
-                    logger.info('Authorization failed. Access token will be dropped')
-                    self.access_token = None
-                    return self.make_request(method_request)
-
-                else:
-                    raise error
-
-    def send_api_request(self, request, captcha_response=None):
-        url = self.API_URL + request._method_name
-        method_args = request._api._method_default_args.copy()
-        method_args.update(stringify_values(request._method_args))
-        access_token = self.access_token
-        if access_token:
-            method_args['access_token'] = access_token
-        if captcha_response:
-            method_args['captcha_sid'] = captcha_response['sid']
-            method_args['captcha_key'] = captcha_response['key']
-        timeout = request._api._timeout
-        response = self.requests_session.post(url, method_args, timeout=timeout)
-        return response
+class SessionCapchaFix(Session):
 
     def get_captcha_key(self, captcha_image_url):
         """
@@ -151,55 +45,6 @@ class SessionCapchaFix(object):
         cap = input('capcha text:')
         return cap
 
-    def auth_code_is_needed(self, content, session):
-        """
-        Default behavior on 2-AUTH CODE is to raise exception
-        Reload this in child
-        """
-        raise VkAuthError('Authorization error (2-factor code is needed)')
-
-    def auth_captcha_is_needed(self, content, session):
-        """
-        Default behavior on CAPTCHA is to raise exception
-        Reload this in child
-        """
-        raise VkAuthError('Authorization error (captcha)')
-
-    def phone_number_is_needed(self, content, session):
-        """
-        Default behavior on PHONE NUMBER is to raise exception
-        Reload this in child
-        """
-        logger.error('Authorization error (phone number is needed)')
-        raise VkAuthError('Authorization error (phone number is needed)')
-
-
-class API(object):
-    def __init__(self, session, timeout=10, **method_default_args):
-        self._session = session
-        self._timeout = timeout
-        self._method_default_args = method_default_args
-
-    def __getattr__(self, method_name):
-        return Request(self, method_name)
-
-    def __call__(self, method_name, **method_kwargs):
-        return getattr(self, method_name)(**method_kwargs)
-
-
-class Request(object):
-    __slots__ = ('_api', '_method_name', '_method_args')
-
-    def __init__(self, api, method_name):
-        self._api = api
-        self._method_name = method_name
-
-    def __getattr__(self, method_name):
-        return Request(self._api, self._method_name + '.' + method_name)
-
-    def __call__(self, **method_args):
-        self._method_args = method_args
-        return self._api._session.make_request(self)
 
 
 class VK_Bot:
@@ -265,7 +110,7 @@ class VK_Bot:
             '!пост': [self.MakePost, ['admin', 'editor', 'moderator'], "постит в группе ваш текст", '', False],
             '!бан': [self.BanUser, ['admin', 'editor', 'moderator'], 'Банит', '', False],
             '!музыка': [self.Music, ['admin', 'editor', 'moderator', 'user'], 'Ищет музыку',
-                        "Ищет музыку, форма запроса:\n!музыка\nимя:НАЗВАНИЕ", False],
+                        "Ищет музыку, форма запроса:\n!музыка\nимя:НАЗВАНИЕ", True],
             '!e621': [self.e621, ['admin', 'editor', 'moderator'], "Ищет пикчи на e621",
                       "Ищет пикчи на e621, форма запроса:\n!e621\ntags:тэги через ;\nsort:fav_count либо score либо вообще не пишите это, если хотите случайных\nn:кол-во артов(максимум 10)\npage:страница на которой искать",
                       False],
@@ -284,13 +129,14 @@ class VK_Bot:
             '!добавить': [self.AddUser, ['admin'], "Не для вас", '', False],
             '!likes': [self.Likes, ['admin'], "Тоже не для вас", '', False],
             '!rss': [self.GetRss, ['admin', 'editor', 'moderator', 'user'], "РСС парсит", '', False],
-            '!lockname': [self.LockName, ['admin', 'editor', 'moderator', 'user'], "РСС парсит", '', True],
-            '!5nights': [self.JoinFiveNigths, ['admin', 'editor', 'moderator', 'user'], "Добавляет в общую беседу",
-                         '', True],
+            '!lockname': [self.LockName, ['admin', 'editor', 'moderator', 'user'], "Лочит имя беседы", '', True],
+            '!5nights': [self.JoinFiveNigths, ['admin', 'editor', 'moderator', 'user'], "Добавляет в общую беседу", '',
+                         True],
             '!roll': [self.rollRows, ['admin', 'editor', 'moderator', 'user'], "kok", '', True],
             '!rollrandom': [self.rollRowsrand, ['admin', 'editor', 'moderator', 'user'], "kok", '', True],
             '!rollsmart': [self.rollRowssmart, ['admin', 'editor', 'moderator', 'user'], "kok", '', True],
-            '!чс': [self.Blacklist, ['admin', 'editor', 'moderator', 'user'], "kok", '', True],
+            '!чс': [self.Blacklist, ['admin', 'editor', 'moderator', 'user'], "Добавляет человека в игнор лист", '',
+                    True],
             '!выполни': [self.ExecCode, ['admin', 'editor'], "kok", '', True],
             '!wanted': [self.WantedFunk, ['admin', 'editor', 'moderator', 'user'], "kok", '', True],
             '!jontron': [self.JonTronFunk, ['admin', 'editor', 'moderator', 'user'], "kok", '', True],
@@ -301,7 +147,6 @@ class VK_Bot:
         url = 'https://api.vk.com/method/{}?{}&access_token={}'.format('messages.getChat', 'chat_id={}'.format(id),
                                                                        self.Settings['UserAccess_token'])
         resp = requests.get(url).json()
-
         return resp['response']
 
     def Blacklist(self, args):
@@ -496,14 +341,12 @@ class VK_Bot:
 
     def GetRss(self, args):
         print('GetRss ', args)
-        # comm = args['rss'].replace(" ", "").lower()
         url = args['url']
         rss = Vk_bot_RssModule.RssParser(url=url)
         news = rss.Parse()[:5]
         # rss = RssBot.Parse()
 
         for r in news:
-            # print(r)
             Margs = {}
             Margs['v'] = 5.45
             Margs['peer_id'] = args['args']['peer_id']
@@ -516,7 +359,6 @@ class VK_Bot:
             atts = self.UploadPhoto(r['img'])
             Margs['attachment'] = atts
             Margs['message'] = msg
-            # self.Reply(self.UserApi, Margs)
             self.Replyqueue.put(Margs)
             sleep(1)
         return True
@@ -525,11 +367,13 @@ class VK_Bot:
 
         while True:
             args = self.Replyqueue.get()
+
             args['random_id'] = randint(0, 500000)
             print('Unfinished Reply tasks:', self.Replyqueue.unfinished_tasks)
             print('Reply:', args)
             sleep(1)
             try:
+
                 self.UserApi.messages.send(**args)
             except Exception as Ex:
                 print("error couldn't send message:", Ex)
@@ -742,16 +586,28 @@ class VK_Bot:
         try:
 
             photo = self.GetBiggesPic(atts[0], args['data']['message_id'])
-        except:
-            return False
-        req = urllib.request.Request(photo, headers=self.hdr)
+            req = urllib.request.Request(photo, headers=self.hdr)
 
-        img = urlopen(req).read()
-        Tmp = TempFile(img, 'jpg')
-        JonTron(Tmp.path_)
-        att = self.UploadFromDisk(Tmp.path_)
+            img = urlopen(req).read()
+            Tmp = TempFile(img, 'jpg')
+            JonTron(Tmp.path_)
+            att = self.UploadFromDisk(Tmp.path_)
+
+            Tmp.rem()
+        except:
+            text = args['text'] if 'text' in args else 'Meh...'
+            size = args['size'] if 'size' in args else 120
+            font = args['font'] if 'font' in args else 'times.ttf'
+            x = int(args['x']) if 'x' in args else 100
+            y = int(args['y']) if 'y' in args else 150
+            if text == None:
+                return False
+            _path = textPlain(text, size, font, x, y, 512, 512)
+            JonTron(_path)
+            att = self.UploadFromDisk(_path)
+            os.remove(_path)
+            del _path
         Topost.append(att)
-        Tmp.rem()
         args['attachment'] = Topost
         self.Replyqueue.put(args)
         return True
@@ -774,17 +630,14 @@ class VK_Bot:
             att = self.UploadFromDisk(Tmp.path_)
             Tmp.rem()
         except:
-            text = args['text'] if 'text' in args else None
+            text = args['text'] if 'text' in args else 'кок'
             size = args['size'] if 'size' in args else 300
+            font = args['font'] if 'font' in args else 'times.ttf'
+            x = int(args['x']) if 'x' in args else 250
+            y = int(args['y']) if 'y' in args else 200
             if text == None:
                 return False
-            text = str(text)
-            im = Image.new('RGB', (1280, 720), color=(255, 255, 255))
-            draw = ImageDraw.Draw(im)
-            font = ImageFont.truetype("times.ttf", int(size))
-            draw.text((100, 200), text, font=font, fill=(0, 0, 0, 255))
-            _path = TempFile.generatePath('png')
-            img = im.save(_path)
+            _path = textPlain(text, size, font, x, y, 1280, 720)
             SayMax(_path)
             att = self.UploadFromDisk(_path)
             os.remove(_path)
@@ -1698,6 +1551,7 @@ class VK_Bot:
                                 if not Commands[Command][4]:
                                     args['message'] = "Выполняю, подождите"
                                     self.Replyqueue.put(args)
+                                self.UserApi.messages.setActivity(peer_id=data['peer_id'], type='typing', v=5.56)
                                 ret = self.ExecCommand(Commands[Command][0], CommandDict)
                             else:
 
@@ -1722,6 +1576,7 @@ class VK_Bot:
                             re.search('^((Р|р)ед)', data['message'].lower())) or (
                             re.search(r'\b(Р|р)ед\b', data['message'])):
                         toCheck = data['message'].lower().replace(' ', '')
+                        self.UserApi.messages.setActivity(peer_id=data['peer_id'], type='typing', v=5.56)
                         if self.hello.search(data['message'], re.IGNORECASE):
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.45
