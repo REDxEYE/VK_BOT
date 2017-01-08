@@ -1,3 +1,4 @@
+import json
 import random
 import urllib.request
 from io import StringIO
@@ -7,6 +8,8 @@ from xml.etree import ElementTree
 
 import requests
 from bs4 import BeautifulSoup
+
+
 def e621(tags, n, page, sort_=None):
     hdr = {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
@@ -102,7 +105,7 @@ def e926(tags, n, page, sort_=None):
         # return link
 
 
-def e621v2(tags, n, page, sort_=None):
+def e926v2(tags, n, sort_=None):
     hdr = {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -110,29 +113,54 @@ def e621v2(tags, n, page, sort_=None):
         'Accept-Encoding': 'none',
         'Accept-Language': 'en-US,en;q=0.8',
         'Connection': 'keep-alive'}
-    xml = requests.request('GET', 'http://e926.net/post/index.xml?tags={}'.format(' '.join(tags)))
+    js = json.loads(requests.request('GET', 'http://e926.net/post/index.json?tags={}'.format(' '.join(tags))).text)
 
-    xml = ElementTree.parse(StringIO(xml.text))
-    posts = xml.getroot()
     aa = {}
-    for post in posts:
+    for post in js:
 
         try:
             if sort_:
-                aa[post.find('file_url').text] = int(post.find(sort_).text)
+                aa[post['file_url']] = int(post[sort_])
 
 
         except:
             continue
+
     ss = sorted(aa, key=aa.__getitem__)
     ss = ss[::-1]
-    return ss
+    return ss[:n]
 
+
+def e621v2(tags, n, sort_=None):
+    hdr = {
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+        'Accept-Encoding': 'none',
+        'Accept-Language': 'en-US,en;q=0.8',
+        'Connection': 'keep-alive'}
+    js = json.loads(requests.request('GET', 'http://e621.net/post/index.json?tags={}'.format(' '.join(tags))).text)
+
+    aa = {}
+    for post in js:
+
+        try:
+            if sort_:
+                aa[post['file_url']] = int(post[sort_])
+
+
+        except:
+            continue
+
+    ss = sorted(aa, key=aa.__getitem__)
+    ss = ss[::-1]
+    print(ss)
+    return ss[:n]
 def get(tags, n, page, sort_):
-    return e621(tags, n, page, sort_)
+    return e621v2(tags, n, sort_)
 
 
 def getSafe(tags, n, page, sort_):
-    return e926(tags, n, page, sort_)
+    return e926v2(tags, n, sort_)
 
-# print(e621v2(['fnaf'],50,1,'fav_count'))
+# print(e926v2(['female', 'order:score', '-animated', 'fnaf', 'rating:q'],50,'score'))

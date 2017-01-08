@@ -102,7 +102,7 @@ class Glitch2():
         file_data = file_handler.read()
         file_handler.close()
 
-        for i in range(1, random.randint(3, 13)):
+        for i in range(1, random.randint(3, 6)):
             file_data = Glitch2.splice_a_chunk_in_a_file(file_data)
 
         file_handler = open(local_image, 'w+b')

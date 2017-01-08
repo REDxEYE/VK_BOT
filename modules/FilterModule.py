@@ -1,12 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-""" A module containing a number of interesting image filter effects,
-    such as:
-    * Black-and-white pencil sketch
-    * Warming/cooling filters
-    * Cartoonizer
-"""
 import random
 from multiprocessing.pool import ThreadPool
 
@@ -18,7 +9,8 @@ from scipy.interpolate import UnivariateSpline
 xrange = range
 
 
-class PencilSketch:
+class Filter_PencilSketch:
+    name = "PencilSketch"
     """Pencil sketch effect
 
         A class that applies a pencil sketch effect to an image.
@@ -62,7 +54,8 @@ class PencilSketch:
         # return
 
 
-class WarmingFilter:
+class Filter_WarmingFilter:
+    name = "WarmingFilter"
     """Warming filter
 
         A class that applies a warming filter to an image.
@@ -105,7 +98,8 @@ class WarmingFilter:
         return spl(xrange(256))
 
 
-class CoolingFilter:
+class Filter_CoolingFilter:
+    name = "CoolingFilter"
     """Cooling filter
 
         A class that applies a cooling filter to an image.
@@ -148,7 +142,8 @@ class CoolingFilter:
         return spl(xrange(256))
 
 
-class Cartoonizer:
+class Filter_Cartoonizer:
+    name = "Cartoonizer"
     """Cartoonizer effect
 
         A class that applies a cartoon effect to an image.
@@ -200,7 +195,9 @@ class Cartoonizer:
         # return cv2.bitwise_and(img_color, img_edge)
 
 
-class Equal:
+class Filter_Equal:
+    name = "Equal"
+
     def __init__(self):
         pass
 
@@ -210,7 +207,9 @@ class Equal:
         im.save(img, 'PNG')
 
 
-class AutoContrast:
+class Filter_AutoContrast:
+    name = "AutoContrast"
+
     def __init__(self):
         pass
 
@@ -220,7 +219,9 @@ class AutoContrast:
         im.save(img, 'PNG')
 
 
-class Tlen:
+class Filter_Tlen:
+    name = "Tlen"
+
     def __init__(self):
         pass
 
@@ -231,7 +232,9 @@ class Tlen:
         im.save(img, 'JPEG')
 
 
-class Neural:
+class Filter_Neural:
+    name = "Neural"
+
     def __init__(self):
         pass
 

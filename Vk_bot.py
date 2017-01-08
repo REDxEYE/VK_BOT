@@ -1,22 +1,24 @@
-import atexit
 import calendar
 import datetime
+import inspect
 import json
 import queue
 import re
 import subprocess
 import sys
 import threading
+import tkinter as tk
 import traceback
 from datetime import timedelta
-from math import ceil
+from math import *
 from time import sleep
+from tkinter import ttk
 from urllib.request import urlopen
 
 import aiml
 import giphypop
-import pyowm
 import requests
+from PIL import ImageTk, Image
 from vk import *
 
 import DA_Api as D_A
@@ -34,21 +36,63 @@ def getpath():
     return os.path.dirname(os.path.abspath(__file__))
 
 
+def prettier_size(n, pow=0, b=1024, u='B', pre=[''] + [p + 'i' for p in 'KMGTPEZY']):
+    r, f = min(int(log(max(n * b ** pow, 1), b)), len(pre) - 1), '{:,.%if} %s%s'
+    return (f % (abs(r % (-r - 1)), pre[r], u)).format(n * b ** pow / b ** float(r))
 class SessionCapchaFix(Session):
-
+    hdr = {
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+        'Accept-Encoding': 'none',
+        'Accept-Language': 'en-US,en;q=0.8',
+        'Connection': 'keep-alive'}
     def get_captcha_key(self, captcha_image_url):
         """
         Default behavior on CAPTCHA is to raise exception
         Reload this in child
         """
         print(captcha_image_url)
-        cap = input('capcha text:')
-        return cap
+        img = urllib.request.Request(captcha_image_url, headers=self.hdr)
+        a = TempFile(img, 'jpg', NoCache=True)
+        self.popup(img)
+        a.rem()
+        # cap = input('capcha text:')
+        return self.capcha.get()
 
+    def popup(self, img):
+        img = Image.open(img)
+
+        self.root = tk.Toplevel()
+        img = ImageTk.PhotoImage(image=img)
+
+        Img = tk.Label(self.root)
+        Img.pack()
+        Img.configure(image=img)
+        Img._image_cache = img
+        self.capcha = ttk.Entry(self.root)
+        self.capcha.pack()
+        button = ttk.Button(self.root, command=self.Ret)
+        button.pack()
+        self.root.mainloop()
+
+    def Ret(self):
+        self.root.destroy()
 
 
 class VK_Bot:
-    def __init__(self, threads=4):
+    def __init__(self, debug=False, threads=4, LP_Threads=4):
+        self.DEBUG = debug
+        self.GUI = threading.Thread(target=self.GUI)
+        self.GUI.setDaemon(True)
+        self.GUI.start()
+        sleep(0.5)
+        self.stdout.tag_config("log", foreground="black", font="Arial 10 italic")
+        self.stdout.tag_config("message", foreground="black", font="Arial 10 italic")
+        self.stdout.tag_config("event", foreground="black", font="Arial 10 italic")
+        self.stdout.tag_config("reply", foreground="black", font="Arial 10 italic")
+        self.stdout.tag_config("command", foreground="black", font="Arial 10 italic")
+        self.stdout.tag_config("error", foreground="black", font="Arial 13 italic")
         self.kernel = aiml.Kernel()
         # if os.path.isfile("bot_brain.brn"):
         #    pass
@@ -68,9 +112,10 @@ class VK_Bot:
             'Accept-Encoding': 'none',
             'Accept-Language': 'en-US,en;q=0.8',
             'Connection': 'keep-alive'}
+        self.Longpool = queue.Queue()
         self.Checkqueue = queue.Queue()
         self.Replyqueue = queue.Queue()
-        self.owm = pyowm.OWM('4595c45204ebe8bea66cc624ee5a411b')
+        self.LOG('log', "MAIN THREAD", "Loading")
         print('Loading')
         self.LoadConfig()
         if 'namelock' not in self.Settings:
@@ -81,19 +126,29 @@ class VK_Bot:
             self.t.setDaemon(True)
             self.t.start()
             print('Поток обработки сообщений создан')
+            self.LOG('log', "MAIN THREAD", "Поток обработки сообщений создан")
+        for _ in range(LP_Threads):
+            self.LP = threading.Thread(target=self.parseLongPool)
+            self.LP.setDaemon(True)
+            self.LP.start()
+            self.LOG('log', "MAIN THREAD", 'Поток обработки лонгпула создан')
+            print('Поток обработки лонгпула создан')
         self.y = threading.Thread(target=self.Reply)
         self.y.setDaemon(True)
         self.y.start()
+
+        self.LOG('log', "MAIN THREAD", 'Поток обработки ответов создан')
         print('Поток обработки ответов создан')
 
-        self.Group = self.Settings['Group']
-        self.GroupDomain = self.Settings['Domain']
-        self.GroupAccess_token = self.Settings['GroupAccess_token']
+        self.Group = self.Settings['Group'] if 'Group' in self.Settings else None
+        self.GroupDomain = self.Settings['Domain'] if 'Domain' in self.Settings else None
+        self.GroupAccess_token = self.Settings['GroupAccess_token'] if 'GroupAccess_token' in self.Settings else None
         self.UserAccess_token = self.Settings['UserAccess_token']
         self.UserSession = SessionCapchaFix(access_token=self.UserAccess_token)
-        self.GroupSession = SessionCapchaFix(access_token=self.GroupAccess_token)
+        self.GroupSession = SessionCapchaFix(
+            access_token=self.GroupAccess_token) if self.GroupAccess_token != None else None
         self.UserApi = API(self.UserSession)
-        self.GroupApi = API(self.GroupSession)
+        self.GroupApi = API(self.GroupSession) if self.GroupAccess_token != None else None
         self.MyUId = self.UserApi.users.get()[0]['uid']
         self.MyName = self.GetUserNameById(self.MyUId)
         self.hello = re.compile(
@@ -101,21 +156,31 @@ class VK_Bot:
         self.oldMsg = ""
         self.OldStat = self.UserApi.status.get()['text']
         self.UserApi.status.set(text="Bot online")
-        friends = self.UserApi.friends.getRequests(v=5.38)['items']
-        for friend in friends:
-            print(friend)
-            self.UserApi.friends.add(user_id=friend)
-        print(self.OldStat)
+        self.chatlist = self.UserApi.messages.getDialogs(v=5.60, count=20)
+        # self.buildChatlist()
+        # friends = self.UserApi.friends.getRequests(v=5.38)['items']
+        # for friend in friends:
+        #    self.UserApi.friends.add(user_id=friend)
         self.Commands = {
             '!пост': [self.MakePost, ['admin', 'editor', 'moderator'], "постит в группе ваш текст", '', False],
             '!бан': [self.BanUser, ['admin', 'editor', 'moderator'], 'Банит', '', False],
             '!музыка': [self.Music, ['admin', 'editor', 'moderator', 'user'], 'Ищет музыку',
                         "Ищет музыку, форма запроса:\n!музыка\nимя:НАЗВАНИЕ", True],
             '!e621': [self.e621, ['admin', 'editor', 'moderator'], "Ищет пикчи на e621",
-                      "Ищет пикчи на e621, форма запроса:\n!e621\ntags:тэги через ;\nsort:fav_count либо score либо вообще не пишите это, если хотите случайных\nn:кол-во артов(максимум 10)\npage:страница на которой искать",
+                      "Ищет пикчи на e621, форма запроса:\n"
+                      "!e621\n"
+                      "tags:тэги через ;\n"
+                      "sort:fav_count либо score либо вообще не пишите это, если хотите случайных\n"
+                      "n:кол-во артов(максимум 10)\n"
+                      "page:страница на которой искать",
                       False],
             '!e926': [self.e926, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на e926",
-                      "Ищет пикчи на e926, форма запроса:\n!e626\ntags:тэги через ;\nsort:fav_count либо score либо вообще не пишите это, если хотите случайных\nn:кол-во артов(максимум 10)\npage:страница на которой искать",
+                      "Ищет пикчи на e926, форма запроса:\n"
+                      "!e926\n"
+                      "tags:тэги через ;\n"
+                      "sort:fav_count либо score либо вообще не пишите это, если хотите случайных\n"
+                      "n:кол-во артов(максимум 10)\n"
+                      "page:страница на которой искать",
                       False],
             '!d_a': [self.D_A, ['admin', 'editor', 'moderator', 'user'], "Ищет пикчи на DA", '', False],
             '!yt': [self.YT, ['admin', 'editor', 'moderator', 'user'], "Ищет видео на Ютубе", '', False],
@@ -132,16 +197,122 @@ class VK_Bot:
             '!lockname': [self.LockName, ['admin', 'editor', 'moderator', 'user'], "Лочит имя беседы", '', True],
             '!5nights': [self.JoinFiveNigths, ['admin', 'editor', 'moderator', 'user'], "Добавляет в общую беседу", '',
                          True],
-            '!roll': [self.rollRows, ['admin', 'editor', 'moderator', 'user'], "kok", '', True],
-            '!rollrandom': [self.rollRowsrand, ['admin', 'editor', 'moderator', 'user'], "kok", '', True],
-            '!rollsmart': [self.rollRowssmart, ['admin', 'editor', 'moderator', 'user'], "kok", '', True],
-            '!чс': [self.Blacklist, ['admin', 'editor', 'moderator', 'user'], "Добавляет человека в игнор лист", '',
+            '!roll': [self.rollRows, ['admin', 'editor', 'moderator', 'user'], "сложна объяснить", '', True],
+            '!rollrandom': [self.rollRowsrand, ['admin', 'editor', 'moderator', 'user'], "сложна объяснить", '', True],
+            '!rollsmart': [self.rollRowssmart, ['admin', 'editor', 'moderator', 'user'], "сложна объяснить", '', True],
+            '!чс': [self.Blacklist, ['admin', 'editor', 'moderator'], "Добавляет человека в игнор лист", '',
                     True],
-            '!выполни': [self.ExecCode, ['admin', 'editor'], "kok", '', True],
-            '!wanted': [self.WantedFunk, ['admin', 'editor', 'moderator', 'user'], "kok", '', True],
-            '!jontron': [self.JonTronFunk, ['admin', 'editor', 'moderator', 'user'], "kok", '', True],
-            '!saymax': [self.SayMaxFunk, ['admin', 'editor', 'moderator', 'user'], "kok", '', True]
+            '!выполни': [self.ExecCode, ['admin', 'editor'], '', "Выполняет код из сообщения\n"
+                                                                 "переменная api содержит api пользователя\n"
+                                                                 "переменная self - содержит внутренние функции бота",
+                         True],
+            '!wanted': [self.WantedFunk, ['admin', 'editor', 'moderator', 'user'], "сложна объяснить", '', True],
+            '!jontron': [self.JonTronFunk, ['admin', 'editor', 'moderator', 'user'], "сложна объяснить", '', True],
+            '!saymax': [self.SayMaxFunk, ['admin', 'editor', 'moderator', ], "сложна объяснить", '', True],
+            '!stat': [self.StatComm, ['admin', 'editor', 'moderator', ], "Выводит стату", '', True],
+            '!debug': [self.Debug, ['admin', 'editor', 'moderator', ], "Всякая дебажная фигня", '', True],
+            '!изгнать': [self.kik, ['admin', 'editor', 'moderator', ], '',
+                         "Изгоняет пользователя из беседы, если бот её создатель \n"
+                         "!изнать\n"
+                         "id: id предателя", True],
         }
+        self.UpdateStats()
+        #GUI!!!
+
+    def GUI(self):
+        self.root = tk.Tk()
+        self.stdout = tk.Text(self.root)
+        self.stdout.pack()
+        self.root.title('Vk bot GUI')
+        self.StatsTemplate = "Messages: {}  Commands:{}  Cache:{}"
+        self.Stats = ttk.Label(text="")
+        self.Stats.pack()
+
+        self.root.protocol("WM_DELETE_WINDOW", self.quit_)
+        self.root.mainloop()
+
+    def quit_(self):
+
+        self.root.destroy()
+        os._exit(9)
+
+    def SetCurChat(self, event):
+
+        print(self.Chats.get())
+        # self.curChar =
+
+    def buildChatlist(self):
+        emoji_pattern = re.compile("[\u1F300-\u1F5FF\u1F600-\u1F64F\u1F680-\u1F6FF\u2600-\u26FF\u2700-\u27BF]+",
+                                   flags=re.UNICODE)
+        self.ChatList = {}
+        for chat in self.chatlist['items']:
+            if chat['title'] == ' ... ':
+                user = self.GetUserNameById(chat['user_id'])
+                print(emoji_pattern.findall(user['first_name']))
+                print(emoji_pattern.findall(user['last_name']))
+                self.ChatList[chat['user_id']] = "{} {}".format(emoji_pattern.sub(r'', user['first_name']),
+                                                                emoji_pattern.sub(r'', user[
+                                                                    'last_name'])) if user is not None else "ОШИБКА"
+            else:
+                self.ChatList[chat['chat_id']] = chat['title']
+        print(self.ChatList)
+        self.Chats = ttk.Combobox(self.root, values=self.ChatList.values())
+        self.Chats.bind("<<ComboboxSelected>>", self.SetCurChat)
+        self.Chats.pack()
+
+    def UpdateStats(self):
+        self.Stats.configure(
+            text=self.StatsTemplate.format(self.Stat['messages'], self.Stat['commands'], self.Stat['cache']))
+        self.root.after(1000, self.UpdateStats)
+
+    def LOG(self, tag, prefix="UNKNOWN", *text):
+        out = ''
+        for t in text:
+            if isinstance(t, list):
+                out += " ".join(t) + "\n"
+            if isinstance(t, dict):
+                out += str(t) + "\n"
+            if isinstance(text, tuple):
+                out += str(t) + "\n"
+        if not self.DEBUG:
+            if tag == ("log" or "command" or "reply"):
+                return
+        self.stdout.insert(tk.END, '[{}]: '.format(prefix) + out + os.linesep, tag)
+        self.stdout.see("end")
+
+    def getinfo(self, command):
+        return 'Неправильно оформлен запрос \n' + self.Commands[command][3]
+
+    def kik(self, args):
+        R_args = {'v': 5.45, 'peer_id': args['data']['peer_id']}
+        user = args['id'] if 'id' in args else None
+        if user == None:
+            R_args['message'] = args['info']
+            self.Replyqueue.put(R_args)
+            return True
+        name = self.GetUserNameById(user)
+        R_args['message'] = "The kickHammer has spoken\n {} has been kicked in the ass".format(
+            ' '.join([name['first_name'], name['last_name']]))
+        self.UserApi.messages.removeChatUser(v=5.45, chat_id=args['data']['peer_id'] - 2000000000, user_id=user)
+        self.Replyqueue.put(R_args)
+        return True
+
+    def Debug(self, args):
+        R_args = {'v': 5.45, 'peer_id': args['data']['peer_id']}
+        msg = "Кол-во команд в обработке: {}\n".format(self.Checkqueue.unfinished_tasks)
+        a = []
+        for _ in range(self.Checkqueue.unfinished_tasks):
+
+            try:
+                a.append(str(self.Checkqueue.get_nowait()))
+            except:
+                break
+        msg += "Дамп очереди: {}\n".format('\n'.join(a))
+        msg += "Имя и ID аккаунта: {}".format(self.MyName)
+        R_args['message'] = msg
+
+        self.Replyqueue.put(R_args)
+        return True
 
     def GetChatName(self, id):
         url = 'https://api.vk.com/method/{}?{}&access_token={}'.format('messages.getChat', 'chat_id={}'.format(id),
@@ -174,7 +345,7 @@ class VK_Bot:
 
     def GetUserNameById(self, Id):
         # print('GetUserNameById: ', Id)
-        sleep(0.01)
+        sleep(0.1)
         try:
             User = self.UserApi.users.get(user_ids=Id, fields=['sex'])[0]
         except:
@@ -186,13 +357,16 @@ class VK_Bot:
         comms = []
         for _ in range(0, ceil(count / 100)):
             sleep(0.25)
-            for Com in self.UserApi.wall.getComments(owner_id=GroupId, post_id=PostId, count=100)[1:]:
+            for Com in self.UserApi.wall.getComments(owner_id=GroupId, post_id=PostId, count=100, v=5.60)['items']:
                 comments.append(Com)
         for comment in comments:
-            comms.append([self.GetUserNameById(comment['uid']), comment['text']])
+            comms.append([self.GetUserNameById(comment['id']), comment['text']])
         Out = ""
         for comm in comms:
-            Out += comm[0] + " : " + comm[1] + "\n"
+            try:
+                Out += " ".join([comm[0]['first_name'], comm[0]['last_name']]) + " : " + comm[1] + "\n"
+            except:
+                Out += 'Кто-то вызвавший эксепшен' + " : " + comm[1] + "\n"
         return Out
 
     def CheckWall(self, GroupDomain):
@@ -205,7 +379,7 @@ class VK_Bot:
             # comms = self.GetCommentsFromPost(I['to_id'],I['id'],I['reply_count'])
             # print(I)
             sleep(0.25)
-            self.Data = datetime.fromtimestamp(post['date'])
+            self.Data = datetime.datetime.fromtimestamp((post['date']))
             self.LikeCount = post['likes']['count']
             # print("Кол-во лайков: ",LikeCount)
             if post['text']:
@@ -214,7 +388,7 @@ class VK_Bot:
                 Text = "Без текста"
             FIO = self.GetUserNameById(post["from_id"])
             ID = post["from_id"]
-            Out += FIO + " : " + str(ID) + "\n"
+            Out += "{} {}".format(FIO['first_name'], FIO['last_name']) + " : " + str(ID) + "\n"
             Out += Text + '\n'
             Out += "Кол-во лайков: " + str(self.LikeCount) + "\n"
             Out += "Дата: " + str(self.Data) + "\n"
@@ -287,23 +461,57 @@ class VK_Bot:
     def Ban(self, args):
         return self.UserApi.groups.banUser(**args)
 
+    def generateConfig(self, path):
+        token = input('User access token')
+        adminid = input('Admin vk id')
+        data = {}
+        with open(path + '/settings.json', 'w') as config:
+            data['users'] = {'admin': [adminid]}
+            data['settings'] = {'UserAccess_token': token}
+            json.dump(data, config)
     def LoadConfig(self):
         path = getpath()
+        if not os.path.exists(path + '/settings.json'):
+            self.generateConfig(path)
         with open(path + '/settings.json', 'r') as config:
             settings = json.load(config)
             self.UserGroups = settings["users"]
+            try:
+                self.Stat = settings["stat"]
+            except:
+                self.Stat = {}
+                self.Stat['messages'] = 0
+                self.Stat['commands'] = 0
+                self.Stat['cache'] = 0
+            self.LOG('log', sys._getframe().f_code.co_name, 'User groups: ', self.UserGroups)
             print('User groups: ', self.UserGroups)
             self.Settings = settings["settings"]
-
+        self.LOG('log', sys._getframe().f_code.co_name, 'Loading config :done')
+        print('Loading config :done')
     def SaveConfig(self):
         path = getpath()
         data = {}
         with open(path + '/settings.json', 'w') as config:
             data['users'] = self.UserGroups
+
+            data['stat'] = self.Stat
+            #print(self.Stat)
             data['settings'] = self.Settings
             json.dump(data, config)
+            # print('Saving config :done')
+
+    def StatComm(self, args):
+        R_args = {}
+        msg = 'Кол-во обработанных сообщений: {}\nКол-во выполеных команд: {}\nРазмер кэша: {}\n'
+        R_args['message'] = msg.format(self.Stat['messages'], self.Stat['commands'], str(
+            prettier_size((os.path.getsize(os.path.join(getpath(), 'tmp', 'cache.zip'))))))
+        R_args['peer_id'] = args['args']['peer_id']
+        R_args['v'] = 5.45
+        self.Replyqueue.put(R_args)
+        return True
 
     def AddUser(self, args):
+        self.LOG('log', sys._getframe().f_code.co_name, 'Adduser: ', args)
         print('Adduser: ', args)
         if "группа" in args:
             Group = args['группа'].lower()
@@ -312,6 +520,7 @@ class VK_Bot:
 
         if 'id' in args:
             print(Group in self.UserGroups)
+            self.LOG('log', sys._getframe().f_code.co_name, Group in self.UserGroups)
             if Group in self.UserGroups.keys():
                 Ids = self.UserGroups[Group]
                 Ids.append(int(args['id']))
@@ -325,6 +534,7 @@ class VK_Bot:
             userName = self.GetUserNameById(args['id'])
             MArgs['message'] = userName['first_name'] + ' ' + userName['last_name'] + ' был добавлен как ' + Group
             MArgs['v'] = 5.45
+            self.LOG('log', sys._getframe().f_code.co_name, 'Adduser reply: ', MArgs)
             print('Adduser reply: ', MArgs)
             # self.Reply(self.UserApi, MArgs)
             self.Replyqueue.put(MArgs)
@@ -335,7 +545,9 @@ class VK_Bot:
             return False
 
     def ExecCommand(self, command, args):
+        self.LOG('log', "Command Exec", 'executing command: ', command, ' with args:')
         print('executing command: ', command, ' with args:')
+        self.LOG('log', 'Command Exec', args)
         print(args)
         return command(args)
 
@@ -366,23 +578,25 @@ class VK_Bot:
     def Reply(self):
 
         while True:
+            #print('Reply queue',self.Replyqueue)
             args = self.Replyqueue.get()
-
-            args['random_id'] = randint(0, 500000)
-            print('Unfinished Reply tasks:', self.Replyqueue.unfinished_tasks)
+            self.Replyqueue.task_done()
+            # print('Unfinished Reply tasks:', self.Replyqueue.unfinished_tasks)
+            self.LOG('reply', sys._getframe().f_code.co_name, 'Reply:', args)
             print('Reply:', args)
             sleep(1)
             try:
 
                 self.UserApi.messages.send(**args)
             except Exception as Ex:
+                self.LOG('error', sys._getframe().f_code.co_name, 'Reply:', "error couldn't send message:", Ex)
                 print("error couldn't send message:", Ex)
                 try:
                     args['message'] += '\nФлудконтроль:{}'.format(randint(0, 255))
                 except:
                     args['message'] = '\nФлудконтроль:{}'.format(randint(0, 255))
                 self.Replyqueue.put(args)
-            self.Replyqueue.task_done()
+
 
     def GetUploadServer(self):
         return self.UserApi.photos.getMessagesUploadServer()
@@ -395,16 +609,19 @@ class VK_Bot:
         i = 0
         for url in urls:
             i += 1
+            self.LOG('log', sys._getframe().f_code.co_name, 'Reply:', 'downloading photo№{}'.format(i))
             print('downloading photo№{}'.format(i))
             server = self.GetUploadServer()['upload_url']
             req = urllib.request.Request(url, headers=self.hdr)
             img = urlopen(req).read()
             Tmp = TempFile(img, 'jpg')
-
+            Tmp.cachefile(Tmp.path_)
             args = {}
             args['server'] = server
+            self.LOG('log', sys._getframe().f_code.co_name, 'uploading photo №{}'.format(i))
             print('uploading photo №{}'.format(i))
             req = requests.post(server, files={'photo': open(Tmp.file_(), 'rb')})
+            self.LOG('log', sys._getframe().f_code.co_name, 'Done')
             print('Done')
             Tmp.rem()
 
@@ -422,12 +639,15 @@ class VK_Bot:
         return atts
 
     def UploadFromDisk(self, file):
+        self.Stat['cache'] = str(prettier_size((os.path.getsize(os.path.join(getpath(), 'tmp', 'cache.zip')))))
         atts = []
         server = self.GetUploadServer()['upload_url']
         args = {}
         args['server'] = server
+        self.LOG('log', sys._getframe().f_code.co_name, 'uploading photo')
         print('uploading photo №')
         req = requests.post(server, files={'photo': open(file, 'rb')})
+        self.LOG('log', sys._getframe().f_code.co_name, 'Done')
         print('Done')
         # req = requests.post(server,files = {'photo':img})
         if req.status_code == requests.codes.ok:
@@ -446,8 +666,10 @@ class VK_Bot:
         args = {}
         args['server'] = server
         name = file.split('/')[-1]
+        self.LOG('log', sys._getframe().f_code.co_name, 'uploading file')
         print('uploading file')
         req = requests.post(server, files={'file': open(file, 'rb')})
+        self.LOG('log', sys._getframe().f_code.co_name, 'Done')
         print('Done')
         # req = requests.post(server,files = {'photo':img})
         if req.status_code == requests.codes.ok:
@@ -459,86 +681,69 @@ class VK_Bot:
         return None, None
 
     def Music(self, args):
-        name = args['имя']
-        T_args = {}
-        T_args['q'] = name
-        tracks = self.UserApi.audio.search(**T_args)[1:]
-
-        R_args = {}
+        R_args = {'peer_id': args['args']['peer_id'], 'v': 5.45, 'forward_messages': args['data']['message_id']}
+        name = args['имя'] if 'имя' in args else None
+        if name == None:
+            R_args['message'] = args['info']
+            self.Replyqueue.put(R_args)
+            return True
+        tracks = self.UserApi.audio.search(q=name)[1:]
         atts = []
-        R_args['peer_id'] = args['args']['peer_id']
         # print(R_args)
-        R_args['v'] = 5.45
         R_args['message'] = 'Песни по запросу {}'.format(name)
-        print(tracks[0])
+        #print(tracks[0])
         for track in tracks:
-            print(track)
+            #print(track)
             atts.append('audio{}_{}'.format(track['owner_id'], track['aid']))
         # print(atts)
-
         R_args['attachment'] = atts
         # print('ats',atts)
         # self.Reply(self.UserApi, R_args)
-        args['forward_messages'] = args['data']['message_id']
         self.Replyqueue.put(R_args)
 
         return True
         # print(tracks)
 
     def e621(self, args):
-        R_args = {}
-        print(args)
-        R_args['peer_id'] = args['args']['peer_id']
-        tags = args['tags'].split(';')
-        n = int(args['n'])
-        try:
-            page = int(args['page'])
-        except:
-            page = 1
-        try:
-            sort_ = args['sort'].replace(' ', '')
-        except:
-            sort_ = 'random'
+        R_args = {'peer_id': args['args']['peer_id'], 'v': 5.45, 'forward_messages': args['data']['message_id']}
+        tags = args['tags'].split(';') if 'tags' in args else None
+        if tags == None:
+            R_args['message'] = args['info']
+            self.Replyqueue.put(R_args)
+            return True
+        n = int(args['n']) if 'n' in args else 5
+        page = int(args['page']) if 'page' in args else 1
+        sort_ = args['sort'].replace(' ', '') if 'sort' in args else 'random'
         imgs = e6.get(tags=tags, n=n, page=page, sort_=sort_)
+        self.LOG('log', sys._getframe().f_code.co_name, imgs)
         print(imgs)
         atts = self.UploadPhoto(imgs)
         R_args['attachment'] = atts
-        R_args['v'] = 5.45
         R_args['message'] = 'Вот порнушка по твоему запросу, шалунишка...'
-        # self.Reply(self.UserApi, R_args)
-        R_args['forward_messages'] = args['data']['message_id']
         self.Replyqueue.put(R_args)
 
         return True
 
     def D_A(self, args):
-        R_args = {}
-        R_args['peer_id'] = args['args']['peer_id']
-        R_args['v'] = 5.45
-        try:
-            try:
-                tag = args['tag'].replace(' ', '').split(';')
-                func = 'search'
-            except:
-                tag = args['user'].replace(" ", "")
-                func = 'user'
-        except:
-            return False
-        try:
-            n = int(args['n'])
-        except:
-            n = 5
+        R_args = {'peer_id': args['args']['peer_id'], 'v': 5.45, 'forward_messages': args['data']['message_id']}
+        if ('tag' or 'user') not in args:
+            R_args['message'] = args['info']
+            self.Replyqueue.put(R_args)
+            return True
+
+        tag = args['tag'].replace(' ', '').split(';') if 'tag' in args else args['user'].replace(" ", "")
+        func = 'search' if 'tag' in args else 'user'
+        n = int(args['n']) if 'n' in args else 5
         if func == "search":
             imgs, _ = D_A.search(tag)
             R_args['message'] = 'Фото по тэгу {} с сайта Deviantart'.format(' '.join(tag))
         elif func == 'user':
             imgs, _ = D_A.user(tag)
             R_args['message'] = 'Фото от пользователя {} с сайта Deviantart'.format(tag)
+        self.LOG('log', sys._getframe().f_code.co_name, imgs)
         print(imgs)
         atts = self.UploadPhoto(imgs[:n])
         R_args['attachment'] = atts
-        # self.Reply(self.UserApi,R_args)
-        args['forward_messages'] = args['data']['message_id']
         self.Replyqueue.put(R_args)
         return True
 
@@ -546,7 +751,7 @@ class VK_Bot:
         args['peer_id'] = args['data']['peer_id']
         args['v'] = 5.45
         atts = args['data']['attachments']
-        print(atts)
+        #print(atts)
         Topost = []
         if len(atts) != 2:
             args['message'] = 'Нужно 2 фотографии'
@@ -570,6 +775,8 @@ class VK_Bot:
         Wanted(Tmp.path_, Tmp1.path_)
         att = self.UploadFromDisk(Tmp.path_)
         Topost.append(att)
+        Tmp.cachefile(Tmp.path_)
+        Tmp1.cachefile(Tmp1.path_)
         Tmp.rem()
         Tmp1.rem()
         args['attachment'] = Topost
@@ -580,7 +787,7 @@ class VK_Bot:
         args['peer_id'] = args['data']['peer_id']
         args['v'] = 5.45
         atts = args['data']['attachments']
-        print(atts)
+        #print(atts)
         Topost = []
 
         try:
@@ -590,6 +797,7 @@ class VK_Bot:
 
             img = urlopen(req).read()
             Tmp = TempFile(img, 'jpg')
+            Tmp.cachefile(Tmp.path_)
             JonTron(Tmp.path_)
             att = self.UploadFromDisk(Tmp.path_)
 
@@ -604,6 +812,7 @@ class VK_Bot:
                 return False
             _path = textPlain(text, size, font, x, y, 512, 512)
             JonTron(_path)
+
             att = self.UploadFromDisk(_path)
             os.remove(_path)
             del _path
@@ -616,7 +825,7 @@ class VK_Bot:
         args['peer_id'] = args['data']['peer_id']
         args['v'] = 5.45
         atts = args['data']['attachments']
-        print(atts)
+        #print(atts)
         Topost = []
 
         try:
@@ -626,7 +835,9 @@ class VK_Bot:
 
             img = urlopen(req).read()
             Tmp = TempFile(img, 'jpg')
+
             SayMax(Tmp.path_)
+            Tmp.cachefile(Tmp.path_)
             att = self.UploadFromDisk(Tmp.path_)
             Tmp.rem()
         except:
@@ -648,25 +859,19 @@ class VK_Bot:
         self.Replyqueue.put(args)
         return True
     def e926(self, args):
-        R_args = {}
-        print(args)
-        R_args['peer_id'] = args['args']['peer_id']
-        tags = args['tags'].split(';')
-        n = int(args['n'])
-        try:
-            page = int(args['page'])
-        except:
-            page = 1
-        try:
-            sort_ = args['sort'].replace(' ', '')
-        except:
-            sort_ = 'random'
-
+        R_args = {'peer_id': args['args']['peer_id'], 'v': 5.45, 'forward_messages': args['data']['message_id']}
+        tags = args['tags'].split(';') if 'tags' in args else None
+        if tags == None:
+            R_args['message'] = args['info']
+            self.Replyqueue.put(R_args)
+            return True
+        n = int(args['n']) if 'n' in args else 5
+        page = int(args['page']) if 'page' in args else 1
+        sort_ = args['sort'].replace(' ', '') if 'sort' in args else 'random'
         imgs = e6.getSafe(tags=tags, n=n, page=page, sort_=sort_)
+        self.LOG('log', sys._getframe().f_code.co_name, imgs)
         atts = self.UploadPhoto(imgs)
-
         R_args['attachment'] = atts
-        R_args['v'] = 5.45
         R_args['message'] = 'Вот картиночки по твоему запросу:\n'
         for img in imgs:
             R_args['message'] += '{}\n'.format(img)
@@ -690,28 +895,27 @@ class VK_Bot:
         return s
 
     def ExecCode(self, args):
-        R_args = {}
-        R_args['v'] = 5.45
-        R_args['peer_id'] = args['args']['peer_id']
+        R_args = {'peer_id': args['args']['peer_id'], 'v': 5.45, 'forward_messages': args['data']['message_id']}
         code = self.html_decode(args['data']['message'])
         code = '\n'.join(code.split('<br>')[1:]).replace('|', '  ')
         a = compile(code, '<string>', 'exec')
         l = {'api': self.UserApi, 'self': self}
         g = {}
         exec(a, g, l)
-        R_args['message'] = str(l['out'])
+        R_args['message'] = str(l['out']) if 'out' in l else 'Выполнил'
         self.Replyqueue.put(R_args)
         return True
 
     def YT(self, args):
-        try:
-            text = args['text'].split(' ')
-        except:
+        R_args = {'peer_id': args['args']['peer_id'], 'v': 5.45, 'forward_messages': args['data']['message_id']}
+        text = args['text'].split(' ') if 'text' in args else None
+        if text == None:
+            R_args['message'] = args['info']
             return False
+        R_args['message'] = "Временно не работает"
+        self.Replyqueue.put(R_args)
+        return True
         m = ""
-        R_args = {}
-        R_args['v'] = 5.45
-        R_args['peer_id'] = args['data']['peer_id']
         videos, titles = YT_.search(text)
         for i in range(len(titles)):
             m += "{}.{}\n".format(i, titles[i])
@@ -719,13 +923,11 @@ class VK_Bot:
         self.Replyqueue.put(R_args)
         ans = self.WaitForMSG(5, args)
         R_args['message'] = videos[ans]
-        R_args['forward_messages'] = args['data']['message_id']
         self.Replyqueue.put(R_args)
-
         return True
-        # YT_.search()
 
     def WaitForMSG(self, timer, args):
+        self.LOG('log', sys._getframe().f_code.co_name, 'WFM', args)
         print('WFM', args)
         try:
             user = args['data']['user_id']
@@ -748,11 +950,13 @@ class VK_Bot:
                                 break
                         else:
                             if msg['date'] == args['date']:
+                                self.LOG('log', sys._getframe().f_code.co_name, 'Дошел до старого сообщения')
                                 print('Дошел до старого сообщения')
                                 break
 
 
                         ans = int(msg['body'])
+                        self.LOG('log', sys._getframe().f_code.co_name, msg['body'])
                         print(msg['body'])
                         return ans
 
@@ -760,29 +964,25 @@ class VK_Bot:
                     continue
 
     def Likes(self, args):
-        R_args = {}
-        R_args['forward_messages'] = args['data']['message_id']
-        R_args['v'] = 5.45
-        R_args['peer_id'] = args['data']['peer_id']
-        owner_id = int(args['id'])
+        R_args = {'peer_id': args['args']['peer_id'], 'v': 5.45, 'forward_messages': args['data']['message_id']}
+        owner_id = int(args['id']) if 'id' in args else None
+        if owner_id == None:
+            R_args['message'] = args['info']
+            self.Replyqueue.put(R_args)
+            return True
         user = self.GetUserNameById(owner_id)
-        try:
-            n = int(args['n'])
-        except:
-            n = 5
-        try:
-            count = int(args['count'])
-        except:
-            count = 20
+        n = int(args['n']) if 'n' in args else 5
+        count = int(args['count']) if 'count' in args else 20
         b = 0
         Wall = self.UserApi.wall.get(owner_id=owner_id, count=count, v=5.53)
+        self.LOG('log', sys._getframe().f_code.co_name, 'Wall hooked')
         print('Wall hooked')
         sleep(1)
         for post in Wall['items']:
             L = int(
                 self.UserApi.likes.isLiked(owner_id=post['owner_id'], type='post', item_id=post['id'], v=5.53)['liked'])
             if L == 0:
-                print(b)
+                #print(b)
                 if b == n:
                     break
                 b += 1
@@ -794,22 +994,19 @@ class VK_Bot:
         return True
 
     def Glitch(self, args):
-        R_args = {}
-        R_args['v'] = 5.45
-        R_args['peer_id'] = args['data']['peer_id']
-        sigma = int(args['sigma'])
-        iter = int(args['iter'])
-        size = int(args['size'])
-        try:
-            Glitch_ = bool(args['color'])
-        except:
-            Glitch_ = False
-        try:
-            random_ = bool(args['rand'])
-        except:
-            random_ = False
-
+        R_args = {'peer_id': args['args']['peer_id'], 'v': 5.45, 'forward_messages': args['data']['message_id']}
+        sigma = int(args['sigma']) if 'sigma' in args else 5
+        iter = int(args['iter']) if 'iter' in args else 150
+        size = int(args['size']) if 'size' in args else 32
+        Glitch_ = bool(args['color']) if 'color' in args else True
+        random_ = bool(args['rand']) if 'rand' in args else True
         atts = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments']
+        atts = atts[1]['attachments'] if atts[1]['attachments'] else None
+        if atts == None:
+            R_args['message'] = args['info']
+            self.Replyqueue.put(Random)
+            return True
+
         Topost = []
         for att in atts:
             if att['type'] == 'photo':
@@ -831,6 +1028,7 @@ class VK_Bot:
                 img = urlopen(req).read()
                 Tmp = TempFile(img, 'jpg')
                 Glitch(file=Tmp.path_, sigma=sigma, blockSize=size, iterations=iter, random_=random_, Glitch_=Glitch_)
+                Tmp.cachefile(Tmp.path_)
                 att = self.UploadFromDisk(Tmp.path_)
                 Topost.append(att)
                 Tmp.rem()
@@ -857,25 +1055,13 @@ class VK_Bot:
         return True
 
     def GifFromPhoto(self, args):
-        R_args = {}
-        R_args['v'] = 5.45
-        R_args['peer_id'] = args['data']['peer_id']
-        sigma = int(args['sigma'])
-        iter = int(args['iter'])
-        size = int(args['size'])
-        try:
-            Glitch_ = bool(args['color'])
-        except:
-            Glitch_ = False
-        try:
-            random_ = bool(args['rand'])
-        except:
-            random_ = False
-        try:
-            len_ = int(args['len'])
-        except:
-            len_ = 60
-
+        R_args = {'peer_id': args['args']['peer_id'], 'v': 5.45, 'forward_messages': args['data']['message_id']}
+        sigma = int(args['sigma']) if 'sigma' in args else 5
+        iter = int(args['iter']) if 'iter' in args else 150
+        size = int(args['size']) if 'size' in args else 32
+        Glitch_ = bool(args['color']) if 'color' in args else True
+        random_ = bool(args['rand']) if 'rand' in args else True
+        len_ = int(args['len']) if 'len' in args else 60
         atts = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments']
         Topost = []
         for att in atts:
@@ -900,6 +1086,7 @@ class VK_Bot:
                 file = MakeGlitchGif(image=Tmp.path_, len_=len_, sigma=sigma, blockSize=size, iterations=iter,
                                      random_=random_, Glitch_=Glitch_)
                 doc, t = self.UploadDocFromDisk(file)
+                Tmp.cachefile(file)
                 os.remove(file)
                 Topost.append(doc)
                 Tmp.rem()
@@ -910,25 +1097,13 @@ class VK_Bot:
         return True
 
     def GifFromPhotoVSH(self, args):
-        R_args = {}
-        R_args['v'] = 5.45
-        R_args['peer_id'] = args['data']['peer_id']
-        sigma = int(args['sigma'])
-        iter = int(args['iter'])
-        size = int(args['size'])
-        try:
-            Glitch_ = bool(args['color'])
-        except:
-            Glitch_ = False
-        try:
-            random_ = bool(args['rand'])
-        except:
-            random_ = False
-        try:
-            len_ = int(args['len'])
-        except:
-            len_ = 60
-
+        R_args = {'peer_id': args['args']['peer_id'], 'v': 5.45, 'forward_messages': args['data']['message_id']}
+        sigma = int(args['sigma']) if 'sigma' in args else 5
+        iter = int(args['iter']) if 'iter' in args else 150
+        size = int(args['size']) if 'size' in args else 32
+        Glitch_ = bool(args['color']) if 'color' in args else True
+        random_ = bool(args['rand']) if 'rand' in args else True
+        len_ = int(args['len']) if 'len' in args else 60
         atts = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments']
         Topost = []
         for att in atts:
@@ -952,6 +1127,7 @@ class VK_Bot:
                 Tmp = TempFile(img, 'jpg')
                 file = MakeGlitchGifVSH(image=Tmp.path_, len_=len_, sigma=sigma, blockSize=size, iterations=iter,
                                         random_=random_, Glitch_=Glitch_)
+                Tmp.cachefile(file)
                 doc, t = self.UploadDocFromDisk(file)
                 os.remove(file)
                 Topost.append(doc)
@@ -963,9 +1139,7 @@ class VK_Bot:
         return True
 
     def LockName(self, args):
-        R_args = {}
-        R_args['v'] = 5.45
-        R_args['peer_id'] = args['data']['peer_id']
+        R_args = {'peer_id': args['args']['peer_id'], 'v': 5.45, 'forward_messages': args['data']['message_id']}
         id = str(args['data']['peer_id'])
         if id in self.Settings['namelock']:
 
@@ -983,15 +1157,14 @@ class VK_Bot:
         return True
 
     def JoinFiveNigths(self, args):
-        R_args = {}
-        R_args['v'] = 5.45
-        R_args['peer_id'] = args['data']['peer_id']
-        are_friend = self.UserApi.friends.areFriends(user_ids=[args['data']['user_id']])['friend_status']
+        R_args = {'peer_id': args['args']['peer_id'], 'v': 5.45, 'forward_messages': args['data']['message_id']}
+        are_friend = self.UserApi.friends.areFriends(user_ids=[args['data']['user_id']])[0]['friend_status']
         if int(are_friend) == 3:
             ans = self.UserApi.messages.addChatUser(chat_id=13, user_id=args['data']['user_id'])
 
             if int(ans) != 1:
                 R_args['message'] = 'Ошибка добавления'
+            return True
 
         else:
             f = int(self.UserApi.friends.add(user_id=args['data']['user_id'], text='Что б добавить в беседу'))
@@ -1008,10 +1181,7 @@ class VK_Bot:
             return True
 
     def Prism(self, args):
-        R_args = {}
-        R_args['v'] = 5.45
-        R_args['peer_id'] = args['data']['peer_id']
-
+        R_args = {'peer_id': args['args']['peer_id'], 'v': 5.45, 'forward_messages': args['data']['message_id']}
         att = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments'][0]['photo']
         try:
             photo = att['src_xxxbig']
@@ -1049,6 +1219,7 @@ class VK_Bot:
             pass
         subprocess.call('python prismsort.py {} {}'.format(Tmp.path_, cmds))
         att = self.UploadFromDisk(Tmp.path_)
+        Tmp.cachefile(Tmp.path_)
         Tmp.rem()
         R_args['attachment'] = att
         R_args['message'] = ':D'
@@ -1056,10 +1227,8 @@ class VK_Bot:
         return True
 
     def rollRows(self, args):
-        R_args = {}
-        R_args['v'] = 5.45
-        R_args['peer_id'] = args['data']['peer_id']
-        delta = int(args['delta'])
+        R_args = {'peer_id': args['args']['peer_id'], 'v': 5.45, 'forward_messages': args['data']['message_id']}
+        delta = int(args['delta']) if 'delta' in args else 20
         atts = self.UserApi.messages.getById(message_id=args['data']['message_id'])[1]['attachments']
         Topost = []
         for att in atts:
@@ -1082,6 +1251,7 @@ class VK_Bot:
                 img = urlopen(req).read()
                 Tmp = TempFile(img, 'jpg')
                 roll(Tmp.path_, delta)
+                Tmp.cachefile(Tmp.path_)
                 att = self.UploadFromDisk(Tmp.path_)
                 Topost.append(att)
                 Tmp.rem()
@@ -1118,6 +1288,7 @@ class VK_Bot:
                 rollRandom(Tmp.path_)
                 att = self.UploadFromDisk(Tmp.path_)
                 Topost.append(att)
+                Tmp.cachefile(Tmp.path_)
                 Tmp.rem()
         R_args['attachment'] = Topost
         R_args['message'] = ':D'
@@ -1150,6 +1321,7 @@ class VK_Bot:
                 img = urlopen(req).read()
                 Tmp = TempFile(img, 'jpg')
                 rollsmast(Tmp.path_)
+                Tmp.cachefile(Tmp.path_)
                 att = self.UploadFromDisk(Tmp.path_)
                 Topost.append(att)
                 Tmp.rem()
@@ -1162,7 +1334,7 @@ class VK_Bot:
         args['peer_id'] = data['peer_id']
         args['v'] = 5.45
         atts = data['attachments']
-        print(atts)
+        #print(atts)
         if len(atts) < 2:
             args['message'] = 'Нужны 2 файла'
             self.Replyqueue.put(args)
@@ -1186,6 +1358,8 @@ class VK_Bot:
         add(Tmp.path_, Tmp1.path_)
         att = self.UploadFromDisk(Tmp.path_)
         Topost.append(att)
+        Tmp.cachefile(Tmp.path_)
+        Tmp1.cachefile(Tmp1.path_)
         Tmp.rem()
         Tmp1.rem()
         args['attachment'] = Topost
@@ -1195,7 +1369,7 @@ class VK_Bot:
         args['peer_id'] = data['peer_id']
         args['v'] = 5.45
         atts = data['attachments']
-        print(atts)
+        #print(atts)
         if len(atts) < 2:
             args['message'] = 'Нужны 2 файла'
             self.Replyqueue.put(args)
@@ -1217,6 +1391,8 @@ class VK_Bot:
         Merge(Tmp.path_, Tmp1.path_)
         att = self.UploadFromDisk(Tmp.path_)
         Topost.append(att)
+        Tmp.cachefile(Tmp.path_)
+        Tmp1.cachefile(Tmp1.path_)
         Tmp.rem()
         Tmp1.rem()
         args['attachment'] = Topost
@@ -1227,7 +1403,7 @@ class VK_Bot:
         args['v'] = 5.45
         try:
             att = data['attachments'][0]
-            print(att)
+            #print(att)
             photo = self.GetBiggesPic(att, data['message_id'])
         except:
             return False
@@ -1239,6 +1415,7 @@ class VK_Bot:
         if 'кек' in toCheck:
             kek(Tmp.path_)
         att = self.UploadFromDisk(Tmp.path_)
+        Tmp.cachefile(Tmp.path_)
         Tmp.rem()
         args['attachment'] = att
         self.Replyqueue.put(args)
@@ -1268,6 +1445,7 @@ class VK_Bot:
             args['forward_messages'] = data['message_id']
             self.Replyqueue.put(args)
             ans = self.WaitForMSG(5, data)
+            self.LOG('log', sys._getframe().f_code.co_name, 'used filter {}'.format(ans - 1))
             print('used filter {}'.format(ans - 1))
             ImgF = FiltersArray[ans - 1]()
             ImgF.render(Tmp.path_)
@@ -1275,6 +1453,7 @@ class VK_Bot:
             att = self.UploadFromDisk(Tmp.path_)
 
             Topost.append(att)
+            Tmp.cachefile(Tmp.path_)
             Tmp.rem()
         args['attachment'] = Topost
         args['forward_messages'] = data['message_id']
@@ -1298,6 +1477,7 @@ class VK_Bot:
             Glitch2.glitch_an_image(Tmp.path_)
             att = self.UploadFromDisk(Tmp.path_)
             Topost.append(att)
+            Tmp.cachefile(Tmp.path_)
             Tmp.rem()
         args['attachment'] = Topost
         self.Replyqueue.put(args)
@@ -1325,6 +1505,7 @@ class VK_Bot:
             img = urlopen(req).read()
             Tmp = TempFile(img, 'gif')
             doc = self.UploadDocFromDisk(Tmp.path_)
+            Tmp.cachefile(Tmp.path_)
             Tmp.rem()
             args['attachment'] = doc
         else:
@@ -1333,7 +1514,7 @@ class VK_Bot:
         # self.Reply(self.UserApi, args)
         self.Replyqueue.put(args)
 
-    def Who(self, args, data):
+    def Whom(self, args, data):
         args['peer_id'] = data['peer_id']
         args['v'] = 5.45
         args['forward_messages'] = data['message_id']
@@ -1356,6 +1537,39 @@ class VK_Bot:
                 msg = random.choice(replies)
 
             args['message'] = msg.format(name)
+            # self.Reply(self.UserApi, args)
+            self.Replyqueue.put(args)
+            self.oldMsg = msg
+
+    def Who(self, args, data):
+        args['peer_id'] = data['peer_id']
+        args['v'] = 5.45
+        args['forward_messages'] = data['message_id']
+        text = " ".join(data['message'].split(',')[1].split(' ')[2:]) if "?" not in data['message'] else " ".join(
+            data['message'].split(',')[1].split(' ')[2:])[:-1]
+        if "мне" in text: text = text.replace('мне', 'тебе')
+        if "мной" in text: text = text.replace('мной', 'тобой')
+        if "моей" in text: text = text.replace('моей', 'твоей')
+
+        if int(data['peer_id']) <= 2000000000:
+            args['message'] = "Ты"
+            self.Replyqueue.put(args)
+        else:
+            chat = int(data['peer_id']) - 2000000000
+            users = self.UserApi.messages.getChatUsers(chat_id=chat, fields='nickname', v=5.38,
+                                                       name_case='nom')
+            user = random.choice(users)
+            if user['id'] == self.MyUId:
+                args['message'] = 'Определённо Я'
+                self.Replyqueue.put(args)
+            name = '{} {}'.format(user['first_name'], user['last_name'])
+            replies = ["Определённо {} {}", "Точно {} {}", "Я уверен что он -  {} {}"]
+            msg = random.choice(replies)
+
+            while self.oldMsg == msg:
+                msg = random.choice(replies)
+
+            args['message'] = msg.format(name, text)
             # self.Reply(self.UserApi, args)
             self.Replyqueue.put(args)
             self.oldMsg = msg
@@ -1418,7 +1632,7 @@ class VK_Bot:
         args['peer_id'] = data['peer_id']
         args['v'] = 5.45
         atts = data['attachments']
-        print(atts)
+        #print(atts)
         if len(atts) < 2:
             args['message'] = 'Нужны 2 файла'
             self.Replyqueue.put(args)
@@ -1442,6 +1656,8 @@ class VK_Bot:
         FullMerge(Tmp.path_, Tmp1.path_)
         att = self.UploadFromDisk(Tmp.path_)
         Topost.append(att)
+        Tmp.cachefile(Tmp.path_)
+        Tmp1.cachefile(Tmp1.path_)
         Tmp.rem()
         Tmp1.rem()
         args['attachment'] = Topost
@@ -1453,7 +1669,6 @@ class VK_Bot:
         atts = data['attachments']
 
         Topost = []
-        print('resend', atts)
         for att in atts:
             try:
 
@@ -1468,20 +1683,23 @@ class VK_Bot:
             Tmp = TempFile(img, 'jpg')
             att = self.UploadFromDisk(Tmp.path_)
             Topost.append(att)
+            Tmp.cachefile(Tmp.path_)
             Tmp.rem()
         args['attachment'] = Topost
         self.Replyqueue.put(args)
     def CheckForCommands(self):
         while True:
-            print('Unfinished Check tasks:', self.Checkqueue.unfinished_tasks)
+
             sleep(1)
             data = self.Checkqueue.get()
             user = self.GetUserNameById(data['user_id'])
-
+            self.Stat['messages'] = self.Stat['messages']+1
             try:
-                self.toPrint = user['first_name'] + ' ' + user['last_name'] + " : " + str(
-                    data['message']) + '\n' + 'message_id : ' + str(data['message_id']) + '  peer_id : ' + str(
-                    data['peer_id'])
+                self.toPrint = data['subject'] + " : " + user['first_name'] + ' ' + user['last_name'] + " : " + str(
+                    data['message'])
+                self.toPrint += '\n' + 'message_id : ' + str(data['message_id']) + '  peer_id : ' + str(
+                    data['peer_id']) if self.DEBUG else ""
+                self.LOG('message', "Command check Thread" if self.DEBUG else "Message", self.toPrint)
                 print(self.toPrint)
             except:
                 pass
@@ -1526,35 +1744,47 @@ class VK_Bot:
                             C = C.split(":")
                             CommandDict[C[0].replace(" ", "").lower()] = ':'.join(C[1:])
                         Command = comm[0].replace(" ", "").lower()
+                        self.LOG('command', "Command check Thread", 'Command - ', Command)
                         print('Command - ', Command)
                         CommandDict['args'] = args
                         CommandDict['data'] = data
-                        print(CommandDict)
+                        try:
+                            CommandDict['info'] = self.getinfo(Command) if self.getinfo(Command) != '' else "Нету инфы"
+                        except:
+                            continue
                         if Command in Commands:
 
                             for group in self.UserGroups.keys():
                                 if data['user_id'] in self.UserGroups[group]:
+                                    self.LOG('command', "Command check Thread", 'user check - True')
                                     print('user check - True')
                                     User_group = group
+
                                     print('User group - ', User_group)
                                     break
                                 elif data['user_id'] not in self.UserGroups[group]:
 
                                     User_group = 'user'
                                     print('User group - ', User_group)
-
+                            self.LOG('command', "Command check Thread", 'User group - ', User_group)
                             Command_Users = Commands[Command][1]
+                            self.LOG('command', "Command check Thread", 'Users groups for command -', Command, ' - ',
+                                     Command_Users)
+                            self.LOG('command', "Command check Thread", 'access check of user - ', User_group, ' - ',
+                                     User_group in Command_Users)
                             print('Users groups for command -', Command, ' - ', Command_Users)
                             print('access check of user - ', User_group, ' - ', User_group in Command_Users)
-                            access = User_group in Command_Users
-                            if access:
+                            has_access = User_group in Command_Users
+                            if has_access:
                                 if not Commands[Command][4]:
                                     args['message'] = "Выполняю, подождите"
                                     self.Replyqueue.put(args)
                                 self.UserApi.messages.setActivity(peer_id=data['peer_id'], type='typing', v=5.56)
+                                self.Stat['commands'] = self.Stat['commands']+1
+
                                 ret = self.ExecCommand(Commands[Command][0], CommandDict)
                             else:
-
+                                args['forward_messages'] = data['message_id']
                                 args['message'] = "Недостаточно прав"
                                 self.Replyqueue.put(args)
                                 self.Checkqueue.task_done()
@@ -1566,9 +1796,6 @@ class VK_Bot:
                             else:
                                 args['message'] = "Не удалось выполнить"
                                 self.Replyqueue.put(args)
-                        else:
-                            if (data['message'][1:]).isdigit():
-                                continue
 
                                 # args['message'] = "Команда не распознана"
                                 # self.Replyqueue.put(args)
@@ -1593,7 +1820,7 @@ class VK_Bot:
                         elif ',котики' in toCheck:
                             args['peer_id'] = data['peer_id']
                             args['v'] = 5.45
-                            args['message'] = 'мимими, '
+                            args['message'] = 'мимими'
                             Kotik = mimimi()
                             att = self.UploadPhoto(Kotik)
                             args['attachment'] = att
@@ -1602,6 +1829,8 @@ class VK_Bot:
                         elif ',где' in toCheck:
                             self.Where(args, data)
                         elif ',кого' in toCheck:
+                            self.Whom(args, data)
+                        elif ',кто' in toCheck:
                             self.Who(args, data)
                         elif (',вероятность' in toCheck) or (',инфа' in toCheck):
                             self.prob(args, data)
@@ -1632,7 +1861,7 @@ class VK_Bot:
                         elif (self.MyName['first_name'] in data['message']) or ('ред' in data['message'].lower()):
                             try:
                                 msg = ' '.join(data['message'].split(' ' if ',' in data['message'] else ' ')[1:])
-                                print('bot', msg)
+                                #print('bot', msg)
                                 answ = self.kernel.respond(msg, sessionID=data['user_id'])
                                 if answ == "IT'S HIGH NOON":
                                     att = self.UploadFromDisk(choice(['Noon1.jpg', 'Noon2.jpg']))
@@ -1671,10 +1900,13 @@ class VK_Bot:
 
                     args['peer_id'] = data['peer_id']
                     args['v'] = 5.45
+                    self.LOG('error', "Command check Thread", Ex.__traceback__)
+                    self.LOG('error', "Command check Thread", Ex.__cause__)
                     print(Ex.__traceback__)
                     print(Ex.__cause__)
                     sleep(1)
                     if 'many requests per second' in str(Ex):
+                        self.LOG('error', "Command check Thread", 'Too many requests per second')
                         print('Too many requests per second')
                         # self.Checkqueue.put(data,timeout=5)
                         continue
@@ -1685,7 +1917,7 @@ class VK_Bot:
                                                                                                "Перешлите это сообение владельцу бота")
                     # self.Reply(self.UserApi, args)
                     self.Replyqueue.put(args)
-
+            self.SaveConfig()
             self.Checkqueue.task_done()
 
     @staticmethod
@@ -1710,17 +1942,17 @@ class VK_Bot:
 
         return datetime.date(year, month, day)
 
-    def getMus(self):
-        music = self.UserApi.audio.get(count=6000)
-        print(music)
 
     def GetBiggesPic(self, att, mid):
         try:
             data = self.UserApi.photos.getById(photos=att, v=5.57)[0]
         except:
+
             print('using MID')
+            self.LOG('log', sys._getframe().f_code.co_name, 'using MID')
             data = self.UserApi.messages.getById(message_ids=mid, v=5.57)['items'][0]['attachments']
             print('mid data', data)
+            #self.LOG('log',sys._getframe().f_code.co_name, 'mid data', data)
             for i in data:
 
                 if i['type'] == 'photo' and (int(i['photo']['id']) == int(att.split('_')[1])):
@@ -1761,8 +1993,6 @@ class VK_Bot:
             return uid
 
     def ContiniousMessageCheck(self, server=''):
-        print('done')
-
         while True:
             if (server == ''):
                 results = self.UserApi.messages.getLongPollServer()
@@ -1770,7 +2000,6 @@ class VK_Bot:
                 server = results['server']
                 ts = results['ts']
             results = self.LongPool(key, server, ts)
-
             try:
                 ts = results['ts']
             except (KeyError, TypeError):
@@ -1787,139 +2016,160 @@ class VK_Bot:
                 ts = ''
                 sleep(0.001)
                 continue
+            self.Longpool.put(results)
+
+    def parseLongPool(self):
+        while True:
+            results = self.Longpool.get()
+            try:
+                updates = results['updates']
+            except (KeyError, TypeError):
+                key = ''
+                server = ''
+                ts = ''
+                sleep(0.001)
+                continue
+            try:
+                updates = results['updates']
+            except (KeyError, TypeError):
+                key = ''
+                server = ''
+                ts = ''
+                sleep(0.001)
+                continue
             if updates:
+                for update in updates:
+                    s = update
 
-                try:
-                    s = updates[0]
-
-                except KeyError:
-                    continue
-                try:
-                    code = s[0]
-                except KeyError:
-                    continue
-                if code == 4:
                     try:
-                        args = {}
-
-                        message_id = s[1]
-                        flags = s[2]
-                        from_id = s[3]
-                        timestamp = s[4]
-                        subject = s[5]
-                        text = s[6]
-                        atts = s[7]
-                        print(atts)
-                        attatchments = []
+                        code = s[0]
+                    except KeyError:
+                        continue
+                    if code == 4:
                         try:
-                            rand_id = int(atts[-1])
-                        except:
-                            rand_id = None
-                        attsFindAll = re.findall(r'attach\d+_type', str(atts))
-                        for att in attsFindAll:
+                            args = {}
 
-                            if atts[att] == 'photo':
-                                attatchments.append(atts[att.split('_')[0]])
-                        args['attachments'] = attatchments
+                            message_id = s[1]
+                            flags = s[2]
+                            from_id = s[3]
+                            timestamp = s[4]
+                            subject = s[5]
+                            text = s[6]
+                            atts = s[7]
+                            attatchments = []
+                            try:
+                                rand_id = int(atts[-1])
+                            except:
+                                rand_id = None
+                            attsFindAll = re.findall(r'attach\d+_type', str(atts))
+                            for att in attsFindAll:
 
-                        args['peer_id'] = from_id
-                        args["message"] = text
-                        args['message_id'] = message_id
-                        args['date'] = timestamp
-                        args['user_id'] = self.GetUserFromMessage(message_id)
-                        args['atts'] = atts
-                        print('atts', atts)
-                        args['subject'] = subject
-                        args['v'] = 5.45
-                        if text == '!':
+                                if atts[att] == 'photo':
+                                    attatchments.append(atts[att.split('_')[0]])
+                            args['attachments'] = attatchments
+
+                            args['peer_id'] = from_id
+                            args["message"] = text
+                            args['message_id'] = message_id
+                            args['date'] = timestamp
+                            args['user_id'] = self.GetUserFromMessage(message_id)
+                            args['atts'] = atts
+                            args['subject'] = subject
+                            args['v'] = 5.45
+                            if text == '!':
+                                continue
+                            if args['user_id'] != self.MyUId and rand_id == None:
+                                self.Checkqueue.put(args, timeout=60)
+                                # self.CheckForCommands(args)
+                                # self.Reply(self.UserApi,args)
+                                # return from_id,text,subject
+                        except KeyError:
                             continue
-                        if args['user_id'] != self.MyUId and rand_id == None:
-                            self.Checkqueue.put(args, timeout=60)
-                            # self.CheckForCommands(args)
-                            # self.Reply(self.UserApi,args)
-                            # return from_id,text,subject
-                    except KeyError:
-                        continue
-                elif code == 8:
-                    continue
-                    try:
-                        user = self.GetUserNameById(s[1] * -1)
+                    elif code == 8:
                         try:
-                            if user['sex'] == 2:
-                                sex = 'Вошел'
-                            elif user['sex'] == 1:
-                                sex = 'Вошла'
-                        except:
-                            sex = 'Вошло'
-                        print(user['first_name'], user['last_name'], ' {} в сеть'.format(sex))
-                    except KeyError:
-                        continue
-                elif code == 9:
-                    continue
-                    try:
+                            user = self.GetUserNameById(s[1] * -1)
+                            try:
+                                if user['sex'] == 2:
+                                    sex = 'Вошел'
+                                elif user['sex'] == 1:
+                                    sex = 'Вошла'
+                            except:
+                                sex = 'Вошло'
+                            toprint = " ".join([user['first_name'], user['last_name'], ' {} в сеть'.format(sex)])
+                            self.LOG('event', "VK out", toprint)
+                            print(toprint)
+                        except KeyError:
+                            continue
+                    elif code == 9:
 
-                        user = self.GetUserNameById(s[1] * -1)
                         try:
-                            if user['sex'] == 2:
-                                sex = 'Вышел'
-                            elif user['sex'] == 1:
-                                sex = 'Вышла'
+
+                            user = self.GetUserNameById(s[1] * -1)
+                            try:
+                                if user['sex'] == 2:
+                                    sex = 'Вышел'
+                                elif user['sex'] == 1:
+                                    sex = 'Вышла'
+                                else:
+                                    sex = "Вышло"
 
 
-                        except:
-                            sex = 'Вышло'
+                            except:
+                                sex = 'Вышло'
+                            try:
+                                toprint = " ".join([user['first_name'], user['last_name'], ' {} из сети'.format(sex)])
+                                self.LOG('event', "VK out", toprint)
+                                print(toprint)
+                            except:
+                                print('Что-то пошло не так при выходе из сети')
+                        except KeyError:
+                            continue
+                    elif code == 61:
+
                         try:
-                            print(user['first_name'], user['last_name'], ' {} из сети'.format(sex))
+                            user = self.GetUserNameById(s[1])
+                            toprint = " ".join([user['first_name'], user['last_name'], 'Набирает сообщение'])
+                            self.LOG('event', "VK out", toprint)
+                            print(toprint)
                         except:
-                            print('Что-то пошло не так при выходе из сети')
-                    except KeyError:
-                        continue
-                elif code == 61:
-                    continue
-                    try:
+                            continue
+                    elif code == 62:
                         user = self.GetUserNameById(s[1])
-                        print(user['first_name'], user['last_name'], 'Набирает сообщение')
-                    except:
-                        continue
-                elif code == 62:
-                    continue
-                    user = self.GetUserNameById(s[1])
 
-                    arg = {}
-                    arg['chat_id'] = s[2]
+                        arg = {}
+                        arg['chat_id'] = s[2]
 
-                    try:
-                        chat = self.UserApi.messages.getChat(**arg)
-                    except:
-                        chat = {}
-                        chat['title'] = 'Хз чё, но тута ошибка'
+                        try:
+                            chat = self.UserApi.messages.getChat(**arg)
+                        except:
+                            chat = {}
+                            chat['title'] = 'Хз чё, но тута ошибка'
 
-                    try:
-                        print(user['first_name'], user['last_name'], 'Набирает сообщение в беседе', chat['title'])
-                    except:
-                        continue
-                elif code == 51:
-
-                    Targs = {}
-                    id = str(s[1] + 2000000000)
-                    if self.Settings['namelock'][id][1]:
-                        chat = self.UserApi.messages.getChat(chat_id=s[1], v=5.57)['title']
-                        if chat == self.Settings['namelock'][id][0]:
+                        try:
+                            toprint = " ".join(
+                                [user['first_name'], user['last_name'], 'Набирает сообщение в беседе', chat['title']])
+                            self.LOG('event', "VK out", toprint)
+                            print(toprint)
+                        except:
                             continue
-                        self.UserApi.messages.editChat(chat_id=s[1], title=self.Settings['namelock'][id][0], v=5.57)
-                        Targs['peer_id'] = id
-                        Targs['v'] = 5.45
-                        Targs['message'] = 'Название беседы менять запрещено'
-                        self.Replyqueue.put(Targs)
+                    elif code == 51:
+                        try:
+                            Targs = {}
+                            id = str(s[1] + 2000000000)
+                            if self.Settings['namelock'][id][1]:
+                                chat = self.UserApi.messages.getChat(chat_id=s[1], v=5.57)['title']
+                                if chat == self.Settings['namelock'][id][0]:
+                                    continue
+                                self.UserApi.messages.editChat(chat_id=s[1], title=self.Settings['namelock'][id][0],
+                                                               v=5.57)
+                                Targs['peer_id'] = id
+                                Targs['v'] = 5.45
+                                Targs['message'] = 'Название беседы менять запрещено'
+                                self.Replyqueue.put(Targs)
+                        except:
+                            pass
 
-    def status(self):
-        self.UserApi.status.set(text=self.OldStat)
 
+bot = VK_Bot(debug=True)
 
-A = VK_Bot()
-# print(A.CheckWall("5nights"))
-# A.ClearPosts()
-atexit.register(A.status)
-A.ContiniousMessageCheck()
-# print(A.getMus())
-# print(A.GetChats())
+bot.ContiniousMessageCheck()
