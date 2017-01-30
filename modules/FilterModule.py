@@ -10,7 +10,7 @@ xrange = range
 
 
 class Filter_PencilSketch:
-    name = "PencilSketch"
+    name = "Карандашный набросок"
     """Pencil sketch effect
 
         A class that applies a pencil sketch effect to an image.
@@ -55,7 +55,7 @@ class Filter_PencilSketch:
 
 
 class Filter_WarmingFilter:
-    name = "WarmingFilter"
+    name = "Тёплый фильтр"
     """Warming filter
 
         A class that applies a warming filter to an image.
@@ -99,7 +99,8 @@ class Filter_WarmingFilter:
 
 
 class Filter_CoolingFilter:
-    name = "CoolingFilter"
+    name = "Холодный фильтр"
+    # охлаждает ваше трахатье
     """Cooling filter
 
         A class that applies a cooling filter to an image.
@@ -143,7 +144,7 @@ class Filter_CoolingFilter:
 
 
 class Filter_Cartoonizer:
-    name = "Cartoonizer"
+    name = "Мультфильм фильтр"
     """Cartoonizer effect
 
         A class that applies a cartoon effect to an image.
@@ -196,7 +197,7 @@ class Filter_Cartoonizer:
 
 
 class Filter_Equal:
-    name = "Equal"
+    name = "Уравнивающий фильтр"
 
     def __init__(self):
         pass
@@ -208,7 +209,7 @@ class Filter_Equal:
 
 
 class Filter_AutoContrast:
-    name = "AutoContrast"
+    name = "Автоконтраст"
 
     def __init__(self):
         pass
@@ -220,7 +221,7 @@ class Filter_AutoContrast:
 
 
 class Filter_Tlen:
-    name = "Tlen"
+    name = "Тлен"
 
     def __init__(self):
         pass
@@ -233,7 +234,7 @@ class Filter_Tlen:
 
 
 class Filter_Neural:
-    name = "Neural"
+    name = "Нейронный фильтр"
 
     def __init__(self):
         pass

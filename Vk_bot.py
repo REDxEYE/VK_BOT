@@ -1,15 +1,12 @@
 import calendar
 import datetime
-import inspect
 import json
 import queue
 import re
 import subprocess
-import sys
 import threading
 import tkinter as tk
 import traceback
-from datetime import timedelta
 from math import *
 from time import sleep
 from tkinter import ttk
@@ -18,7 +15,7 @@ from urllib.request import urlopen
 import aiml
 import giphypop
 import requests
-from PIL import ImageTk, Image
+from PIL import ImageTk
 from vk import *
 
 import DA_Api as D_A
@@ -432,34 +429,8 @@ class VK_Bot:
     def Post(self, args):
         return self.UserApi.wall.post(**args)
 
-    def BanUser(self, args):
-        SArgs = {}
-        uid = int(args["id"])
-        if "причина" in args:
-            reason = int(args["причина"])
-            SArgs['reason'] = reason
-        if "группа" in args:
-            SArgs['group_id'] = args["группа"]
-        else:
-            SArgs['group_id'] = self.Group.replace("-", "")
-        SArgs['user_id'] = uid
-        if args["комментарий"]:
-            comment = args["комментарий"]
-            SArgs['comment'] = comment
-            SArgs['comment_visible'] = 1
 
-        if "время" in args:
-            end_date = datetime.timestamp(datetime.now() + timedelta(hours=int(args["время"])))
-            SArgs["end_date"] = end_date
-        ret = self.Ban(SArgs)
 
-        if ret == 1:
-            return True
-        else:
-            return False
-
-    def Ban(self, args):
-        return self.UserApi.groups.banUser(**args)
 
     def generateConfig(self, path):
         token = input('User access token')
@@ -1033,21 +1004,21 @@ class VK_Bot:
                 Topost.append(att)
                 Tmp.rem()
 
-            for att in atts:
-                if att['type'] == 'doc':
-                    try:
-                        gif = att['doc']['url']
-                    except:
-                        return False
-                    req = urllib.request.Request(gif, headers=self.hdr)
-                    img = urlopen(req).read()
-                    Tmp = TempFile(img, 'gif')
-                    file = GlitchGif(Tmp.path_, sigma=sigma, blockSize=size, iterations=iter, random_=random_,
-                                     Glitch_=Glitch_)
-                    doc, t = self.UploadDocFromDisk(file)
-                    Tmp.rem()
-                    os.remove(file)
-                    Topost.append(doc)
+        for att in atts:
+            if att['type'] == 'doc':
+                try:
+                    gif = att['doc']['url']
+                except:
+                    return False
+                req = urllib.request.Request(gif, headers=self.hdr)
+                img = urlopen(req).read()
+                Tmp = TempFile(img, 'gif')
+                file = GlitchGif(Tmp.path_, sigma=sigma, blockSize=size, iterations=iter, random_=random_,
+                                 Glitch_=Glitch_)
+                doc, t = self.UploadDocFromDisk(file)
+                Tmp.rem()
+                os.remove(file)
+                Topost.append(doc)
         R_args['message'] = ':D'
         R_args['attachment'] = Topost
 

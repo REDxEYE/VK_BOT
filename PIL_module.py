@@ -4,7 +4,7 @@ import random
 import cv2
 import imageio
 import numpy as np
-from PIL import Image, ImageSequence, ImageChops, ImageFont, ImageDraw
+from PIL import Image, ImageSequence, ImageChops, ImageFont, ImageDraw, ImageEnhance
 
 from tempfile_ import TempFile
 
@@ -380,6 +380,7 @@ def textPlain(text, size, font='times.ttf', x=100, y=200, xsize=1280, ysize=720)
     im.save(_path)
     return _path
 
+
 def JonTron(im1):
     JonTron = Image.open('JonTron.png')
     toplace = cv2.flip(cv2.imread(im1), 1)
@@ -402,3 +403,14 @@ def SayMax(im1):
     final = Image.fromarray(cv2.cvtColor(drawing, cv2.COLOR_BGR2RGB))
     final.paste(JonTron, (0, 0), JonTron)
     final.save(im1)
+
+
+def resize_(x, imf, sharp=False):
+    im = Image.open(imf)
+    ox, oy = im.size
+    y = round((x / ox) * oy)
+    im = im.resize((x, y), Image.LANCZOS)
+    if sharp:
+        enhancer = ImageEnhance.Sharpness(im)
+        im = enhancer.enhance(2)
+    im.save(imf)

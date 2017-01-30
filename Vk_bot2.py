@@ -1,25 +1,24 @@
 import importlib
-import inspect
+import io
 import json
-import os.path
 import queue
 import re
-import sys
 import threading
 import tkinter as tk
 import traceback
 import urllib
 from copy import copy
 from math import *
+from random import choice
 from time import sleep
 from tkinter import ttk
 from urllib.request import urlopen
 
-import aiml
 import requests
 from PIL import Image, ImageTk
 from vk import *
 
+from AIML_module import Responder
 from tempfile_ import *
 
 HDR = {
@@ -83,38 +82,34 @@ class SessionCapchaFix(Session):
 
 
 class Bot:
-    def __init__(self, threads=4, LP_Threads=4, ):
+    def __init__(self, threads=4, LP_Threads=4, DEBUG=False):
+        self.DEBUG = DEBUG
+        self.AdminModeOnly = False
         self.defargs = {"v": "5.60"}
         self.LoadConfig()
         self.SaveConfig()
-        self.kernel = aiml.Kernel()
-        # if os.path.isfile("bot_brain.brn"):
-        #    pass
-        #    self.kernel.bootstrap(brainFile="bot_brain.brn")
-        # else:
-        #    pass
-        #    self.kernel.bootstrap(learnFiles="startup.xml")
-        #    self.kernel.bootstrap(learnFiles="1.xml")
-        #    self.kernel.saveBrain("bot_brain.brn")
-        self.kernel.bootstrap(learnFiles="startup.xml")
-        self.kernel.bootstrap(learnFiles="1.xml")
-        self.kernel.setTextEncoding('utf-8')
+        self.Responder = Responder()
         self.Longpool = queue.Queue()
         self.Checkqueue = queue.Queue()
         self.Replyqueue = queue.Queue()
         self.UserAccess_token = self.Settings['UserAccess_token']
+        self.GroupAccess_token = self.Settings['GroupAccess_token']
         self.UserSession = SessionCapchaFix(access_token=self.UserAccess_token)
+        self.DefSession = SessionCapchaFix()
+        self.GroupSession = SessionCapchaFix(access_token=self.GroupAccess_token)
         self.UserApi = API(self.UserSession)
-
+        self.DefApi = API(self.DefSession)
+        self.GroupApi = API(self.GroupSession)
+        self.log = io.open("Message_Log.Log", mode="ta", newline="\n", encoding="utf-8")
         for _ in range(LP_Threads):
             self.LP = threading.Thread(target=self.parseLongPool)
             self.LP.setDaemon(True)
             self.LP.start()
-
-        for _ in range(threads):
-            self.t = threading.Thread(target=self.ExecCommands)
-            self.t.setDaemon(True)
-            self.t.start()
+        self.EX_threadList = []
+        for i in range(threads):
+            self.EX_threadList.append(threading.Thread(target=self.ExecCommands))
+            self.EX_threadList[i].setDaemon(True)
+            self.EX_threadList[i].start()
 
         self.ReplyThread = threading.Thread(target=self.Reply)
         self.ReplyThread.setDaemon(True)
@@ -134,71 +129,63 @@ class Bot:
                     if class_.startswith("Command"):
                         funk = getattr(module, class_)
                         self.Botmodules['commands'][funk.name] = getattr(module, class_)
-                        #    def GetAliases(self):
-                        #        path = getpath()
-                        #        if not os.path.exists(path + '/aliases.json'):
-                        #            return {}
-                        #        else:
-                        #            with open(path + '/aliases.json', 'r',encoding="utf-8") as alieses:
-                        #                aliases = json.load(alieses)
-                        #                return aliases
-                        #    def SaveAlieses(self,data):
-                        #        path = getpath()
-                        #        with open(path + '/aliases.json', 'w') as alieses:
-                        #            alieses.write(json.dumps(data,ensure_ascii=False))
-
+        self.FILTERS = self.Botmodules['filters']
     def GetUserFromMessage(self, message_id):
         sleep(0.25)
 
         try:
-            uid = self.UserApi.messages.getById(message_id=message_id)[1]['uid']
+            uid = self.UserApi.messages.getById(message_ids=message_id, v="5.60")['items'][0]['user_id']
             return uid
         except:
             sleep(1)
-            uid = self.UserApi.messages.getById(message_id=message_id)[1]['uid']
+            uid = self.UserApi.messages.getById(message_ids=message_id, v="5.60")['items'][0]['user_id']
             return uid
 
+    @staticmethod
+    def html_decode(s):
+        htmlCodes = (
+            ("'", '&#39;'),
+            ('"', '&quot;'),
+            ('>', '&gt;'),
+            ('<', '&lt;'),
+            ('&', '&amp;')
+        )
+        for code in htmlCodes:
+            s = s.replace(code[1], code[0])
+        return s
     def GetUserNameById(self, Id):
         sleep(0.1)
         try:
-            User = self.UserApi.users.get(user_ids=Id, fields=['sex'])[0]
+            User = self.DefApi.users.get(user_ids=Id, v="5.60", fields=['sex'])[0]
         except:
             return None
         return User
 
-    def WaitForMSG(self, timer, args):
+    def WaitForMSG(self, tries, args):
         print('WFM', args)
-        try:
-            user = args['data']['user_id']
-            peer_id = args['data']['peer_id']
-            old = True
-        except:
-            user = args['user_id']
-            peer_id = args['peer_id']
-            old = False
-        for _ in range(timer):
+
+        user = args['user_id']
+        peer_id = args['peer_id']
+        for _ in range(tries):
             sleep(3)
             hist = self.UserApi.messages.getHistory(**{"peer_id": peer_id, "user_id": user, "count": 50, 'v': 5.38})
 
             for msg in hist['items']:
+
                 try:
 
-                    if (int(msg['from_id']) == int(user)) and (re.match(r'\d+$', msg['body'])):
-                        if old:
-                            if msg['date'] == args['data']['date']:
-                                break
-                        else:
-                            if msg['date'] == args['date']:
-                                print('Дошел до старого сообщения')
-                                break
+                    if (int(msg['from_id']) == int(user)) and (
+                        (re.match(r'\d+$', msg['body'])) or re.match(r'((Д|д)а)|((Н|н)ет)', msg['body'])):
+                        if int(msg['date']) < int(args['date']):
+                            print('Дошел до старого сообщения')
+                            break
 
-                        ans = int(msg['body'])
-                        print(msg['body'])
+                        ans = msg['body']
                         return ans
 
                 except:
                     continue
-
+        return None
     def Reply(self):
         while True:
             args = self.Replyqueue.get()
@@ -301,8 +288,13 @@ class Bot:
             try:
                 params = {'server': req.json()['server'], 'photo': req.json()['photo'], 'hash': req.json()['hash']}
                 photo = self.UserApi.photos.saveMessagesPhoto(**params)[0]
-            except:
-                pass
+            except Exception as ex:
+                print(ex.__traceback__)
+                print(ex.__cause__)
+
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                TB = traceback.format_tb(exc_traceback)
+                print(exc_type, exc_value, ''.join(TB))
 
         return photo['id']
 
@@ -339,35 +331,78 @@ class Bot:
     def ExecCommands(self):
         while True:
             data = self.Checkqueue.get()
+            sleep(0.3)
+            self.Stat['messages'] = self.Stat['messages'] + 1
+            if self.AdminModeOnly:
+                if "admin" != self.GetUserGroup(data['user_id']):
+                    continue
             defargs = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
-            print(data)
+            p = '[\U0001F600-\U0001F64F]|[\U0001F300-\U0001F5FF]|[\U0001F680-\U0001F6FF]|[\U0001F1E0-\U0001F1FF]'
+            emoji_pattern = re.compile(p, re.VERBOSE)
+            data['message'] = emoji_pattern.sub('', data['message'])
+            try:
+                user = self.GetUserNameById(data['user_id'])
+                toPrint = data['subject'] if "..." not in data['subject'] else "Личка" + " : " + user[
+                    'first_name'] + ' ' + user['last_name'] + " : " + str(
+                    data['message'])
+                toPrint += '\n' + '[ message_id : ' + str(data['message_id']) + '  peer_id : ' + str(
+                    data['peer_id']) + " ]" if self.DEBUG else ""
+                print(toPrint)
+                self.log.write(toPrint)
+                self.log.flush()
+                os.fsync(self.log.fileno())
+                # print(data)
+            except Exception as ex:
+                print(ex.__traceback__)
+                print(ex.__cause__)
+
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                TB = traceback.format_tb(exc_traceback)
+                print(exc_type, exc_value, ''.join(TB))
+                pass
+            comm = data["message"]
+            comm = comm.split("<br>")
+            args = {}
+            temp = {}
+            for C in comm[1:]:
+                C = C.split(":")
+                temp[C[0].replace(" ", "").lower()] = ':'.join(C[1:])
+            args.update(data)
+            args["custom"] = temp
+
+            pattern = "{}, ?|{}, ?|{}, ?|{}, ?".format(self.MyName['first_name'].lower(), self.MyName['first_name'],
+                                                       'ред', "Ред")
+            Command = re.split(pattern, comm[0])[-1]
+            text = copy(Command)
             if (data['message'].lower().startswith(self.MyName['first_name'].lower())) or (
                     data['message'].lower().startswith('ред')):
-                comm = data["message"]
-                comm = comm.split("<br>")
-                args = {}
-                temp = {}
-                for C in comm[1:]:
-                    C = C.split(":")
-                    temp[C[0].replace(" ", "").lower()] = ':'.join(C[1:])
-                args["custom"] = temp
-                args.update(data)
-                pattern = "{}, ?|{}, ?|{}, ?|{}, ?".format(self.MyName['first_name'].lower(), self.MyName['first_name'],
-                                                           'ред', "Ред")
-                Command = re.split(pattern, comm[0])[-1]
-                text = copy(Command)
+                if 'fwd' in data['atts']:
+                    message = data['atts']['fwd'].split(',')[0].split('_')[1]
+                    try:
+                        atts = self.UserApi.messages.getById(v="5.60", message_ids=data['message_id'])['items'][0][
+                            'fwd_messages'][0]['attachments']
+                    except:
+                        pass
+                    for att in atts:
+                        try:
+                            data['attachments'].append("{}_{}".format(att['photo']['owner_id'], att['photo']['id']))
+                        except:
+                            data['attachments'].extend(atts)
+
+
+
+
                 args["text"] = text
 
                 Command = Command.split(' ')[0]
-                print(Command in self.Botmodules['commands'])
                 if Command in self.Botmodules['commands']:
                     funk = self.Botmodules['commands'][Command]
                     user = data["user_id"]
-                    print(self.GetUserGroup(data["user_id"]) in funk.access)
                     if ("all" in funk.access) or (self.GetUserGroup(user) in funk.access):
                         try:
                             print("Trying to execute commnad {},\n arguments:{}".format(Command, args))
                             funk.execute(self, args)
+                            self.Stat['commands'] = self.Stat['commands'] +1
                         except Exception as Ex:
 
                             print(Ex.__traceback__)
@@ -377,21 +412,33 @@ class Bot:
                                 print('Too many requests per second')
                                 # self.Checkqueue.put(data,timeout=5)
                                 continue
+
                             exc_type, exc_value, exc_traceback = sys.exc_info()
                             TB = traceback.format_tb(exc_traceback)
-                            print("Не удалось выполнить, ошибка:{}\n {}\n {} \n {}".format(exc_type, exc_value,
-                                                                                           ''.join(TB),
-                                                                                           "Перешлите это сообение владельцу бота"))
+
                             defargs['message'] = "Не удалось выполнить, ошибка:{}\n {}\n {} \n {}".format(exc_type,
                                                                                                           exc_value,
                                                                                                           ''.join(TB),
-                                                                                                          "Перешлите это сообение владельцу бота")
+                                                                                                          "Перешлите это сообщение владельцу бота")
+                            print(defargs['message'])
                             # self.Reply(self.UserApi, args)
                             self.Replyqueue.put(defargs)
+
                     else:
                         print('"Недостаточно прав"')
                         defargs["message"] = "Недостаточно прав"
                         self.Replyqueue.put(defargs)
+
+                else:
+                    ans = self.Responder.respond(str(data['message']), args['user_id'])
+                    print(ans)
+                    if ans == "":
+                        continue
+                    if ans == "IT'S HIGH NOON":
+                        att = self.UploadFromDisk(choice(['Noon1.jpg', 'Noon2.jpg']))
+                        defargs['attachment'] = att
+                    defargs['message'] = ans
+                    self.Replyqueue.put(defargs)
 
     def GetUserGroup(self, id):
         for group in self.UserGroups.keys():
@@ -425,17 +472,27 @@ class Bot:
                 continue
             self.Longpool.put(results)
 
-    def GetBiggesPic(self, att, mid):
+    def GetBiggesPic(self, att, mid=0):
         try:
-            data = self.UserApi.photos.getById(photos=att, v=5.57)[0]
+            data = self.UserApi.photos.getById(photos=att, v=5.60)[0]
+            print('using GBI')
         except:
 
             print('using MID')
-            data = self.UserApi.messages.getById(message_ids=mid, v=5.57)['items'][0]['attachments']
+            data = self.UserApi.messages.getById(message_ids=mid, v=5.60)
             print('mid data', data)
+            data = data['items']
+            print('mid items', data)
+            data = data[0]
+            print('mid 0', data)
+            if 'attachments' not in data:
+                data = data['fwd_messages'][0]['attachments']
+            else:
+                data = data['attachments']
+            print('mid atts', data)
             # self.LOG('log',sys._getframe().f_code.co_name, 'mid data', data)
             for i in data:
-
+                print("[MID]", i)
                 if i['type'] == 'photo' and (int(i['photo']['id']) == int(att.split('_')[1])):
                     key = i['photo']['access_key']
                     data = self.UserApi.photos.getById(photos=att, v=5.57, access_key=key)[0]
@@ -515,65 +572,57 @@ class Bot:
                                 # return from_id,text,subject
                         except KeyError:
                             continue
-                    elif code == 8:
-                        try:
-                            user = self.GetUserNameById(s[1] * -1)
-                            try:
-                                if user['sex'] == 2:
-                                    sex = 'Вошел'
-                                elif user['sex'] == 1:
-                                    sex = 'Вошла'
-                            except:
-                                sex = 'Вошло'
-                            toprint = " ".join([user['first_name'], user['last_name'], ' {} в сеть'.format(sex)])
-                        except KeyError:
-                            continue
-                    elif code == 9:
-
-                        try:
-
-                            user = self.GetUserNameById(s[1] * -1)
-                            try:
-                                if user['sex'] == 2:
-                                    sex = 'Вышел'
-                                elif user['sex'] == 1:
-                                    sex = 'Вышла'
-                                else:
-                                    sex = "Вышло"
-
-
-                            except:
-                                sex = 'Вышло'
-                            try:
-                                toprint = " ".join([user['first_name'], user['last_name'], ' {} из сети'.format(sex)])
-                            except:
-                                pass
-                        except KeyError:
-                            continue
-                    elif code == 61:
-
-                        try:
-                            user = self.GetUserNameById(s[1])
-                            toprint = " ".join([user['first_name'], user['last_name'], 'Набирает сообщение'])
-                        except:
-                            continue
-                    elif code == 62:
-                        user = self.GetUserNameById(s[1])
-
-                        arg = {}
-                        arg['chat_id'] = s[2]
-
-                        try:
-                            chat = self.UserApi.messages.getChat(**arg)
-                        except:
-                            chat = {}
-                            chat['title'] = 'Хз чё, но тута ошибка'
-
-                        try:
-                            toprint = " ".join(
-                                [user['first_name'], user['last_name'], 'Набирает сообщение в беседе', chat['title']])
-                        except:
-                            continue
+                    # elif code == 8:
+                    #    try:
+                    #        user = self.GetUserNameById(s[1] * -1)
+                    #        try:
+                    #            if user['sex'] == 2:
+                    #                sex = 'Вошел'
+                    #            elif user['sex'] == 1:
+                    #                sex = 'Вошла'
+                    #        except:
+                    #            sex = 'Вошло'
+                    #        toprint = " ".join([user['first_name'], user['last_name'], ' {} в сеть'.format(sex)])
+                    #    except KeyError:
+                    #        continue
+                    # elif code == 9:
+                    #    try:
+                    #        user = self.GetUserNameById(s[1] * -1)
+                    #        try:
+                    #            if user['sex'] == 2:
+                    #                sex = 'Вышел'
+                    #            elif user['sex'] == 1:
+                    #                sex = 'Вышла'
+                    #            else:
+                    #                sex = "Вышло"
+                    #        except:
+                    #            sex = 'Вышло'
+                    #        try:
+                    #            toprint = " ".join([user['first_name'], user['last_name'], ' {} из сети'.format(sex)])
+                    #        except:
+                    #            pass
+                    #    except KeyError:
+                    #        continue
+                    # elif code == 61:
+                    #    try:
+                    #        user = self.GetUserNameById(s[1])
+                    #        toprint = " ".join([user['first_name'], user['last_name'], 'Набирает сообщение'])
+                    #    except:
+                    #        continue
+                    # elif code == 62:
+                    #    user = self.GetUserNameById(s[1])
+                    #    arg = {}
+                    #    arg['chat_id'] = s[2]
+                    #    try:
+                    #        chat = self.UserApi.messages.getChat(**arg)
+                    #    except:
+                    #        chat = {}
+                    #        chat['title'] = 'Хз чё, но тута ошибка'
+                    #    try:
+                    #        toprint = " ".join(
+                    #            [user['first_name'], user['last_name'], 'Набирает сообщение в беседе', chat['title']])
+                    #    except:
+                    #        continue
                     elif code == 51:
                         try:
                             Targs = {}
@@ -592,6 +641,8 @@ class Bot:
                             pass
 
 
-bot = Bot()
+if len(sys.argv) > 1:
+    print(sys.argv[1])
+bot = Bot(DEBUG=True)
 print(bot.Botmodules)
-bot.ContiniousMessageCheck()
+ret = bot.ContiniousMessageCheck()
