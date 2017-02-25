@@ -1,14 +1,20 @@
+import importlib
 import os
 import random
-import sys
+import threading
+import types
 import urllib
 from datetime import datetime, timedelta
+from html.parser import HTMLParser
 from math import log
 from time import sleep
 from urllib.request import urlopen
 
+import feedparser
 import pymorphy2
+from vk import API
 
+from Vk_bot2 import SessionCapchaFix
 from tempfile_ import TempFile
 
 morph = pymorphy2.MorphAnalyzer()
@@ -29,10 +35,12 @@ def prettier_size(n, pow=0, b=1024, u='B', pre=[''] + [p + 'i' for p in 'KMGTPEZ
     r, f = min(int(log(max(n * b ** pow, 1), b)), len(pre) - 1), '{:,.%if} %s%s'
     return (f % (abs(r % (-r - 1)), pre[r], u)).format(n * b ** pow / b ** float(r))
 
+
 class Command_Whom:
     name = "кого"
     access = ["all"]
     desc = "Выбирает случайного человека"
+
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -89,6 +97,7 @@ class Command_Who:
     name = "кто?"
     access = ["all"]
     desc = "Выбирает случайного человека"
+
     @staticmethod
     def execute(bot, data, ):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -161,6 +170,7 @@ class Command_Prob:
     name = "вероятность"
     access = ["all"]
     desc = "Процент правдивости инфы"
+
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -179,6 +189,7 @@ class Command_Where:
     name = "где"
     access = ["all"]
     desc = "Говорит где что находится "
+
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -193,6 +204,7 @@ class Command_You:
     name = "ты!"
     access = ['all']
     desc = "Не обзывай бота"
+
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -220,6 +232,7 @@ class Command_Help:
     name = "команды"
     access = ['all']
     desc = "Выводит это сообщение"
+
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -234,6 +247,7 @@ class Command_resend:
     name = "перешли"
     access = ['all']
     desc = "Пересылает фото"
+
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -264,6 +278,7 @@ class Command_kik:
     name = "изгнать"
     access = ['admin', 'moderator', 'editor']
     desc = "Изгоняет пользователя"
+
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -289,6 +304,7 @@ class Command_JoinFiveNigths:
     name = "5nights"
     access = ["all"]
     desc = "Добавляет в беседу"
+
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -320,6 +336,7 @@ class Command_ExecCode:
     name = "выполни"
     access = ['admin']
     desc = "Выполняет код из сообщения"
+
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -338,6 +355,7 @@ class Command_StatComm:
     name = "инфо"
     access = ["all"]
     desc = "Статистика"
+
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -403,6 +421,7 @@ class Command_AddUser:
     name = "добавить"
     access = ["admin"]
     desc = "Устанавливает права на пользователя"
+
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -474,6 +493,137 @@ class Command_restart:
 
     @staticmethod
     def execute(bot, data):
-        print(__file__)
-        # os.system("python Vk_bot2.py {}".format(os.getpid()))
-        os.execv(__file__, sys.argv)
+        args = {"peer_id": data['peer_id'], "v": "5.60"}
+        args['message'] = "Перезапуск всех потоков начат"
+        bot.Replyqueue.put(args)
+        with bot.Checkqueue.mutex:
+            bot.Checkqueue.queue.clear()
+        with bot.Longpool.mutex:
+            bot.Longpool.queue.clear()
+        sleep(3)
+        # del bot.UserApi
+        # del bot.GroupSession
+        # del bot.UserSession
+        # del bot.GroupApi
+
+        bot.UserSession = SessionCapchaFix(access_token=bot.UserAccess_token)
+        bot.GroupSession = SessionCapchaFix(access_token=bot.GroupAccess_token)
+        bot.GroupApi = API(bot.GroupSession)
+        bot.UserpApi = API(bot.UserSession)
+        t = len(bot.LP_threads)
+        for th in bot.LP_threads:
+            try:
+                th._stop()
+                th.join()
+                bot.LP_threads.pop(th)
+            except:
+                t -= 1
+        for i in range(t):
+            bot.LP_threads.append(threading.Thread(target=bot.parseLongPool))
+            bot.LP_threads[i].setDaemon(True)
+            bot.LP_threads[i].start()
+        t = len(bot.EX_threadList)
+        for th in bot.EX_threadList:
+            try:
+                th._stop()
+                th.join()
+                bot.EX_threadList.pop(th)
+            except:
+                t -= 1
+        for i in range(t):
+            bot.EX_threadList.append(threading.Thread(target=bot.ExecCommands))
+            bot.EX_threadList[i].setDaemon(True)
+            bot.EX_threadList[i].start()
+        print("Чистим все ответы")
+        with bot.Replyqueue.mutex:
+            bot.Replyqueue.queue.clear()
+        bot.ReplyThread._reset_internal_locks(False)
+        bot.ReplyThread._stop()
+        bot.ReplyThread.join()
+        del bot.ReplyThread
+        bot.ReplyThread = threading.Thread(target=bot.Reply)
+        bot.ReplyThread.setDaemon(True)
+        bot.ReplyThread.start()
+        print("Перезапуск закончен")
+        for name, val in globals().items():
+            if isinstance(val, types.ModuleType):
+                importlib.reload(val)
+        args['message'] = "Перезапуск закончен"
+        bot.Replyqueue.put(args)
+        # os.system("RESTART.bat {}".format(os.getpid()))
+        # #os.startfile(__file__,sys.executable)
+        # #subprocess.Popen([sys.executable,__file__],close_fds=True,creationflags=0x00000008)
+        # sleep(1)
+        # #print(os.spawnv(os.P_NOWAIT, sys.executable, [__file__]))
+        # os._exit(1)
+        # #os.execv(__file__, sys.argv)
+
+
+class Command_Zadolbali:
+    name = "этослучилось"
+    access = ["all"]
+    desc = "Рандомная история с ithappens.me"
+
+    class MLStripper(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.reset()
+            self.fed = []
+
+        def handle_data(self, d):
+            self.fed.append(d)
+
+        def get_data(self):
+            return ''.join(self.fed)
+
+    @staticmethod
+    def strip_tags(html):
+        s = Command_Zadolbali.MLStripper()
+        s.feed(html)
+        return s.get_data()
+
+    @staticmethod
+    def execute(bot, data):
+        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+        feed = feedparser.parse('http://www.ithappens.me/rss')['entries']
+        zz = random.choice(feed)
+        template = """      {}
+
+         {}
+          {}"""
+        msg = template.format(zz['title'], Command_Zadolbali.strip_tags(zz['summary']), zz['link'])
+        args['message'] = msg
+        bot.Replyqueue.put(args)
+        return True
+
+        # if __name__ == "__main__":
+        #    Command_Zadolbali().execute(None,{})
+
+
+class Command_banCommand:
+    name = "блок"
+    access = ["admin", "editor", "moderator"]
+    desc = "блокирует команду в чате"
+
+    @staticmethod
+    def execute(bot, data):
+        comm = data['custom']['команда']
+        if comm in ['bannedCommands']:
+            bot.Settings['bannedCommands'][comm].append(str(data['peer_id']))
+        else:
+            bot.Settings['bannedCommands'][comm] = [str(data['peer_id'])]
+
+
+class Command_Choice:
+    name = "выбери"
+    access = ["all"]
+    desc = "Выбирает из представленных вариантов"
+
+    @staticmethod
+    def execute(bot, data):
+        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+        vars = " ".join(data['text']).split(',')
+        var = random.choice(vars)
+        templates = ['Я выбираю: {}', "Вот это: {}", "Думаю это лучший вариант: {}"]
+        args['message'] = random.choice(templates).format(var)
+        bot.Replyqueue.put(args)

@@ -405,12 +405,18 @@ def SayMax(im1):
     final.save(im1)
 
 
-def resize_(x, imf, sharp=False):
-    im = Image.open(imf)
+def resize_(x, imf, sharp=False, ret=False):
+    if ret:
+        im = imf
+    else:
+        im = Image.open(imf)
     ox, oy = im.size
     y = round((x / ox) * oy)
     im = im.resize((x, y), Image.LANCZOS)
     if sharp:
         enhancer = ImageEnhance.Sharpness(im)
         im = enhancer.enhance(2)
-    im.save(imf)
+    if ret:
+        return im
+    else:
+        im.save(imf)

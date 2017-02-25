@@ -101,10 +101,11 @@ class Bot:
         self.DefApi = API(self.DefSession)
         self.GroupApi = API(self.GroupSession)
         self.log = io.open("Message_Log.Log", mode="ta", newline="\n", encoding="utf-8")
-        for _ in range(LP_Threads):
-            self.LP = threading.Thread(target=self.parseLongPool)
-            self.LP.setDaemon(True)
-            self.LP.start()
+        self.LP_threads = []
+        for i in range(LP_Threads):
+            self.LP_threads.append(threading.Thread(target=self.parseLongPool))
+            self.LP_threads[i].setDaemon(True)
+            self.LP_threads[i].start()
         self.EX_threadList = []
         for i in range(threads):
             self.EX_threadList.append(threading.Thread(target=self.ExecCommands))
@@ -114,22 +115,25 @@ class Bot:
         self.ReplyThread = threading.Thread(target=self.Reply)
         self.ReplyThread.setDaemon(True)
         self.ReplyThread.start()
-
         self.MyUId = self.UserApi.users.get()[0]['uid']
         self.MyName = self.GetUserNameById(self.MyUId)
         self.Botmodules = {"filters": {}, "commands": {}}
-        modules = os.listdir(os.path.join(getpath(), "modules"))
+        self.modules = os.listdir(os.path.join(getpath(), "modules"))
         sys.path.append(os.path.join(getpath(), "modules"))
-        for module in modules:
+        for module in self.modules:
             if not module.startswith("__"):
+                print("Importing module {}".format(module))
                 module = importlib.import_module(str(module.split(".")[0]))
                 for class_ in dir(module):
                     if class_.startswith("Filter"):
                         self.Botmodules['filters'][class_.split("_")[-1]] = getattr(module, class_)
                     if class_.startswith("Command"):
+
                         funk = getattr(module, class_)
+                        print("Importing command {}".format(class_))
                         self.Botmodules['commands'][funk.name] = getattr(module, class_)
         self.FILTERS = self.Botmodules['filters']
+
     def GetUserFromMessage(self, message_id):
         sleep(0.25)
 
@@ -153,6 +157,7 @@ class Bot:
         for code in htmlCodes:
             s = s.replace(code[1], code[0])
         return s
+
     def GetUserNameById(self, Id):
         sleep(0.1)
         try:
@@ -175,7 +180,7 @@ class Bot:
                 try:
 
                     if (int(msg['from_id']) == int(user)) and (
-                        (re.match(r'\d+$', msg['body'])) or re.match(r'((Д|д)а)|((Н|н)ет)', msg['body'])):
+                                (re.match(r'\d+$', msg['body'])) or re.match(r'((Д|д)а)|((Н|н)ет)', msg['body'])):
                         if int(msg['date']) < int(args['date']):
                             print('Дошел до старого сообщения')
                             break
@@ -186,13 +191,15 @@ class Bot:
                 except:
                     continue
         return None
+
     def Reply(self):
         while True:
             args = self.Replyqueue.get()
-            self.Replyqueue.task_done()
+
             sleep(1)
             try:
                 self.UserApi.messages.send(**args)
+                self.Replyqueue.task_done()
             except Exception as Ex:
                 print("error couldn't send message:", Ex)
                 try:
@@ -207,7 +214,8 @@ class Bot:
         data = {}
         with open(path + '/settings.json', 'w') as config:
             data['users'] = {'admin': [adminid]}
-            data['settings'] = {'UserAccess_token': token}
+            data['settings'] = {'UserAccess_token': token, "bannedCommands": {}}
+
             json.dump(data, config)
 
     def LoadConfig(self):
@@ -258,9 +266,8 @@ class Bot:
             print('Done')
             Tmp.rem()
 
-            # req = requests.post(server,files = {'photo':img})
             if req.status_code == requests.codes.ok:
-                # print('req',req.json())
+
                 photo = 'photo' + str(i)
                 try:
                     params = {'server': req.json()['server'], 'photo': req.json()['photo'], 'hash': req.json()['hash']}
@@ -333,18 +340,20 @@ class Bot:
             data = self.Checkqueue.get()
             sleep(0.3)
             self.Stat['messages'] = self.Stat['messages'] + 1
+            self.SaveConfig()
             if self.AdminModeOnly:
                 if "admin" != self.GetUserGroup(data['user_id']):
                     continue
             defargs = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+
             p = '[\U0001F600-\U0001F64F]|[\U0001F300-\U0001F5FF]|[\U0001F680-\U0001F6FF]|[\U0001F1E0-\U0001F1FF]'
             emoji_pattern = re.compile(p, re.VERBOSE)
+
             data['message'] = emoji_pattern.sub('', data['message'])
             try:
                 user = self.GetUserNameById(data['user_id'])
-                toPrint = data['subject'] if "..." not in data['subject'] else "Личка" + " : " + user[
-                    'first_name'] + ' ' + user['last_name'] + " : " + str(
-                    data['message'])
+                toPrint = (data['subject'] if "..." not in data['subject'] else "Личка") + " : " + user[
+                    'first_name'] + ' ' + user['last_name'] + " : " + data['message']
                 toPrint += '\n' + '[ message_id : ' + str(data['message_id']) + '  peer_id : ' + str(
                     data['peer_id']) + " ]" if self.DEBUG else ""
                 print(toPrint)
@@ -374,6 +383,7 @@ class Bot:
                                                        'ред', "Ред")
             Command = re.split(pattern, comm[0])[-1]
             text = copy(Command)
+
             if (data['message'].lower().startswith(self.MyName['first_name'].lower())) or (
                     data['message'].lower().startswith('ред')):
                 if 'fwd' in data['atts']:
@@ -389,12 +399,14 @@ class Bot:
                         except:
                             data['attachments'].extend(atts)
 
-
-
-
-                args["text"] = text
+                args["text"] = text.split(' ')[1:]
 
                 Command = Command.split(' ')[0]
+                if Command in self.Settings['bannedCommands']:
+                    if str(args['peer_id']) in self.Settings['bannedCommands'][Command]:
+                        self.Checkqueue.task_done()
+                        return
+
                 if Command in self.Botmodules['commands']:
                     funk = self.Botmodules['commands'][Command]
                     user = data["user_id"]
@@ -402,7 +414,9 @@ class Bot:
                         try:
                             print("Trying to execute commnad {},\n arguments:{}".format(Command, args))
                             funk.execute(self, args)
-                            self.Stat['commands'] = self.Stat['commands'] +1
+                            self.Checkqueue.task_done()
+                            self.Stat['commands'] = self.Stat['commands'] + 1
+                            self.SaveConfig()
                         except Exception as Ex:
 
                             print(Ex.__traceback__)
@@ -422,11 +436,13 @@ class Bot:
                                                                                                           "Перешлите это сообщение владельцу бота")
                             print(defargs['message'])
                             # self.Reply(self.UserApi, args)
+                            self.Checkqueue.task_done()
                             self.Replyqueue.put(defargs)
 
                     else:
                         print('"Недостаточно прав"')
                         defargs["message"] = "Недостаточно прав"
+                        self.Checkqueue.task_done()
                         self.Replyqueue.put(defargs)
 
                 else:
@@ -438,6 +454,7 @@ class Bot:
                         att = self.UploadFromDisk(choice(['Noon1.jpg', 'Noon2.jpg']))
                         defargs['attachment'] = att
                     defargs['message'] = ans
+                    self.Checkqueue.task_done()
                     self.Replyqueue.put(defargs)
 
     def GetUserGroup(self, id):
@@ -641,8 +658,7 @@ class Bot:
                             pass
 
 
-if len(sys.argv) > 1:
-    print(sys.argv[1])
-bot = Bot(DEBUG=True)
-print(bot.Botmodules)
-ret = bot.ContiniousMessageCheck()
+if __name__ == "__main__":
+    bot = Bot(DEBUG=True)
+    print(bot.Botmodules)
+    ret = bot.ContiniousMessageCheck()

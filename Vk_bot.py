@@ -4,6 +4,7 @@ import json
 import queue
 import re
 import subprocess
+import sys
 import threading
 import tkinter as tk
 import traceback
@@ -160,7 +161,7 @@ class VK_Bot:
         #    self.UserApi.friends.add(user_id=friend)
         self.Commands = {
             '!пост': [self.MakePost, ['admin', 'editor', 'moderator'], "постит в группе ваш текст", '', False],
-            '!бан': [self.BanUser, ['admin', 'editor', 'moderator'], 'Банит', '', False],
+            # '!бан': [self.BanUser, ['admin', 'editor', 'moderator'], 'Банит', '', False],
             '!музыка': [self.Music, ['admin', 'editor', 'moderator', 'user'], 'Ищет музыку',
                         "Ищет музыку, форма запроса:\n!музыка\nимя:НАЗВАНИЕ", True],
             '!e621': [self.e621, ['admin', 'editor', 'moderator'], "Ищет пикчи на e621",

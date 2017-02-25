@@ -396,7 +396,6 @@ class Command_GlitchImg:
 
         for att in atts:
             try:
-                att = data['attachments'][0]
                 photo = bot.GetBiggesPic(att, data['message_id'])
             except:
                 return False
