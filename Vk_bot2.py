@@ -54,17 +54,19 @@ class SessionCapchaFix(Session):
         Reload this in child
         """
         print(captcha_image_url)
-        img = urllib.request.Request(captcha_image_url, headers=self.hdr)
-        a = TempFile(img, 'jpg', NoCache=True)
-        self.popup(img)
+
+        img = urlopen(captcha_image_url)
+        print(img)
+        a = TempFile(img.read(), 'jpg', NoCache=True)
+        self.popup(a.path_)
         a.rem()
         # cap = input('capcha text:')
-        return self.capcha.get()
+        return self.capchaVal
 
     def popup(self, img):
         img = Image.open(img)
 
-        self.root = tk.Toplevel()
+        self.root = tk.Tk()
         img = ImageTk.PhotoImage(image=img)
 
         Img = tk.Label(self.root)
@@ -78,11 +80,12 @@ class SessionCapchaFix(Session):
         self.root.mainloop()
 
     def Ret(self):
+        self.capchaVal = self.capcha.get()
         self.root.destroy()
 
 
 class Bot:
-    def __init__(self, threads=4, LP_Threads=4, DEBUG=False):
+    def __init__(self, threads=4, LP_Threads=1, DEBUG=False):
         self.DEBUG = DEBUG
         self.AdminModeOnly = False
         self.defargs = {"v": "5.60"}
@@ -128,7 +131,6 @@ class Bot:
                     if class_.startswith("Filter"):
                         self.Botmodules['filters'][class_.split("_")[-1]] = getattr(module, class_)
                     if class_.startswith("Command"):
-
                         funk = getattr(module, class_)
                         print("Importing command {}".format(class_))
                         self.Botmodules['commands'][funk.name] = getattr(module, class_)
@@ -158,10 +160,10 @@ class Bot:
             s = s.replace(code[1], code[0])
         return s
 
-    def GetUserNameById(self, Id):
+    def GetUserNameById(self, Id, case='nom'):
         sleep(0.1)
         try:
-            User = self.DefApi.users.get(user_ids=Id, v="5.60", fields=['sex'])[0]
+            User = self.DefApi.users.get(user_ids=Id, v="5.60", fields=['sex'], name_case=case)[0]
         except:
             return None
         return User
@@ -179,16 +181,18 @@ class Bot:
 
                 try:
 
-                    if (int(msg['from_id']) == int(user)) and (
-                                (re.match(r'\d+$', msg['body'])) or re.match(r'((Д|д)а)|((Н|н)ет)', msg['body'])):
-                        if int(msg['date']) < int(args['date']):
-                            print('Дошел до старого сообщения')
-                            break
+                    if (int(msg['from_id']) == int(user)):
+                        if ((re.match(r'\d+$', msg['body'])) or re.match(r'((Д|д)а)|((Н|н)ет)', msg['body'])):
 
-                        ans = msg['body']
-                        return ans
+                            if int(msg['date']) < int(args['date']):
+                                print('Дошел до старого сообщения')
+                                break
 
-                except:
+                            ans = msg['body']
+                            return ans
+
+                except Exception as E:
+                    print('WMF exception ', E)
                     continue
         return None
 
@@ -325,7 +329,7 @@ class Bot:
 
     def LongPool(self, key, server, ts):
 
-        url = 'https://' + server + '?act=a_check&key=' + key + '&ts=' + str(ts) + '&wait=25&mode=130&version=1'
+        url = 'https://' + server + '?act=a_check&key=' + key + '&ts=' + str(ts) + '&wait=25&mode=2&version=1'
         try:
 
             request = requests.get(url)
@@ -399,7 +403,7 @@ class Bot:
                         except:
                             data['attachments'].extend(atts)
 
-                args["text"] = text.split(' ')[1:]
+                args["text"] = ' '.join(text.split(' ')[1:])
 
                 Command = Command.split(' ')[0]
                 if Command in self.Settings['bannedCommands']:
@@ -413,7 +417,14 @@ class Bot:
                     if ("all" in funk.access) or (self.GetUserGroup(user) in funk.access):
                         try:
                             print("Trying to execute commnad {},\n arguments:{}".format(Command, args))
-                            funk.execute(self, args)
+                            stat = funk.execute(self, args)
+                            if stat == False:
+                                defargs['message'] = 'Неправильно оформлен запрос. Пример запроса : {}'.format(
+                                    funk.template.format(self.MyName['first_name']))
+                                self.Checkqueue.task_done()
+                                self.Replyqueue.put(defargs)
+                            if stat == 'Error':
+                                pass
                             self.Checkqueue.task_done()
                             self.Stat['commands'] = self.Stat['commands'] + 1
                             self.SaveConfig()
@@ -489,6 +500,60 @@ class Bot:
                 continue
             self.Longpool.put(results)
 
+    def SourceAct(self, type, data, MSData):
+        print('Что то с Актом пришло')
+        Targs = {"peer_id": MSData['peer_id'], "v": "5.60"}
+        if type == 'chat_photo_update':
+            if int(data['from']) == int(self.MyUId):
+                return
+            img = Image.open('CHAT_IMG.jpg')
+            tmpf = {'chat_id': int(MSData['peer_id']) - 2000000000, "crop_x": ((img.size[0] - 350) / 2),
+                    'crop_y': (((img.size[1] - 350) / 2) - 30), 'crop_width': 350}
+            Uurl = self.UserApi.photos.getChatUploadServer(**tmpf)
+            print(Uurl)
+            req = requests.post(Uurl['upload_url'], files={'file1': open('CHAT_IMG.jpg', 'rb')})
+            print(req.text)
+            self.UserApi.messages.setChatPhoto(**{'file': req.json()['response']})
+
+        if type == 'chat_title_update':
+            if int(data['from']) == int(self.MyUId):
+                return
+            if data['source_old_text'] != data['source_text']:
+                if MSData['peer_id'] in self.Settings['namelock']:
+
+                    self.UserApi.messages.editChat(chat_id=MSData['peer_id'] - 2000000000,
+                                                   title=data['source_old_text'], v='5.60')
+
+                    Targs['message'] = 'Название беседы менять запрещено'
+                    self.Replyqueue.put(Targs)
+                else:
+                    pass
+            else:
+                pass
+
+        if type == 'chat_invite_user':
+            who = data['from']  # Кто пригласил
+            target = data['source_mid']  # Кого пригласил
+            if self.GetUserGroup(int(who)) == "user":
+                Targs['message'] = 'Вы не имеете права приглашать людей в данную беседу'
+                self.Replyqueue.put(Targs)
+                name = self.GetUserNameById(int(target))
+                Targs['message'] = "The kickHammer has spoken.\n {} has been kicked in the ass".format(
+                    ' '.join([name['first_name'], name['last_name']]))
+                self.UserApi.messages.removeChatUser(v=5.45, chat_id=MSData['peer_id'] - 2000000000, user_id=target)
+
+            else:
+                print('Приглашен администрацией')
+        if type == 'chat_kick_user':
+            if int(data['from']) == int(self.MyUId):
+                return
+            user = self.GetUserNameById(data['source_mid'], case='gen')
+            if int(data['from']) == int(data['source_mid']):
+                Targs['message'] = 'Оп, {} {} ливнул с подливой &#9786;'.format(user['first_name'], user['last_name'])
+            else:
+                Targs['message'] = 'Оп, {} {} кикнули &#127770;'.format(user['first_name'], user['last_name'])
+            self.Replyqueue.put(Targs)
+
     def GetBiggesPic(self, att, mid=0):
         try:
             data = self.UserApi.photos.getById(photos=att, v=5.60)[0]
@@ -561,6 +626,7 @@ class Bot:
                             subject = s[5]
                             text = s[6]
                             atts = s[7]
+
                             attatchments = []
                             try:
                                 rand_id = int(atts[-1])
@@ -580,82 +646,70 @@ class Bot:
                             args['atts'] = atts
                             args['subject'] = subject
                             args['v'] = 5.45
-                            if text == '!':
-                                continue
+                            if 'source_act' in atts:
+                                print(atts)
+                                self.SourceAct(atts['source_act'], atts, args)
                             if args['user_id'] != self.MyUId and rand_id == None:
                                 self.Checkqueue.put(args, timeout=60)
                                 # self.CheckForCommands(args)
                                 # self.Reply(self.UserApi,args)
                                 # return from_id,text,subject
-                        except KeyError:
-                            continue
-                    # elif code == 8:
-                    #    try:
-                    #        user = self.GetUserNameById(s[1] * -1)
-                    #        try:
-                    #            if user['sex'] == 2:
-                    #                sex = 'Вошел'
-                    #            elif user['sex'] == 1:
-                    #                sex = 'Вошла'
-                    #        except:
-                    #            sex = 'Вошло'
-                    #        toprint = " ".join([user['first_name'], user['last_name'], ' {} в сеть'.format(sex)])
-                    #    except KeyError:
-                    #        continue
-                    # elif code == 9:
-                    #    try:
-                    #        user = self.GetUserNameById(s[1] * -1)
-                    #        try:
-                    #            if user['sex'] == 2:
-                    #                sex = 'Вышел'
-                    #            elif user['sex'] == 1:
-                    #                sex = 'Вышла'
-                    #            else:
-                    #                sex = "Вышло"
-                    #        except:
-                    #            sex = 'Вышло'
-                    #        try:
-                    #            toprint = " ".join([user['first_name'], user['last_name'], ' {} из сети'.format(sex)])
-                    #        except:
-                    #            pass
-                    #    except KeyError:
-                    #        continue
-                    # elif code == 61:
-                    #    try:
-                    #        user = self.GetUserNameById(s[1])
-                    #        toprint = " ".join([user['first_name'], user['last_name'], 'Набирает сообщение'])
-                    #    except:
-                    #        continue
-                    # elif code == 62:
-                    #    user = self.GetUserNameById(s[1])
-                    #    arg = {}
-                    #    arg['chat_id'] = s[2]
-                    #    try:
-                    #        chat = self.UserApi.messages.getChat(**arg)
-                    #    except:
-                    #        chat = {}
-                    #        chat['title'] = 'Хз чё, но тута ошибка'
-                    #    try:
-                    #        toprint = " ".join(
-                    #            [user['first_name'], user['last_name'], 'Набирает сообщение в беседе', chat['title']])
-                    #    except:
-                    #        continue
-                    elif code == 51:
-                        try:
-                            Targs = {}
-                            id = str(s[1] + 2000000000)
-                            if self.Settings['namelock'][id][1]:
-                                chat = self.UserApi.messages.getChat(chat_id=s[1], v=5.57)['title']
-                                if chat == self.Settings['namelock'][id][0]:
-                                    continue
-                                self.UserApi.messages.editChat(chat_id=s[1], title=self.Settings['namelock'][id][0],
-                                                               v=5.57)
-                                Targs['peer_id'] = id
-                                Targs['v'] = 5.45
-                                Targs['message'] = 'Название беседы менять запрещено'
-                                self.Replyqueue.put(Targs)
-                        except:
-                            pass
+                        except Exception as  A:
+                            exc_type, exc_value, exc_traceback = sys.exc_info()
+                            TB = traceback.format_tb(exc_traceback)
+                            print(exc_type, exc_value, ''.join(TB), )
+
+                            # elif code == 8:
+                            #    try:
+                            #        user = self.GetUserNameById(s[1] * -1)
+                            #        try:
+                            #            if user['sex'] == 2:
+                            #                sex = 'Вошел'
+                            #            elif user['sex'] == 1:
+                            #                sex = 'Вошла'
+                            #        except:
+                            #            sex = 'Вошло'
+                            #        toprint = " ".join([user['first_name'], user['last_name'], ' {} в сеть'.format(sex)])
+                            #    except KeyError:
+                            #        continue
+                            # elif code == 9:
+                            #    try:
+                            #        user = self.GetUserNameById(s[1] * -1)
+                            #        try:
+                            #            if user['sex'] == 2:
+                            #                sex = 'Вышел'
+                            #            elif user['sex'] == 1:
+                            #                sex = 'Вышла'
+                            #            else:
+                            #                sex = "Вышло"
+                            #        except:
+                            #            sex = 'Вышло'
+                            #        try:
+                            #            toprint = " ".join([user['first_name'], user['last_name'], ' {} из сети'.format(sex)])
+                            #        except:
+                            #            pass
+                            #    except KeyError:
+                            #        continue
+                            # elif code == 61:
+                            #    try:
+                            #        user = self.GetUserNameById(s[1])
+                            #        toprint = " ".join([user['first_name'], user['last_name'], 'Набирает сообщение'])
+                            #    except:
+                            #        continue
+                            # elif code == 62:
+                            #    user = self.GetUserNameById(s[1])
+                            #    arg = {}
+                            #    arg['chat_id'] = s[2]
+                            #    try:
+                            #        chat = self.UserApi.messages.getChat(**arg)
+                            #    except:
+                            #        chat = {}
+                            #        chat['title'] = 'Хз чё, но тута ошибка'
+                            #    try:
+                            #        toprint = " ".join(
+                            #            [user['first_name'], user['last_name'], 'Набирает сообщение в беседе', chat['title']])
+                            #    except:
+                            #        continue
 
 
 if __name__ == "__main__":

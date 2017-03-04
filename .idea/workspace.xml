@@ -4,19 +4,155 @@
     <bookmark url="file://$PROJECT_DIR$" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8e8d7c2a-d8a5-4bd1-9412-f3862de24023" name="Default" comment="New version &#10;">
+    <list default="true" id="8e8d7c2a-d8a5-4bd1-9412-f3862de24023" name="Default" comment="Nah, i'm bad at commit messages xD.&#10;" />
+    <list id="c7870d81-bdf9-4780-9457-dc5f1ac4a1ff" name="Rejected commit: Default" comment="Nah, i'm bad at commit messages xD.&#10;">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/JonTron.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Noon1.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Noon2.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/SayMax.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Wanted.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/self-test.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tlen.jpeg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tlen2.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tlen3.jpg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/AimlParser.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/AimlParser.py.bak" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/DefaultSubs.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/Kernel.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/Kernel.py.bak" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/PatternMgr.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/PatternMgr.py.bak" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/Utils.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/Utils.py.bak" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/WordSub.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/WordSub.py.bak" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/ai.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/alice.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/astrology.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/atomic.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/badanswer.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/biography.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/bot.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/bot_profile.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/client.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/client_profile.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/computers.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/continuation.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/date.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/default.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/drugs.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/emotion.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/food.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/geography.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/gossip.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/history.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/humor.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/imponderables.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/inquiry.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/interjection.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/iu.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/knowledge.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/literature.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/loebner10.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/money.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/movies.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/mp0.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/mp1.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/mp2.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/mp3.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/mp4.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/mp5.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/mp6.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/music.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/numbers.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/personality.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/phone.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/pickup.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/politics.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/primeminister.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/primitive-math.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/psychology.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/pyschology.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/reduction.names.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/reduction0.safe.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/reduction1.safe.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/reduction2.safe.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/reduction3.safe.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/reduction4.safe.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/reductions-update.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/religion.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/salutations.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/science.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/sex.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/sports.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/stack.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/startup.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/stories.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/that.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/update1.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/update_mccormick.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/wallace.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/alice/xfind.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/startup.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-65percent.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-atomic.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-botmaster.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-brain.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-connect.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-dictionary.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-disconnect.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-dont.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-errors.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-gender.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-geography.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-german.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-gossip.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-hello.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-inactivity.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-inventions.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-knowledge.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-lizards.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-login.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-numbers.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-personality.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-pickup.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-politics.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-profile.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-religion.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-robot.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-sales.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-sextalk.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-sports.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-srai.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-suffixes.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-that.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-turing.aiml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/aiml_/standard/std-yesno.aiml" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/php.py" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/PIL_module.py" afterPath="$PROJECT_DIR$/PIL_module.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Vk_bot.py" afterPath="$PROJECT_DIR$/Vk_bot.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/AIML_module.py" afterPath="$PROJECT_DIR$/AIML_module.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Vk_bot2.py" afterPath="$PROJECT_DIR$/Vk_bot2.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Vk_bot_RssModule.py" afterPath="$PROJECT_DIR$/Vk_bot_RssModule.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/CommandModule.py" afterPath="$PROJECT_DIR$/modules/CommandModule.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/ImageEdits.py" afterPath="$PROJECT_DIR$/modules/ImageEdits.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/__init__.py" afterPath="$PROJECT_DIR$/modules/__init__.py" />
     </list>
     <ignored path="VK_BOT.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path=".idea/dataSources.local.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <file path="$PROJECT_DIR$/aiml_/Kernel.py" ignored="false" />
+    <file path="$PROJECT_DIR$/aiml_/PatternMgr.py" ignored="false" />
+    <file path="$PROJECT_DIR$/modules/CommandModule.py" ignored="false" />
+    <file path="$PROJECT_DIR$/aiml_/AimlParser.py" ignored="false" />
+    <file path="$PROJECT_DIR$/Vk_bot2.py" ignored="true" />
+    <file path="$PROJECT_DIR$/aiml_/WordSub.py" ignored="true" />
+    <file path="$PROJECT_DIR$/modules/__init__.py" ignored="false" />
+    <file path="$PROJECT_DIR$/aiml_/DefaultSubs.py" ignored="false" />
+    <file path="$PROJECT_DIR$/aiml_/standard/startup.xml" ignored="false" />
+    <file path="$PROJECT_DIR$/aiml_/__init__.py" ignored="false" />
+    <file path="$PROJECT_DIR$/aiml_/alice/startup.xml" ignored="false" />
+    <file path="$PROJECT_DIR$/aiml_/Utils.py" ignored="false" />
+    <file path="$PROJECT_DIR$/.idea/workspace.xml" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,7 +166,7 @@
     <SUITE FILE_PATH="coverage/VK_BOT$bip_universalV4.coverage" NAME="bip_universalV4 Coverage Results" MODIFIED="1485858171565" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:/SteamLibrary/SteamApps/common/SourceFilmmaker/game/usermod/scripts/sfm/animset" />
     <SUITE FILE_PATH="coverage/VK_BOT$VK_bot_GUI.coverage" NAME="VK_bot_GUI Coverage Results" MODIFIED="1471951096815" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/VK_BOT$test.coverage" NAME="test Coverage Results" MODIFIED="1477151531058" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/VK_BOT$Vk_bot2.coverage" NAME="Vk_bot2 Coverage Results" MODIFIED="1487675313975" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/VK_BOT$Vk_bot2.coverage" NAME="Vk_bot2 Coverage Results" MODIFIED="1488561373969" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/VK_BOT$AIML_module.coverage" NAME="AIML_module Coverage Results" MODIFIED="1484405348900" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/VK_BOT$Serialiser.coverage" NAME="Serialiser Coverage Results" MODIFIED="1487956021816" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/VK_BOT$php.coverage" NAME="php Coverage Results" MODIFIED="1477000360859" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -38,6 +174,7 @@
     <SUITE FILE_PATH="coverage/VK_BOT$Beat_Detect.coverage" NAME="Beat_Detect Coverage Results" MODIFIED="1474155436284" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/VK_BOT$main.coverage" NAME="main Coverage Results" MODIFIED="1474665565632" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/video_streaming_with_flask_example-master" />
     <SUITE FILE_PATH="coverage/VK_BOT$CommandModule.coverage" NAME="CommandModule Coverage Results" MODIFIED="1486024691507" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/modules" />
+    <SUITE FILE_PATH="coverage/VK_BOT$sandbox_test.coverage" NAME="sandbox_test Coverage Results" MODIFIED="1488229072589" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/VK_BOT$Vk_bot_RssModule.coverage" NAME="Vk_bot_RssModule Coverage Results" MODIFIED="1486023946874" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/VK_BOT$GlitchLib.coverage" NAME="GlitchLib Coverage Results" MODIFIED="1473798539075" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/VK_BOT$filters.coverage" NAME="filters Coverage Results" MODIFIED="1475439453860" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -77,33 +214,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Vk_bot.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Vk_bot.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="2146" column="0" selection-start-line="2146" selection-start-column="0" selection-end-line="2146" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Vk_bot2.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Vk_bot2.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Vk_bot2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="364" column="43" selection-start-line="364" selection-start-column="16" selection-end-line="364" selection-end-column="43" />
-              <folding>
-                <element signature="e#0#16#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="tempfile_.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tempfile_.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="42" column="0" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+            <state vertical-scroll-proportion="-0.2852349">
+              <caret line="450" column="11" selection-start-line="450" selection-start-column="11" selection-end-line="450" selection-end-column="11" />
               <folding />
             </state>
           </provider>
@@ -113,29 +228,27 @@
         <entry file="file://$PROJECT_DIR$/AIML_module.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="13" column="65" selection-start-line="13" selection-start-column="14" selection-end-line="13" selection-end-column="65" />
+              <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ImageEdits.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/modules/ImageEdits.py">
+      <file leaf-file-name="tempfile_.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tempfile_.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.49275362">
-              <caret line="51" column="0" selection-start-line="51" selection-start-column="0" selection-end-line="51" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#9#0" expanded="true" />
-              </folding>
+            <state vertical-scroll-proportion="0.0">
+              <caret line="29" column="0" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Vk_bot_RssModule.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Vk_bot_RssModule.py">
+      <file leaf-file-name="ImageEdits.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/modules/ImageEdits.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="16" />
+              <caret line="155" column="29" selection-start-line="151" selection-start-column="12" selection-end-line="155" selection-end-column="29" />
               <folding />
             </state>
           </provider>
@@ -145,22 +258,38 @@
         <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="623" column="67" selection-start-line="623" selection-start-column="67" selection-end-line="623" selection-end-column="67" />
-              <folding>
-                <element signature="e#0#16#0" expanded="true" />
-              </folding>
+              <caret line="822" column="12" selection-start-line="822" selection-start-column="12" selection-end-line="822" selection-end-column="12" />
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Serialiser.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Serialiser.py">
+      <file leaf-file-name="__init__.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/modules/__init__.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="32" column="37" selection-start-line="32" selection-start-column="37" selection-end-line="32" selection-end-column="37" />
-              <folding>
-                <element signature="e#0#9#0" expanded="true" />
-              </folding>
+              <caret line="0" column="51" selection-start-line="0" selection-start-column="51" selection-end-line="0" selection-end-column="51" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="__Command_template.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/modules/__Command_template.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="8" column="36" selection-start-line="8" selection-start-column="36" selection-end-line="8" selection-end-column="36" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="sandbox_test.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/sandbox_test.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="4" column="69" selection-start-line="4" selection-start-column="69" selection-end-line="4" selection-end-column="69" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -168,8 +297,8 @@
       <file leaf-file-name="settings.json" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/settings.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-0.0">
-              <caret line="0" column="616" selection-start-line="0" selection-start-column="507" selection-end-line="0" selection-end-column="616" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="0" column="63" selection-start-line="0" selection-start-column="63" selection-end-line="0" selection-end-column="63" />
               <folding />
             </state>
           </provider>
@@ -195,10 +324,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/GImg_Api.py" />
-        <option value="D:/Program Files/Py35/Lib/site-packages/aubio/__init__.py" />
-        <option value="$PROJECT_DIR$/Beat_Detect.py" />
-        <option value="$PROJECT_DIR$/Beat_detection.py" />
         <option value="$PROJECT_DIR$/PIL_module_np.py" />
         <option value="$PROJECT_DIR$/video_streaming_with_flask_example-master/camera.py" />
         <option value="D:/Program Files/Py35/Lib/socket.py" />
@@ -220,7 +345,6 @@
         <option value="$PROJECT_DIR$/DA_Api.py" />
         <option value="$PROJECT_DIR$/filters.py" />
         <option value="$PROJECT_DIR$/modules/ImageModule.py" />
-        <option value="$PROJECT_DIR$/modules/__init__.py" />
         <option value="$PROJECT_DIR$/aliases.json" />
         <option value="$PROJECT_DIR$/tempfile_.py" />
         <option value="$PROJECT_DIR$/e621_Api.py" />
@@ -228,7 +352,6 @@
         <option value="$PROJECT_DIR$/modules/PIL_commands.py" />
         <option value="$PROJECT_DIR$/AIMLLib/std-translation.aiml" />
         <option value="$PROJECT_DIR$/Vk_bot.py" />
-        <option value="$PROJECT_DIR$/AIML_module.py" />
         <option value="$PROJECT_DIR$/modules/FilterModule.py" />
         <option value="E:/Python_projekts/Obsibelisc_bot.json" />
         <option value="E:/Python_projekts/import_json.py" />
@@ -240,12 +363,18 @@
         <option value="$PROJECT_DIR$/PillowTest.py" />
         <option value="$PROJECT_DIR$/PIL_module.py" />
         <option value="$PROJECT_DIR$/ExtLib/ASCII_ART.py" />
-        <option value="$PROJECT_DIR$/modules/ImageEdits.py" />
         <option value="$PROJECT_DIR$/Vk_bot_RssModule.py" />
+        <option value="$PROJECT_DIR$/Serialiser.py" />
+        <option value="$PROJECT_DIR$/modules/ImageEdits.py" />
+        <option value="$PROJECT_DIR$/sandbox_test.py" />
+        <option value="$PROJECT_DIR$/modules/COMMAND_TEMPLATES/Command_template.py" />
+        <option value="$PROJECT_DIR$/modules/COMMAND_TEMPLATES/__Command_template.py" />
+        <option value="$PROJECT_DIR$/modules/COMMAND_TEMPLATES/__init__.py" />
+        <option value="$PROJECT_DIR$/modules/__init__.py" />
         <option value="$PROJECT_DIR$/settings.json" />
         <option value="$PROJECT_DIR$/Vk_bot2.py" />
         <option value="$PROJECT_DIR$/modules/CommandModule.py" />
-        <option value="$PROJECT_DIR$/Serialiser.py" />
+        <option value="$PROJECT_DIR$/AIML_module.py" />
       </list>
     </option>
   </component>
@@ -319,10 +448,24 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="VK_BOT" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="VK_BOT" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="aiml_" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="Scratches" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -332,14 +475,18 @@
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="last.edited.regexp" value="" />
     <property name="full.screen.before.presentation.mode" value="false" />
+    <property name="js-jscs-nodeInterpreter" value="D:\program\NODEJS\node.exe" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\VK_BOT\modules" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="E:\VK_BOT\E621Sorter" />
       <recent name="E:\VK_BOT" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.Serialiser">
+  <component name="RunManager" selected="Python.Vk_bot2">
     <configuration default="false" name="Vk_bot2" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -354,24 +501,6 @@
       <module name="VK_BOT" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Vk_bot2.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
-    <configuration default="false" name="ASCII_ART" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ExtLib" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="VK_BOT" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ExtLib/ASCII_ART.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -426,6 +555,24 @@
       <module name="VK_BOT" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Serialiser.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="sandbox_test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="VK_BOT" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sandbox_test.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -625,18 +772,18 @@
     </configuration>
     <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Python.Vk_bot2" />
-      <item index="1" class="java.lang.String" itemvalue="Python.ASCII_ART" />
-      <item index="2" class="java.lang.String" itemvalue="Python.Vk_bot_RssModule" />
-      <item index="3" class="java.lang.String" itemvalue="Python.CommandModule" />
-      <item index="4" class="java.lang.String" itemvalue="Python.Serialiser" />
+      <item index="1" class="java.lang.String" itemvalue="Python.Vk_bot_RssModule" />
+      <item index="2" class="java.lang.String" itemvalue="Python.CommandModule" />
+      <item index="3" class="java.lang.String" itemvalue="Python.Serialiser" />
+      <item index="4" class="java.lang.String" itemvalue="Python.sandbox_test" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.Serialiser" />
-        <item index="1" class="java.lang.String" itemvalue="Python.Vk_bot2" />
-        <item index="2" class="java.lang.String" itemvalue="Python.CommandModule" />
-        <item index="3" class="java.lang.String" itemvalue="Python.Vk_bot_RssModule" />
-        <item index="4" class="java.lang.String" itemvalue="Python.ASCII_ART" />
+        <item index="0" class="java.lang.String" itemvalue="Python.Vk_bot2" />
+        <item index="1" class="java.lang.String" itemvalue="Python.sandbox_test" />
+        <item index="2" class="java.lang.String" itemvalue="Python.Serialiser" />
+        <item index="3" class="java.lang.String" itemvalue="Python.CommandModule" />
+        <item index="4" class="java.lang.String" itemvalue="Python.Vk_bot_RssModule" />
       </list>
     </recent_temporary>
   </component>
@@ -650,18 +797,6 @@
       <created>1467227534050</created>
       <option name="number" value="Default" />
       <updated>1467227534050</updated>
-    </task>
-    <task id="LOCAL-00005" summary="cleanup">
-      <created>1467231872951</created>
-      <option name="number" value="00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1467231872951</updated>
-    </task>
-    <task id="LOCAL-00006" summary="cleanup">
-      <created>1467231943077</created>
-      <option name="number" value="00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1467231943077</updated>
     </task>
     <task id="LOCAL-00007" summary="cleanup">
       <created>1467232321637</created>
@@ -945,7 +1080,19 @@
       <option name="project" value="LOCAL" />
       <updated>1485817822563</updated>
     </task>
-    <option name="localTasksCounter" value="54" />
+    <task id="LOCAL-00054" summary="New version &#10;">
+      <created>1488032480354</created>
+      <option name="number" value="00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1488032480354</updated>
+    </task>
+    <task id="LOCAL-00055" summary="Nah, i'm bad at commit messages xD.&#10;">
+      <created>1488633319827</created>
+      <option name="number" value="00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1488633319827</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="TodoView">
@@ -959,23 +1106,23 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.28624734" sideWeight="0.4949785" order="1" side_tool="false" content_ui="combo" x="715" y="162" width="489" height="693" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.122068234" sideWeight="0.4949785" order="1" side_tool="false" content_ui="combo" x="715" y="162" width="489" height="693" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32792208" sideWeight="0.50479746" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2943723" sideWeight="0.51599145" order="11" side_tool="true" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32792208" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31385282" sideWeight="0.5181237" order="11" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32995737" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32216215" sideWeight="0.4978678" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32575756" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21002132" sideWeight="0.5050215" order="2" side_tool="false" content_ui="tabs" x="93" y="168" width="643" height="697" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32142857" sideWeight="0.4978678" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32467532" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22068231" sideWeight="0.5050215" order="2" side_tool="false" content_ui="tabs" x="93" y="168" width="643" height="697" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32629356" sideWeight="0.4978678" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.32995737" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32864866" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3982684" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3145946" sideWeight="0.48400852" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39783785" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31675676" sideWeight="0.48187634" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.15831557" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32756758" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -996,6 +1143,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="CHECK_NEW_TODO" value="false" />
     <ignored-roots>
       <path value="$PROJECT_DIR$/vkbot" />
@@ -1022,7 +1170,8 @@
     <MESSAGE value="Добавлен базовый ИИ на основе AIML" />
     <MESSAGE value="Huge update" />
     <MESSAGE value="New version &#10;" />
-    <option name="LAST_COMMIT_MESSAGE" value="New version &#10;" />
+    <MESSAGE value="Nah, i'm bad at commit messages xD.&#10;" />
+    <option name="LAST_COMMIT_MESSAGE" value="Nah, i'm bad at commit messages xD.&#10;" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
@@ -1031,46 +1180,11 @@
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="21" />
+      <option name="time" value="23" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://D:/Program Files/Py35/Lib/zipfile.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-15.013745">
-          <caret line="60" column="0" selection-start-line="60" selection-start-column="0" selection-end-line="60" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7077364">
-          <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://D:/Program Files/Py35/Lib/logging/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.3323782">
-          <caret line="794" column="0" selection-start-line="794" selection-start-column="0" selection-end-line="794" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://D:/Program Files/Py35/Lib/logging/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.3323782">
-          <caret line="794" column="0" selection-start-line="794" selection-start-column="0" selection-end-line="794" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/PIL_module_np.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.66246057">
-          <caret line="145" column="32" selection-start-line="145" selection-start-column="32" selection-end-line="145" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/GlitchLib.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.2949527">
@@ -1089,20 +1203,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-0.15705128">
           <caret line="552" column="0" selection-start-line="552" selection-start-column="0" selection-end-line="552" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/aliases.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="12" selection-start-line="0" selection-start-column="12" selection-end-line="0" selection-end-column="12" />
         </state>
       </provider>
     </entry>
@@ -1131,20 +1231,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="8.524355">
           <caret line="207" column="0" selection-start-line="207" selection-start-column="0" selection-end-line="207" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://D:/Program Files/Py35/Lib/site-packages/vk/api.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.088141024">
-          <caret line="154" column="19" selection-start-line="154" selection-start-column="19" selection-end-line="154" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/-2073368585/builtins.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.33333334">
-          <caret line="711" column="8" selection-start-line="711" selection-start-column="8" selection-end-line="711" selection-end-column="8" />
         </state>
       </provider>
     </entry>
@@ -1317,25 +1403,114 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://D:/Program Files/Py35/Lib/threading.py">
+    <entry file="file://$PROJECT_DIR$/Vk_bot_RssModule.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="6.059406">
-          <caret line="972" column="8" selection-start-line="972" selection-start-column="8" selection-end-line="972" selection-end-column="8" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/AIML_module.py">
+    <entry file="file://$PROJECT_DIR$/Serialiser.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="13" column="65" selection-start-line="13" selection-start-column="14" selection-end-line="13" selection-end-column="65" />
+        <state vertical-scroll-proportion="0.028006589">
+          <caret line="32" column="37" selection-start-line="32" selection-start-column="37" selection-end-line="32" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/-2073368585/builtins.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33278418">
+          <caret line="760" column="8" selection-start-line="760" selection-start-column="8" selection-end-line="760" selection-end-column="8" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Vk_bot_RssModule.py">
+    <entry file="file://$PROJECT_DIR$/sandbox_test.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="16" />
+          <caret line="4" column="69" selection-start-line="4" selection-start-column="69" selection-end-line="4" selection-end-column="69" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/__Command_template.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="8" column="36" selection-start-line="8" selection-start-column="36" selection-end-line="8" selection-end-column="36" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="51" selection-start-line="0" selection-start-column="51" selection-end-line="0" selection-end-column="51" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/Program Files/Py35/Lib/threading.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33333334">
+          <caret line="922" column="0" selection-start-line="922" selection-start-column="0" selection-end-line="922" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lunatic-python-1.0/tests/test_lua.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.12854442">
+          <caret line="4" column="4" selection-start-line="4" selection-start-column="4" selection-end-line="4" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/settings.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="63" selection-start-line="0" selection-start-column="63" selection-end-line="0" selection-end-column="63" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/Program Files/Py35/Lib/site-packages/vk/api.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.7549669">
+          <caret line="101" column="31" selection-start-line="101" selection-start-column="26" selection-end-line="101" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/Program Files/Py35/Lib/site-packages/requests/api.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.5115894">
+          <caret line="15" column="4" selection-start-line="15" selection-start-column="4" selection-end-line="15" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tempfile_.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="29" column="0" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/Program Files/Py35/Lib/site-packages/gtts/tts.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0513245">
+          <caret line="96" column="8" selection-start-line="96" selection-start-column="8" selection-end-line="96" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Vk_bot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-3.062914">
+          <caret line="460" column="24" selection-start-line="460" selection-start-column="24" selection-end-line="460" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/ImageEdits.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="155" column="29" selection-start-line="151" selection-start-column="12" selection-end-line="155" selection-end-column="29" />
           <folding />
         </state>
       </provider>
@@ -1343,71 +1518,32 @@
     <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="623" column="67" selection-start-line="623" selection-start-column="67" selection-end-line="623" selection-end-column="67" />
-          <folding>
-            <element signature="e#0#16#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test.bin">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Serialiser.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="32" column="37" selection-start-line="32" selection-start-column="37" selection-end-line="32" selection-end-column="37" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Vk_bot.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="2146" column="0" selection-start-line="2146" selection-start-column="0" selection-end-line="2146" selection-end-column="0" />
+          <caret line="822" column="12" selection-start-line="822" selection-start-column="12" selection-end-line="822" selection-end-column="12" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/settings.json">
+    <entry file="file://$PROJECT_DIR$/aiml_/WordSub.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.125">
+          <caret line="30" column="44" selection-start-line="30" selection-start-column="44" selection-end-line="30" selection-end-column="44" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/AIML_module.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="616" selection-start-line="0" selection-start-column="507" selection-end-line="0" selection-end-column="616" />
+          <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Vk_bot2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="364" column="43" selection-start-line="364" selection-start-column="16" selection-end-line="364" selection-end-column="43" />
-          <folding>
-            <element signature="e#0#16#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tempfile_.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="42" column="0" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+        <state vertical-scroll-proportion="-0.2852349">
+          <caret line="450" column="11" selection-start-line="450" selection-start-column="11" selection-end-line="450" selection-end-column="11" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/ImageEdits.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.49275362">
-          <caret line="51" column="0" selection-start-line="51" selection-start-column="0" selection-end-line="51" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>

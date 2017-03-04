@@ -1,4 +1,4 @@
-import aiml
+import aiml_ as aiml
 
 
 class Responder:
