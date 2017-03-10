@@ -18,7 +18,7 @@ class Command_Glitch_:
     name = "глюк"
     access = ['all']
     desc = "Глючная обработка"
-
+    perm = 'photo.glitch2'
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -55,7 +55,7 @@ class Command_GlitchGif_:
     name = "глюкгиф"
     access = ['admin', "editor", "moderator"]
     desc = "Глючная обработка гифки"
-
+    perm = 'photo.glitchGif'
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}

@@ -23,7 +23,7 @@ class Command_Kok:
     name = "кок"
     access = ["all"]
     desc = "Зеркалит картинку"
-
+    perm = 'photo.kok'
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -48,7 +48,7 @@ class Command_Kek:
     name = "кек"
     access = ["all"]
     desc = "Зеркалит картинку"
-
+    perm = 'photo.kek'
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -73,7 +73,7 @@ class Command_Filter:
     name = "обработай"
     access = ["all"]
     desc = "Позволяет применять фильтры к фото"
-
+    perm = 'photo.filter'
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -118,7 +118,7 @@ class Command_Resize:
     name = "увеличь"
     access = ["all"]
     desc = "Позволяет увеличивать\уменьшать фото"
-
+    perm = 'photo.resize'
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -174,7 +174,7 @@ class Command_e621:
            n:кол-во артов(максимум 10)\n
            page:страница на которой искать"""
     desc = "Ищет пикчи на e612"
-
+    perm = 'core.e621'
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -204,7 +204,7 @@ class Command_e926:
            n:кол-во артов(максимум 10)\n
            page:страница на которой искать"""
     desc = "Ищет пикчи на e926"
-
+    perm = 'photo.e926'
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -228,7 +228,7 @@ class Command_rollRows:
     name = "rollrows"
     access = ["all"]
     desc = "Сдвигает строки в фото"
-
+    perm = 'photo.rollRows'
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -258,7 +258,7 @@ class Command_rollRowssmart:
     name = "rollsmart"
     access = ["all"]
     desc = "Сдвигает строки в фото"
-
+    perm = 'photo.rollRowssmart'
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -288,7 +288,7 @@ class Command_AddImages:
     name = "сложи"
     access = ['all']
     desc = "Соединяет 2 фото"
-
+    perm = 'photo.add'
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -329,7 +329,7 @@ class Command_merge:
     name = "совмести"
     access = ['all']
     desc = "Соединяет 2 фото"
-
+    perm = 'photo.merge'
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -370,7 +370,7 @@ class Command_screen:
     name = "скрин"
     access = ['admin']
     desc = "Скрин экрана"
-
+    perm = 'core.screen'
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
@@ -387,7 +387,7 @@ class Command_GlitchImg:
     name = "глитч"
     access = ["all"]
     desc = "Глючит фото"
-
+    perm = 'photo.glitch'
     @staticmethod
     def execute(bot, data):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}

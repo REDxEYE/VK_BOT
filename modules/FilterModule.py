@@ -244,6 +244,13 @@ class Filter_Neural:
             img = np.array(im)
         else:
             img = cv2.imread(im)
+        if img.shape[0] < 2000:
+            w = img.shape[1]
+            h = img.shape[0]
+            k = 2000 / w
+
+            img = cv2.resize(img, (2000, int(h * k)))
+
         filters = self.build_filters()
         res2 = self.process_threaded(img, filters)
         if ret:
@@ -253,11 +260,201 @@ class Filter_Neural:
 
     def build_filters(self):
         filters = []
+
         ksize = 150
         for theta in np.arange(0, np.pi, np.pi / 16):
             kern = cv2.getGaborKernel((ksize, ksize), 4.0, theta, 10.0, 0.7, 0, ktype=cv2.CV_32F)
             kern /= 1.5 * kern.sum()
             filters.append(kern)
+
+        return filters
+
+    def process_threaded(self, img, filters, threadn=8):
+        accum = np.zeros_like(img)
+
+        def f(kern):
+            return cv2.filter2D(img, cv2.CV_8UC3, kern)
+
+        pool = ThreadPool(processes=threadn)
+        for fimg in pool.imap_unordered(f, filters):
+            np.maximum(accum, fimg, accum)
+        return accum
+
+
+class Filter_Neural2:
+    name = "Нейронный фильтр Sigma 6"
+
+    def __init__(self):
+        pass
+
+    def render(self, im, ret=False, inp=False):
+        if inp:
+            img = np.array(im)
+        else:
+            img = cv2.imread(im)
+        if img.shape[0] < 2000:
+            w = img.shape[1]
+            h = img.shape[0]
+            k = 2000 / w
+
+            img = cv2.resize(img, (2000, int(h * k)))
+        filters = self.build_filters()
+        res2 = self.process_threaded(img, filters)
+        if ret:
+            return res2
+        else:
+            cv2.imwrite(im, res2)
+
+    def build_filters(self):
+        filters = []
+
+        ksize = 150
+        for theta in np.arange(0, np.pi, np.pi / 16):
+            kern = cv2.getGaborKernel((ksize, ksize), 6.0, theta, 10.0, 0.7, 0, ktype=cv2.CV_32F)
+            kern /= 1.5 * kern.sum()
+            filters.append(kern)
+
+        return filters
+
+    def process_threaded(self, img, filters, threadn=8):
+        accum = np.zeros_like(img)
+
+        def f(kern):
+            return cv2.filter2D(img, cv2.CV_8UC3, kern)
+
+        pool = ThreadPool(processes=threadn)
+        for fimg in pool.imap_unordered(f, filters):
+            np.maximum(accum, fimg, accum)
+        return accum
+
+
+class Filter_Neural3:
+    name = "Нейронный фильтр sigma 5"
+
+    def __init__(self):
+        pass
+
+    def render(self, im, ret=False, inp=False):
+        if inp:
+            img = np.array(im)
+        else:
+            img = cv2.imread(im)
+        if img.shape[0] < 2000:
+            w = img.shape[1]
+            h = img.shape[0]
+            k = 2000 / w
+
+            img = cv2.resize(img, (2000, int(h * k)))
+        filters = self.build_filters()
+        res2 = self.process_threaded(img, filters)
+        if ret:
+            return res2
+        else:
+            cv2.imwrite(im, res2)
+
+    def build_filters(self):
+        filters = []
+
+        ksize = 150
+        for theta in np.arange(0, np.pi, np.pi / 16):
+            kern = cv2.getGaborKernel((ksize, ksize), 5.0, theta, 10.0, 0.7, 0, ktype=cv2.CV_32F)
+            kern /= 1.5 * kern.sum()
+            filters.append(kern)
+
+        return filters
+
+    def process_threaded(self, img, filters, threadn=8):
+        accum = np.zeros_like(img)
+
+        def f(kern):
+            return cv2.filter2D(img, cv2.CV_8UC3, kern)
+
+        pool = ThreadPool(processes=threadn)
+        for fimg in pool.imap_unordered(f, filters):
+            np.maximum(accum, fimg, accum)
+        return accum
+
+
+class Filter_Neural_Edges:
+    name = "Нейронный фильтр глубокий"
+
+    def __init__(self):
+        pass
+
+    def render(self, im, ret=False, inp=False):
+        if inp:
+            img = np.array(im)
+        else:
+            img = cv2.imread(im)
+        if img.shape[0] < 2000:
+            w = img.shape[1]
+            h = img.shape[0]
+            k = 2000 / w
+
+            img = cv2.resize(img, (2000, int(h * k)))
+        filters = self.build_filters()
+        res2 = self.process_threaded(img, filters)
+        if ret:
+            return res2
+        else:
+            cv2.imwrite(im, res2)
+
+    def build_filters(self):
+        filters = []
+
+        ksize = 150
+        for theta in np.arange(0, np.pi, np.pi / 16):
+            kern = cv2.getGaborKernel((ksize, ksize), 4.0, theta, 10.0, 0.7, 0.5, ktype=cv2.CV_32F)
+            kern /= 1.5 * kern.sum()
+            filters.append(kern)
+
+        return filters
+
+    def process_threaded(self, img, filters, threadn=8):
+        accum = np.zeros_like(img)
+
+        def f(kern):
+            return cv2.filter2D(img, cv2.CV_8UC3, kern)
+
+        pool = ThreadPool(processes=threadn)
+        for fimg in pool.imap_unordered(f, filters):
+            np.maximum(accum, fimg, accum)
+        return accum
+
+
+class Filter_Neural_Edges2:
+    name = "Нейронный фильтр глубокий 2"
+
+    def __init__(self):
+        pass
+
+    def render(self, im, ret=False, inp=False):
+        if inp:
+            img = np.array(im)
+        else:
+            img = cv2.imread(im)
+        if img.shape[0] < 2000:
+            w = img.shape[1]
+            h = img.shape[0]
+            k = 2000 / w
+
+            img = cv2.resize(img, (2000, int(h * k)))
+        filters = self.build_filters()
+        res2 = self.process_threaded(img, filters)
+        if ret:
+            return res2
+        else:
+            cv2.imwrite(im, res2)
+
+    def build_filters(self):
+        filters = []
+
+        ksize = 150
+        for theta in np.arange(0, np.pi, np.pi / 16):
+            kern = cv2.getGaborKernel((ksize, ksize), 4.0, theta, 10.0, 0.7, 5, ktype=cv2.CV_32F)
+            kern /= 2 * kern.sum()
+            filters.append(kern)
+
         return filters
 
     def process_threaded(self, img, filters, threadn=8):
