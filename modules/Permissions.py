@@ -1,0 +1,94 @@
+try:
+    from .__Command_template import *
+except:
+    from __Command_template import *
+
+
+class Command_SetStatus(Command_template):
+    name = ["status"]
+    access = ["admin"]
+    desc = "Устанавливает права на пользователя"
+    perm = 'core.SetStatus'
+
+    @staticmethod
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
+        print('Adduser: ', data)
+        bb = data['text'].split(' ')
+        user = bb[0]
+        stat = bb[1]
+        print(user, stat)
+        bot.USERS.SetStatus(user, stat)
+
+        userName = bot.GetUserNameById(user)
+        try:
+            args['message'] = 'Пользователю {} {} был установлен статус {}'.format(userName['first_name'],
+                                                                                   userName['last_name'],
+                                                                                   stat)
+
+        except:
+            args['message'] = 'Пользователю были даны следующие права [ {} ]'.format(stat)
+        # self.Reply(self.UserApi, MArgs)
+        bot.Replyqueue.put(args)
+        bot.SaveConfig()
+
+
+class Command_RemovePerms(Command_template):
+    name = ["rperms"]
+    access = ["admin"]
+    desc = "Снимает права у пользователя"
+    perm = 'core.Removeperms'
+
+    @staticmethod
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
+        print('Adduser: ', data)
+        bb = data['text'].split(' ')
+        user = bb[0]
+        perms = bb[1:]
+        bot.USERS.WritePerms(user, bot.USERS.Actions.Remove, *perms)
+
+        userName = bot.GetUserNameById(int(user))
+        try:
+            args['message'] = 'Пользователю {} {} были сняты следующие права [ {} ]'.format(userName['first_name'],
+                                                                                            userName['last_name'],
+                                                                                            ', '.join(perms))
+        except:
+            args['message'] = 'Пользователю были сняты следующие права [ {} ]'.format(', '.join(perms))
+        # self.Reply(self.UserApi, MArgs)
+        bot.Replyqueue.put(args)
+        bot.SaveConfig()
+
+
+class Command_WritePerms(Command_template):
+    name = ["perms"]
+    access = ["admin"]
+    desc = "Устанавливает права на пользователя"
+    perm = 'core.Writeperms'
+
+    @staticmethod
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
+        print('Adduser: ', data)
+        bb = data['text'].split(' ')
+        user = bb[0]
+        perms = bb[1:]
+        bot.USERS.WritePerms(user, bot.USERS.Actions.Add, *perms)
+
+        userName = bot.GetUserNameById(user)
+        try:
+            args['message'] = 'Пользователю {} {} были даны следующие права [ {} ]'.format(userName['first_name'],
+                                                                                           userName['last_name'],
+                                                                                           ', '.join(perms))
+
+        except:
+            args['message'] = 'Пользователю были даны следующие права [ {} ]'.format(', '.join(perms))
+        # self.Reply(self.UserApi, MArgs)
+        bot.Replyqueue.put(args)
+        bot.SaveConfig()

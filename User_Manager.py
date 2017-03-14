@@ -17,13 +17,16 @@ class Status:
     admin = 0
     moder = 1
     user = 99
+    Ян = 9999
+    superadmin = -1
 
     @staticmethod
     def getId(id):
         try:
+            print(id)
             return vars(Status)[id]
         except:
-            raise ('Unknows status')
+            raise Exception('Unknows status: {}'.format(id))
 
     @staticmethod
     def getName(id):
@@ -39,12 +42,13 @@ class UserManager:
     perms = 'perms'
     status = 'status'
     exclude = 'exclude'
+    currency = 'currency'
 
     def __init__(self):
         self.Stats = Status
         self.Actions = Actions
         self.DB = self.LoadConfig()
-        self.UserTemplate = {'status': 99, 'perms': ['text.*', 'photo.*'], 'warn': 0, 'exclude': []}
+        self.UserTemplate = {'status': 99, 'perms': ['text.*', 'photo.*'], 'warn': 0, 'exclude': [], 'currency': 100}
 
     def LoadConfig(self):
         path = getpath()
@@ -128,19 +132,45 @@ class UserManager:
             self.WriteUser(user, Status.user)
         return Status.getName(self.DB[user][UserManager.status])
 
+    def SetStatus(self, user, status):
+        user = str(user)
+        if user not in self.DB:
+            self.WriteUser(user, status)
+        else:
+            self.DB[user][UserManager.status] = Status.getId(status)
+            self.SaveConfig()
+        return
+
+    def GetStatusId(self, user):
+        user = str(user)
+        if user not in self.DB:
+            self.WriteUser(user, Status.user)
+        return self.DB[user][UserManager.status]
+
+    def GetCurrency(self, user):
+        # Идея взята у Яна
+        user = str(user)
+        return self.DB[user][UserManager.currency]
+
+    def UpdateCuttency(self, user, ammount):
+        ammount = int(ammount)
+        self.DB[user][UserManager.currency] += ammount
+        self.SaveConfig()
+
+    def SetCuttency(self, user, ammount):
+        ammount = int(ammount)
+        self.DB[user][UserManager.currency] = ammount
+        self.SaveConfig()
+
+    def _update(self):
+        for user, data in self.DB.items():
+            if 'currency' not in data:
+                data.update({'currency': 100})
+            print(data)
+            self.DB[user] = data
+        self.SaveConfig()
+
 
 if __name__ == "__main__":
     a = UserManager()
-    # a.WriteUser('test', 'admin', Actions.Add, 'core.Ban')
-    # a.WritePerms('test', Actions.Add, 'core.addUser', 'core.removeUser')
-    # a.WritePerms('test', Actions.Remove, 'core.removeUser')
-
-
-
-    a.WritePerms('test', Actions.Add, 'text.test')
-
-    # a.WriteUser('Red', 'admin')
-    # a.WritePerms('Red', Actions.Add, 'core.addUser', 'core.removeUser')
-    # print(a.HasPerm('Red', 'core.addUser'))
-    # print(a.HasPerm('Red', 'core.addAser'))
-    # print(a.HasPerm('Red', 'text.asda'))
+    a._update()

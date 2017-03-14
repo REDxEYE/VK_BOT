@@ -18,15 +18,22 @@ HDR = {
     'Accept-Language': 'en-US,en;q=0.8',
     'Connection': 'keep-alive'}
 
+try:
+    from .__Command_template import *
+except:
+    from __Command_template import *
 
-class Command_Kok:
-    name = "кок"
+
+class Command_Kok(Command_template):
+    name = ["кок"]
     access = ["all"]
     desc = "Зеркалит картинку"
     perm = 'photo.kok'
     @staticmethod
-    def execute(bot, data):
-        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
         try:
             att = data['attachments'][0]
             print(att)
@@ -44,14 +51,16 @@ class Command_Kok:
         bot.Replyqueue.put(args)
 
 
-class Command_Kek:
-    name = "кек"
+class Command_Kek(Command_template):
+    name = ["кек"]
     access = ["all"]
     desc = "Зеркалит картинку"
     perm = 'photo.kek'
     @staticmethod
-    def execute(bot, data):
-        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
         try:
             att = data['attachments'][0]
             print(att)
@@ -69,14 +78,16 @@ class Command_Kek:
         bot.Replyqueue.put(args)
 
 
-class Command_Filter:
-    name = "обработай"
+class Command_Filter(Command_template):
+    name = ["обработай"]
     access = ["all"]
     desc = "Позволяет применять фильтры к фото"
     perm = 'photo.filter'
     @staticmethod
-    def execute(bot, data):
-        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
         atts = data['attachments']
         Topost = []
         for att in atts:
@@ -88,9 +99,9 @@ class Command_Filter:
             img = urlopen(req).read()
             Tmp = TempFile(img, 'jpg', NoCache=True)
             args['message'] = 'Список фильтров:\n'
-            FArr = dict(enumerate(bot.FILTERS))
+            FArr = dict(enumerate(bot.MODULES.FILTERS))
             for filter_ in FArr:
-                Fname = bot.FILTERS[FArr[filter_]].name
+                Fname = bot.MODULES.FILTERS[FArr[filter_]].desc
                 args['message'] += "{}. {}\n".format(filter_ + 1, Fname)
             bot.Replyqueue.put(args)
 
@@ -99,9 +110,9 @@ class Command_Filter:
                 Tmp.rem()
                 args['message'] = "Время ожидания ответа истекло"
                 bot.Replyqueue.put(args)
-            filter_ = bot.FILTERS[FArr[ans]]
+            filter_ = bot.MODULES.FILTERS[FArr[ans]].funk
 
-            print('used filter {} {}'.format(ans, filter_.name))
+            print('used filter {}'.format(filter_.name))
 
             filter_().render(Tmp.path_)
 
@@ -114,14 +125,16 @@ class Command_Filter:
         bot.Replyqueue.put(args)
 
 
-class Command_Resize:
-    name = "увеличь"
+class Command_Resize(Command_template):
+    name = ["увеличь"]
     access = ["all"]
     desc = "Позволяет увеличивать\уменьшать фото"
     perm = 'photo.resize'
     @staticmethod
-    def execute(bot, data):
-        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
         atts = data['attachments']
         if 'size' in data['custom']:
             x = int(data['custom']['size'])
@@ -164,8 +177,8 @@ class Command_Resize:
         bot.Replyqueue.put(args)
 
 
-class Command_e621:
-    name = "e621"
+class Command_e621(Command_template):
+    name = ["e621"]
     access = ["admin", "editor", "moderator"]
     info = """Ищет пикчи на e612, форма запроса:\n
            Ред, e621\n
@@ -176,8 +189,10 @@ class Command_e621:
     desc = "Ищет пикчи на e612"
     perm = 'core.e621'
     @staticmethod
-    def execute(bot, data):
-        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
         tags = data['custom']['tags'].replace(' ', '').split(';') if 'tags' in data['custom'] else None
         if tags == None:
             args['message'] = Command_e926.info
@@ -186,19 +201,22 @@ class Command_e621:
         n = int(data['custom']['n']) if 'n' in data['custom'] else 5
         page = int(data['custom']['page']) if 'page' in data['custom'] else 1
         sort_ = data['custom']['sort'].replace(' ', '') if 'sort' in data['custom'] else 'score'
-        imgs = e6.get(tags=tags, n=n, page=page, sort_=sort_)
-        print(imgs)
-        atts = bot.UploadPhoto(imgs)
+        posts = e6.get(tags=tags, n=n, page=page, sort_=sort_)
+        msg_template = '{} - {}\nSources:\n{}\n'
+        msg = ""
+        for n, post in enumerate(posts):
+            msg += msg_template.format(n + 1, post['link'], '\n'.join(post['sources']))
+        atts = bot.UploadPhoto(list([post['url'] for post in posts]))
         args['attachment'] = atts
-        args['message'] = 'Вот порнушка по твоему запросу, шалунишка...'
+        args['message'] = 'Вот порнушка по твоему запросу, шалунишка...\n' + msg
         bot.Replyqueue.put(args)
 
 
-class Command_e926:
-    name = "e926"
+class Command_e926(Command_template):
+    name = ["e926"]
     access = ["all"]
     info = """Ищет пикчи на e926, форма запроса:\n
-           !e926\n
+           Ред, e926\n
            tags:тэги через ;\n
            sort:fav_count либо score либо вообще не пишите это, если хотите случайных\n
            n:кол-во артов(максимум 10)\n
@@ -206,8 +224,10 @@ class Command_e926:
     desc = "Ищет пикчи на e926"
     perm = 'photo.e926'
     @staticmethod
-    def execute(bot, data):
-        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
         tags = data['custom']['tags'].replace(' ', '').split(';') if 'tags' in data['custom'] else None
         if tags == None:
             args['message'] = Command_e926.info
@@ -216,22 +236,27 @@ class Command_e926:
         n = int(data['custom']['n']) if 'n' in data['custom'] else 5
         page = int(data['custom']['page']) if 'page' in data['custom'] else 1
         sort_ = data['custom']['sort'].replace(' ', '') if 'sort' in data['custom'] else 'score'
-        imgs = e6.getSafe(tags=tags, n=n, page=page, sort_=sort_)
-        print(imgs)
-        atts = bot.UploadPhoto(imgs)
+        posts = e6.getSafe(tags=tags, n=n, page=page, sort_=sort_)
+        msg_template = '{} - {}\nSources:\n{}\n'
+        msg = ""
+        for n, post in enumerate(posts):
+            msg += msg_template.format(n + 1, post['link'], '\n'.join(post['sources']))
+        atts = bot.UploadPhoto(list([post['url'] for post in posts]))
         args['attachment'] = atts
-        args['message'] = 'Вот пикчи по твоему запросу'
+        args['message'] = 'Вот пикчи по твоему запросу\n' + msg
         bot.Replyqueue.put(args)
 
 
-class Command_rollRows:
-    name = "rollrows"
+class Command_rollRows(Command_template):
+    name = ["rollrows"]
     access = ["all"]
     desc = "Сдвигает строки в фото"
     perm = 'photo.rollRows'
     @staticmethod
-    def execute(bot, data):
-        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
         delta = int(args['delta']) if 'delta' in data['custom'] else 20
         atts = data['attachments']
         Topost = []
@@ -254,14 +279,16 @@ class Command_rollRows:
         bot.Replyqueue.put(args)
 
 
-class Command_rollRowssmart:
-    name = "rollsmart"
+class Command_rollRowssmart(Command_template):
+    name = ["rollsmart"]
     access = ["all"]
     desc = "Сдвигает строки в фото"
     perm = 'photo.rollRowssmart'
     @staticmethod
-    def execute(bot, data):
-        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
         delta = int(args['delta']) if 'delta' in data['custom'] else 20
         atts = data['attachments']
         Topost = []
@@ -284,14 +311,16 @@ class Command_rollRowssmart:
         bot.Replyqueue.put(args)
 
 
-class Command_AddImages:
-    name = "сложи"
+class Command_AddImages(Command_template):
+    name = ["сложи"]
     access = ['all']
     desc = "Соединяет 2 фото"
     perm = 'photo.add'
     @staticmethod
-    def execute(bot, data):
-        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
         atts = data['attachments']
         # print(atts)
         if len(atts) < 2:
@@ -325,14 +354,16 @@ class Command_AddImages:
         bot.Replyqueue.put(args)
 
 
-class Command_merge:
-    name = "совмести"
+class Command_merge(Command_template):
+    name = ["совмести"]
     access = ['all']
     desc = "Соединяет 2 фото"
     perm = 'photo.merge'
     @staticmethod
-    def execute(bot, data):
-        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
         atts = data['attachments']
         # print(atts)
         if len(atts) < 2:
@@ -366,14 +397,16 @@ class Command_merge:
         bot.Replyqueue.put(args)
 
 
-class Command_screen:
-    name = "скрин"
+class Command_screen(Command_template):
+    name = ["скрин"]
     access = ['admin']
     desc = "Скрин экрана"
     perm = 'core.screen'
     @staticmethod
-    def execute(bot, data):
-        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
         im = ImageGrab.grab()
         pt = TempFile.generatePath('jpg')
         im.save(pt)
@@ -383,14 +416,17 @@ class Command_screen:
         bot.Replyqueue.put(args)
 
 
-class Command_GlitchImg:
-    name = "глитч"
+class Command_GlitchImg(Command_template):
+    name = ["глитч"]
     access = ["all"]
     desc = "Глючит фото"
     perm = 'photo.glitch'
+
     @staticmethod
-    def execute(bot, data):
-        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
         atts = data['attachments']
         Topost = []
 

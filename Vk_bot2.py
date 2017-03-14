@@ -1,8 +1,6 @@
-import importlib
 import io
 import queue
 import re
-import sys
 import threading
 import tkinter as tk
 import traceback
@@ -18,6 +16,7 @@ from PIL import Image, ImageTk
 from vk import *
 
 from AIML_module import Responder
+from Module_Manager import *
 from User_Manager import *
 from tempfile_ import *
 
@@ -86,57 +85,54 @@ class SessionCapchaFix(Session):
 
 class Bot:
     def __init__(self, threads=4, LP_Threads=1, DEBUG=False):
-        self.USERS = UserManager()
 
-        self.DEBUG = DEBUG
-        self.AdminModeOnly = False
-        self.defargs = {"v": "5.60"}
-        self.LoadConfig()
-        self.SaveConfig()
         self.Responder = Responder()
         self.Longpool = queue.Queue()
         self.Checkqueue = queue.Queue()
         self.Replyqueue = queue.Queue()
-        self.UserAccess_token = self.Settings['UserAccess_token']
-        self.GroupAccess_token = self.Settings['GroupAccess_token']
-        self.UserSession = SessionCapchaFix(access_token=self.UserAccess_token)
-        self.DefSession = SessionCapchaFix()
-        self.GroupSession = SessionCapchaFix(access_token=self.GroupAccess_token)
-        self.UserApi = API(self.UserSession)
-        self.DefApi = API(self.DefSession)
-        self.GroupApi = API(self.GroupSession)
-        self.log = io.open("Message_Log.Log", mode="ta", newline="\n", encoding="utf-8")
         self.LP_threads = []
         for i in range(LP_Threads):
             self.LP_threads.append(threading.Thread(target=self.parseLongPool))
             self.LP_threads[i].setDaemon(True)
             self.LP_threads[i].start()
+            print('LongPool thread №{} started'.format(i))
         self.EX_threadList = []
         for i in range(threads):
             self.EX_threadList.append(threading.Thread(target=self.ExecCommands))
             self.EX_threadList[i].setDaemon(True)
             self.EX_threadList[i].start()
+            print('Exec thread №{} started'.format(i))
+        self.USERS = UserManager()
+        self.MODULES = ModuleManager()
+        self.DEBUG = DEBUG
+
+        self.AdminModeOnly = False
+
+        self.defargs = {"v": "5.60"}
+
+        self.LoadConfig()
+        self.SaveConfig()
+
+        self.UserAccess_token = self.Settings['UserAccess_token']
+        self.GroupAccess_token = self.Settings['GroupAccess_token']
+
+        self.UserSession = SessionCapchaFix(access_token=self.UserAccess_token)
+        self.DefSession = SessionCapchaFix()
+        self.GroupSession = SessionCapchaFix(access_token=self.GroupAccess_token)
+
+        self.UserApi = API(self.UserSession)
+        self.DefApi = API(self.DefSession)
+        self.GroupApi = API(self.GroupSession)
+
+        self.log = io.open("Message_Log.Log", mode="ta", newline="\n", encoding="utf-8")
 
         self.ReplyThread = threading.Thread(target=self.Reply)
         self.ReplyThread.setDaemon(True)
         self.ReplyThread.start()
+
         self.MyUId = self.UserApi.users.get()[0]['uid']
         self.MyName = self.GetUserNameById(self.MyUId)
-        self.Botmodules = {"filters": {}, "commands": {}}
-        self.modules = os.listdir(os.path.join(getpath(), "modules"))
-        sys.path.append(os.path.join(getpath(), "modules"))
-        for module in self.modules:
-            if not module.startswith("__"):
-                print("Importing module {}".format(module))
-                module = importlib.import_module(str(module.split(".")[0]))
-                for class_ in dir(module):
-                    if class_.startswith("Filter"):
-                        self.Botmodules['filters'][class_.split("_")[-1]] = getattr(module, class_)
-                    if class_.startswith("Command"):
-                        funk = getattr(module, class_)
-                        print("Importing command {}".format(class_))
-                        self.Botmodules['commands'][funk.name] = getattr(module, class_)
-        self.FILTERS = self.Botmodules['filters']
+
         print('LOADED')
     def GetUserFromMessage(self, message_id):
         sleep(0.25)
@@ -339,13 +335,34 @@ class Bot:
         return result
 
     def ExecCommands(self):
+
+        def process_fwd_msg(self, data):
+            if 'fwd' in data['atts']:
+                try:
+                    atts = self.UserApi.messages.getById(v="5.60", message_ids=data['message_id'])['items'][0][
+                        'fwd_messages'][0]
+                    print(atts)
+                    if 'attachments' in atts:
+                        for att in atts['attachments']:
+                            print(att)
+                            try:
+                                data['attachments'].append("{}_{}".format(att['photo']['owner_id'], att['photo']['id']))
+                            except:
+                                data['attachments'].extend(atts)
+                    else:
+                        return data
+                except Exception as E:
+                    print(E)
+                    pass
+
+            return data
         while True:
             data = self.Checkqueue.get()
             sleep(0.3)
             self.Stat['messages'] = self.Stat['messages'] + 1
             self.SaveConfig()
             if self.AdminModeOnly:
-                if "admin" != self.GetUserGroup(data['user_id']):
+                if 0 <= self.USERS.GetStatusId(data['user_id']):
                     continue
             defargs = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
 
@@ -355,10 +372,13 @@ class Bot:
             data['message'] = emoji_pattern.sub('', data['message'])
             try:
                 user = self.GetUserNameById(data['user_id'])
-                toPrint = (data['subject'] if "..." not in data['subject'] else "Личка") + " : " + user[
-                    'first_name'] + ' ' + user['last_name'] + " : " + data['message']
-                toPrint += '\n' + '[ message_id : ' + str(data['message_id']) + '  peer_id : ' + str(
-                    data['peer_id']) + " ]\n" if self.DEBUG else "\n"
+                template = '{} : {} : \n| {}\n'
+                template2 = '[ message_id : {} | peer_id : {} ]\n'
+                subj = "PM" if "..." in data['subject'] else data['subject']
+                usr = user['first_name'] + ' ' + user['last_name']
+                msg = data['message'].replace('<br>', '\n| ')
+                toPrint = template.format(subj, usr, msg) + template2.format(str(data['message_id']), str(
+                    data['peer_id'])) if self.DEBUG else '\n'
                 print(toPrint, type_='message')
                 self.log.write(toPrint)
                 self.log.flush()
@@ -389,20 +409,11 @@ class Bot:
 
             if (data['message'].lower().startswith(self.MyName['first_name'].lower())) or (
                     data['message'].lower().startswith('ред')):
-                if 'fwd' in data['atts']:
-                    message = data['atts']['fwd'].split(',')[0].split('_')[1]
-                    try:
-                        atts = self.UserApi.messages.getById(v="5.60", message_ids=data['message_id'])['items'][0][
-                            'fwd_messages'][0]['attachments']
-                    except:
-                        pass
-                    for att in atts:
-                        try:
-                            data['attachments'].append("{}_{}".format(att['photo']['owner_id'], att['photo']['id']))
-                        except:
-                            data['attachments'].extend(atts)
+
+                data = process_fwd_msg(self, data)
 
                 args["text"] = ' '.join(text.split(' ')[1:])
+
 
                 Command = Command.split(' ')[0]
                 if Command in self.Settings['bannedCommands']:
@@ -410,13 +421,13 @@ class Bot:
                         self.Checkqueue.task_done()
                         return
 
-                if Command in self.Botmodules['commands']:
-                    funk = self.Botmodules['commands'][Command]
+                if self.MODULES.isValid(Command):
+                    funk = self.MODULES.GetModule(Command)
                     user = data["user_id"]
-                    if self.USERS.HasPerm(user, funk.perm):
+                    if self.USERS.HasPerm(user, funk.perms):
                         try:
                             print("Trying to execute commnad {},\n arguments:{}".format(Command, args))
-                            stat = funk.execute(self, args)
+                            stat = funk.funk.execute(self, args)
                             if stat == False:
                                 defargs['message'] = 'Неправильно оформлен запрос. Пример запроса : {}'.format(
                                     funk.template.format(self.MyName['first_name']))
@@ -457,7 +468,6 @@ class Bot:
 
                 else:
                     ans = self.Responder.respond(str(data['message']), args['user_id'])
-                    print(ans)
                     if ans == "":
                         continue
                     if ans == "IT'S HIGH NOON":
@@ -504,9 +514,7 @@ class Bot:
             tmpf = {'chat_id': int(MSData['peer_id']) - 2000000000, "crop_x": ((img.size[0] - 350) / 2),
                     'crop_y': (((img.size[1] - 350) / 2) - 30), 'crop_width': 350}
             Uurl = self.UserApi.photos.getChatUploadServer(**tmpf)
-            print(Uurl)
             req = requests.post(Uurl['upload_url'], files={'file1': open('CHAT_IMG.jpg', 'rb')})
-            print(req.text)
             self.UserApi.messages.setChatPhoto(**{'file': req.json()['response']})
 
         if type == 'chat_title_update':
@@ -529,7 +537,6 @@ class Bot:
 
         if type == 'chat_invite_user':
             ChatAdmin = self.UserApi.messages.getChat(chat_id=MSData['peer_id'] - 2000000000)['admin_id']
-            print(ChatAdmin)
             if int(ChatAdmin) != self.MyUId:
                 return
             who = data['from']  # Кто пригласил
@@ -538,7 +545,7 @@ class Bot:
             if int(target) == self.MyUId or int(who) == self.MyUId:
                 print('Сам себя')
                 return
-            if (not self.USERS.HasPerm(who, 'chat.invite')) or self.USERS.GetStatus(target) in ['admin', 'moder']:
+            if (not self.USERS.HasPerm(who, 'chat.invite')) or self.USERS.GetStatusId(target) < 99:
                 Targs['message'] = 'Вы не имеете права приглашать людей в данную беседу'
                 self.Replyqueue.put(Targs)
                 name = self.GetUserNameById(int(target))

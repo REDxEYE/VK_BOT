@@ -23,6 +23,7 @@ import pymorphy2
 import requests
 from vk import API
 
+import VK_foaf
 from Vk_bot2 import SessionCapchaFix
 from tempfile_ import TempFile
 
@@ -50,7 +51,7 @@ def prettier_size(n, pow=0, b=1024, u='B', pre=[''] + [p + 'i' for p in 'KMGTPEZ
 
 
 class Command_Whom(Command_template):
-    name = "кого"
+    name = ["кого"]
     access = ["all"]
     desc = "Выбирает случайного человека"
     perm = 'text.whom'
@@ -109,7 +110,7 @@ class Command_Whom(Command_template):
 
 
 class Command_Who(Command_template):
-    name = "кто?"
+    name = ["кто?"]
     access = ["all"]
     desc = "Выбирает случайного человека"
     perm = 'text.who'
@@ -184,7 +185,7 @@ class Command_Who(Command_template):
 
 
 class Command_Prob(Command_template):
-    name = "вероятность"
+    name = ["вероятность"]
     access = ["all"]
     desc = "Процент правдивости инфы"
     perm = 'text.prob'
@@ -205,7 +206,7 @@ class Command_Prob(Command_template):
 
 
 class Command_Where(Command_template):
-    name = "где"
+    name = ["где"]
     access = ["all"]
     desc = "Говорит где что находится "
     perm = 'text.where'
@@ -222,7 +223,7 @@ class Command_Where(Command_template):
 
 
 class Command_You(Command_template):
-    name = "ты!"
+    name = ["ты!"]
     access = ['all']
     desc = "Не обзывай бота"
     template = "Чё блоть? Это сообщение не должно выводится ни в каком случае. Что вы сделали что б бот его написал? Это невозможно блоть"
@@ -245,7 +246,7 @@ class Command_You(Command_template):
         msg = random.choice(replies)
 
         try:
-            args['message'] = msg.format(' '.join(data['text'].split(' ')[1:]))
+            args['message'] = msg.format(' '.join(data['text'].split(' ')))
         except:
             args['message'] = msg
         # self.Reply(self.UserApi, args)
@@ -254,7 +255,7 @@ class Command_You(Command_template):
 
 
 class Command_Help(Command_template):
-    name = "команды"
+    name = ["команды", "помощь"]
     access = ['all']
     desc = "Выводит это сообщение"
     template = "Чё блоть? Это сообщение не должно выводится ни в каком случае. Что вы сделали что б бот его написал? Это невозможно блоть"
@@ -264,16 +265,17 @@ class Command_Help(Command_template):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
         if forward:
             args.update({"forward_messages": data['message_id']})
-        a = ""
-        for command in bot.Botmodules['commands'].keys():
-            a += 'Команда: "{}", {}\n'.format(command, bot.Botmodules['commands'][command].desc)
+        a = "Вам доступны:\n"
+        UserPerms = bot.USERS.GetPerms(data['user_id'])
+        for command in bot.MODULES.GetAvailable(UserPerms):
+            a += 'Команда: "{}", {}\n'.format('" или "'.join(command.names), command.desc)
         args['message'] = str(a)
         bot.Replyqueue.put(args)
         return True
 
 
 class Command_resend(Command_template):
-    name = "перешли"
+    name = ["перешли"]
     access = ['all']
     desc = "Пересылает фото"
     template = "Чё блоть? Это сообщение не должно выводится ни в каком случае. Что вы сделали что б бот его написал? Это невозможно блоть"
@@ -307,12 +309,12 @@ class Command_resend(Command_template):
         return True
 
 
-class Command_kik(Command_template):
-    name = "изгнать"
+class Command_kick(Command_template):
+    name = ["изгнать", "kick", "votekick"]
     access = ['admin', 'moderator', 'editor']
     desc = "Изгоняет пользователя"
     template = "{}, изгнать UID1 UID2 UID3"
-    perm = 'chat.kik'
+    perm = 'chat.kick'
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -321,10 +323,9 @@ class Command_kik(Command_template):
         ToKick = list(data['custom']['id']) if 'id' in data['custom'] else data['text'].split(' ')
         if len(ToKick) < 1:
             return False
-        Admins = list([bot.UserGroups[user] for user in bot.UserGroups])
 
         for user in ToKick:
-            if int(user) in Admins:
+            if bot.USERS.GetStatus(data['user_id']) in ['admin', 'moder']:
                 args['message'] = "Нельзя кикать администрацию"
                 bot.Replyqueue.put(args)
                 continue
@@ -337,7 +338,7 @@ class Command_kik(Command_template):
 
 
 class Command_JoinFiveNigths(Command_template):
-    name = "5nights"
+    name = ["5nights"]
     access = ["all"]
     desc = "Добавляет в беседу"
     perm = 'text.joinChat'
@@ -371,7 +372,7 @@ class Command_JoinFiveNigths(Command_template):
 
 
 class Command_ExecCode(Command_template):
-    name = "py"
+    name = ["py", "python"]
     access = ['admin']
     desc = "Выполняет код из сообщения"
     perm = 'core.PY'
@@ -398,7 +399,6 @@ class Command_ExecCode(Command_template):
                     print_('Вызов ',item,' запрещён')
                     return self
                 def __getattr__(self, item):
-
                     print_('Вызов атрибута ',item,' запрещён')
                     return self
                 def __getitem__(self, item):
@@ -450,7 +450,7 @@ class Command_ExecCode(Command_template):
 
 
 class Command_StatComm(Command_template):
-    name = "инфо"
+    name = ["инфо", "инфа", "info", 'stats', 'stat']
     access = ["all"]
     desc = "Статистика"
     perm = 'text.info'
@@ -459,16 +459,16 @@ class Command_StatComm(Command_template):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
         if forward:
             args.update({"forward_messages": data['message_id']})
-        msg = 'Кол-во обработанных сообщений: {}\nКол-во выполеных команд: {}\nРазмер кэша: {}\nКол-во живых потоков: {}\n'
-        args['message'] = msg.format(bot.Stat['messages'], bot.Stat['commands'], str(
+        msg = 'Кол-во обработанных сообщений: {}\nКол-во выполеных команд: {}\nЗарегестрировано польхователей: {}\nРазмер кэша: {}\nКол-во живых потоков: {}\n'
+        args['message'] = msg.format(bot.Stat['messages'], bot.Stat['commands'], len(bot.USERS.DB), str(
             prettier_size((os.path.getsize(os.path.join(getpath(), "../", 'tmp', 'cache.zip'))))),
-                                     len([thread for thread in bot.EX_threadList if thread.isAlive()]))
+                                     len([thread for thread in bot.EX_threadList if thread.is_alive()]))
         bot.Replyqueue.put(args)
         return True
 
 
 class Command_AdminOnly(Command_template):
-    name = "дебаг"
+    name = ["дебаг"]
     access = ["admin"]
     desc = "Врубает режим АдминОнли"
     perm = 'core.debug'
@@ -485,13 +485,13 @@ class Command_AdminOnly(Command_template):
         return True
 
 
-class Command_BanAllGroupUsers(Command_template):
-    name = "забанитьнафигвсех"
+class _Command_BanAllGroupUsers(Command_template):
+    name = ["забанитьнафигвсех"]
     access = ["admin"]
     desc = "Банит всех участников группы к фигам"
     perm = 'core.banNahoi'
     @staticmethod
-    def execute(bot, data):
+    def execute(bot, data, forward=True):
         exclude = 75615891
         ToBan = bot.GroupApi.groups.getMembers(group_id=data['custom']["id"])['items']
         if data['custom']["id"] == exclude:
@@ -519,60 +519,29 @@ class Command_BanAllGroupUsers(Command_template):
             bot.GroupApi.groups.banUser(**args)
 
 
-class Command_WritePerms(Command_template):
-    name = "perms"
-    access = ["admin"]
-    desc = "Устанавливает права на пользователя"
-    perm = 'core.Writeperms'
+class Command_About(Command_template):
+    name = ['about', 'ктоты']
+    access = ['all']
+    desc = 'Выводит информацию о боте'
+    perm = 'text.about'
 
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
         if forward:
             args.update({"forward_messages": data['message_id']})
-        print('Adduser: ', data)
-        bb = data['text'].split(' ')
-        user = bb.pop()
-        perms = bb
-        bot.USERS.WritePerms(user, bot.USERS.Actions.Add, perms)
 
-        userName = bot.GetUserNameById(user)
-        args['message'] = 'Пользователю {} {} были даны следующие права [ {} ]'.format(userName['first_name'],
-                                                                                       userName['last_name'],
-                                                                                       ', '.join(perms))
-        # self.Reply(self.UserApi, MArgs)
+        args['message'] = \
+            'Создан *red_eye_rus (Red Dragon)\n' \
+            'Множество идей взяты у *rukifox (Яна)\n' \
+            'GitHub: www.github.com/REDxEYE/VK_BOT\n'
         bot.Replyqueue.put(args)
-        bot.SaveConfig()
 
-
-class Command_RemovePerms(Command_template):
-    name = "perms"
-    access = ["admin"]
-    desc = "Устанавливает права на пользователя"
-    perm = 'core.Removeperms'
-    @staticmethod
-    def execute(bot, data, forward=True):
-        args = {"peer_id": data['peer_id'], "v": "5.60", }
-        if forward:
-            args.update({"forward_messages": data['message_id']})
-        print('Adduser: ', data)
-        bb = data['text'].split(' ')
-        user = bb.pop()
-        perms = bb
-        bot.USERS.WritePerms(user, bot.USERS.Actions.Remove, perms)
-
-        userName = bot.GetUserNameById(user)
-        args['message'] = 'Пользователю {} {} были сняты следующие права [ {} ]'.format(userName['first_name'],
-                                                                                        userName['last_name'],
-                                                                                        ', '.join(perms))
-        # self.Reply(self.UserApi, MArgs)
-        bot.Replyqueue.put(args)
-        bot.SaveConfig()
 
 
 
 class Command_LockName(Command_template):
-    name = "namelock"
+    name = ["namelock"]
     access = ["admin"]
     desc = "Лочит имя беседы"
     perm = 'chat.LockName'
@@ -597,26 +566,26 @@ class Command_LockName(Command_template):
 
 
 class Command_quit(Command_template):
-    name = "shutdown"
+    name = ["shutdown"]
     access = ["admin"]
     desc = "Выключение бота"
     perm = 'core.shutdown'
     @staticmethod
-    def execute(bot, data):
+    def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id'],
                 "message": "Увидимся позже"}
         bot.Replyqueue.put(args)
         sleep(2)
-        os._exit(-9)
+        os._exit(0)
 
 
 class Command_restart(Command_template):
-    name = "рестарт"
+    name = ["рестарт"]
     access = ['admin']
     desc = "Рестарт бота"
     perm = 'core.restart'
     @staticmethod
-    def execute(bot, data):
+    def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60"}
         args['message'] = "Перезапуск всех потоков начат"
         bot.Replyqueue.put(args)
@@ -687,8 +656,8 @@ class Command_restart(Command_template):
         # #os.execv(__file__, sys.argv)
 
 
-class Command_Zadolbali(Command_template):
-    name = "этослучилось"
+class Command_ithappens(Command_template):
+    name = ["этослучилось", 'ithappens']
     access = ["all"]
     desc = "Рандомная история с ithappens.me"
     perm = 'text.Zadolbali'
@@ -706,7 +675,7 @@ class Command_Zadolbali(Command_template):
 
     @staticmethod
     def strip_tags(html):
-        s = Command_Zadolbali.MLStripper()
+        s = Command_ithappens.MLStripper()
         s.feed(html)
         return s.get_data()
 
@@ -721,7 +690,7 @@ class Command_Zadolbali(Command_template):
 
          {}
           {}"""
-        msg = template.format(zz['title'], Command_Zadolbali.strip_tags(zz['summary']), zz['link'])
+        msg = template.format(zz['title'], Command_ithappens.strip_tags(zz['summary']), zz['link'])
         args['message'] = msg
         bot.Replyqueue.put(args)
         return True
@@ -731,12 +700,12 @@ class Command_Zadolbali(Command_template):
 
 
 class Command_banCommand(Command_template):
-    name = "блок"
+    name = ["блок"]
     access = ["admin", "editor", "moderator"]
     desc = "блокирует команду в чате"
     perm = 'chat.BlockCommand'
     @staticmethod
-    def execute(bot, data):
+    def execute(bot, data, forward=True):
         comm = data['custom']['команда']
         if comm in ['bannedCommands']:
             bot.Settings['bannedCommands'][comm].append(str(data['peer_id']))
@@ -745,7 +714,7 @@ class Command_banCommand(Command_template):
 
 
 class Command_Choice(Command_template):
-    name = "выбери"
+    name = ["выбери"]
     access = ["all"]
     desc = "Выбирает из представленных вариантов"
     perm = 'text.choice'
@@ -762,7 +731,7 @@ class Command_Choice(Command_template):
 
 
 class Command_EvalJS(Command_template):
-    name = 'EvalJS'
+    name = ['EvalJS']
     access = ['admin']
     desc = 'Выполняет JS скрипт'
     perm = 'core.EvJs'
@@ -781,7 +750,7 @@ class Command_EvalJS(Command_template):
 
 
 class Command_ExecJS(Command_template):
-    name = 'ExecJS'
+    name = ['ExecJS']
     access = ['admin']
     desc = 'Выполняет JS скрипт, (вызываетмый метод - exec)'
     perm = 'core.ExJs'
@@ -815,9 +784,9 @@ class Command_ExecJS(Command_template):
 #        args['message'] = l
 #        bot.Replyqueue.put(args)
 class Command_TTS(Command_template):
-    name = "скажи"
+    name = ["скажи"]
     access = ['all']
-    desc = 'asd'
+    desc = 'Произносит ваш текст на выбранном языке ("Имя бота", "нужный язык (2буквы)" " ВАШ ТЕКСТ")'
     perm = 'text.tts'
     @staticmethod
     def execute(bot, data, forward=True):
@@ -829,7 +798,9 @@ class Command_TTS(Command_template):
         print(apiurl)
         server = json.loads(urlopen(apiurl).read().decode('utf-8'))['response']['upload_url']
         print(server)
-        text = data['message'].replace('<br>', '').split(Command_TTS.name)[-1].split(" ")[1:]
+        for i in Command_TTS.name:
+            if i in data['message']:
+                text = data['message'].replace('<br>', '').split(i)[-1].split(" ")[1:]
         # text = data['text'].split(' ')
         print(text)
         lang = text[0]
@@ -861,13 +832,13 @@ class Command_TTS(Command_template):
             bot.Replyqueue.put(args)
 
 
-class Command_RemoteExec:
-    name = "безпалева"
+class Command_RemoteExec(Command_template):
+    name = ["безпалева"]
     access = ['admin']
     desc = "Выполняет команду в лс/беседе другого человека"
     perm = 'core.remoteExec'
     @staticmethod
-    def execute(bot, data):
+    def execute(bot, data, forward=True):
         RemoteData = copy.deepcopy(data)
         args = {"peer_id": data['peer_id'], "v": "5.60"}
         CustomArgs = data['custom']
@@ -899,7 +870,9 @@ class Command_RemoteExec:
             bot.Replyqueue.put(args)
             return "error"
         try:
-            bot.Botmodules['commands'][CustomArgs['command'].replace(' ', '')].execute(bot, RemoteData, False)
+            bot.MODULES.GetModule[CustomArgs['command'].replace(' ', '')][bot.MODULES.TYPES.funk].execute(bot,
+                                                                                                          RemoteData,
+                                                                                                          False)
         except Exception as E:
 
             exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -913,7 +886,7 @@ class Command_RemoteExec:
 
 
 class Command_AboutUser(Command_template):
-    name = 'whoami'
+    name = ['whoami', "uname"]
     access = ['user']
     desc = 'Выводит информацию о вашем статусе и правах у бота'
     perm = 'text.whoami'
@@ -926,8 +899,81 @@ class Command_AboutUser(Command_template):
 
         userperms = bot.USERS.GetPerms(data['user_id'])
         userstatus = bot.USERS.GetStatus(data['user_id'])
-
-        msg_template = "Ваш статус - {}\nВаши права :\n{}"
-        msg = msg_template.format(userstatus, ',\n'.join(userperms))
+        UD = VK_foaf.GetUser(data['user_id'])
+        msg_template = "Ваш статус - {}\nВаш id - {}\nВаши права :\n{}\nЗарегистрирован {}\nДень рождения {}\n пол {}\nКол-во внутренней валюты: {}\n"
+        msg = msg_template.format(userstatus, data['user_id'], ',\n'.join(userperms), UD['reg'], UD['Bday'],
+                                  UD['gender'], bot.USERS.GetCurrency(data['user_id']))
         args['message'] = msg
         bot.Replyqueue.put(args)
+
+
+class Command_Whois(Command_template):
+    name = ['whois']
+    access = ['user']
+    desc = 'Выводит информацию о вашем статусе и правах у бота'
+    perm = 'text.whois'
+
+    @staticmethod
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
+        bb = data['text'].split(' ')
+        user = bb[0]
+
+        try:
+            userperms = bot.USERS.GetPerms(user)
+            userstatus = bot.USERS.GetStatus(user)
+            UD = VK_foaf.GetUser(user)
+        except:
+            userperms = "Незарегестрирован"
+            userstatus = "Незарегестрирован"
+            UD = {}
+            UD['reg'] = "ОШИБКА"
+            UD['Bday'] = "ОШИБКА"
+            UD['gender'] = "ОШИБКА"
+        userName = bot.GetUserNameById(user)
+
+        msg_template = "Cтатус пользователя - {}\nЕго ФИО - {} {}\nЕго права :\n{}\nЗарегистрирован {}\nДень рождения {}\n пол {}\n"
+        msg = msg_template.format(userstatus, userName['first_name'], userName['last_name'],
+                                  ',\n'.join(userperms) if isinstance(userperms, list) else userperms, UD['reg'],
+                                  UD['Bday'], UD['gender'])
+        args['message'] = msg
+        bot.Replyqueue.put(args)
+
+
+class Command_Zashkvar(Command_template):
+    name = ['зашквар', "жир"]
+    access = ['user']
+    desc = 'Замеряет зашкварность сообщения'
+    perm = 'text.zashkvar'
+
+    @staticmethod
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
+        if 'fwd' in data['atts']:
+            try:
+                message = bot.UserApi.messages.getById(v="5.60", message_ids=data['message_id'])['items'][0][
+                    'fwd_messages'][0]
+                try:
+                    temp = len(message['body'])
+                except:
+                    temp = message['date']
+            except:
+                args['message'] = "Непонятная ошибочка."
+                bot.Replyqueue.put(args)
+                return
+
+            print(temp)
+            random.seed(temp)
+            zh = random.randint(0, 100)
+            template = "Зашкварность - {}%"
+            args['message'] = template.format(zh)
+            bot.Replyqueue.put(args)
+
+
+        else:
+            args['message'] = "Нечего мерять. Прикрепи к команде сообшение зашкварность которого хочешь померять"
+            bot.Replyqueue.put(args)

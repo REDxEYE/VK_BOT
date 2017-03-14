@@ -13,15 +13,22 @@ HDR = {
     'Accept-Language': 'en-US,en;q=0.8',
     'Connection': 'keep-alive'}
 
+try:
+    from .__Command_template import *
+except:
+    from __Command_template import *
 
-class Command_WantedFunk:
-    name = "wanted"
+
+class Command_WantedFunk(Command_template):
+    name = ["wanted"]
     access = ["all"]
     desc = "Вставляет 2 фото внутрь фото с написью Разыскивается"
     perm = 'photo.wanted'
     @staticmethod
-    def execute(bot, data):
-        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
         atts = data['attachments']
         # print(atts)
         Topost = []
@@ -53,14 +60,16 @@ class Command_WantedFunk:
         bot.Replyqueue.put(args)
 
 
-class Command_JonTronFunk:
-    name = "jontron"
+class Command_JonTronFunk(Command_template):
+    name = ["jontron"]
     access = ['all']
     desc = "Вставляет фото в фото с ДжонТроном"
     perm = 'photo.jontron'
     @staticmethod
-    def execute(bot, data):
-        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
         atts = data['attachments']
         # print(atts)
         Topost = []
@@ -96,14 +105,16 @@ class Command_JonTronFunk:
         bot.Replyqueue.put(args)
 
 
-class Command_SayMaxFunk:
-    name = "saymax"
+class Command_SayMaxFunk(Command_template):
+    name = ["saymax"]
     access = ['all']
     desc = "Даёте подержать ваше фото Сойке"
     perm = 'photo.saymax'
     @staticmethod
-    def execute(bot, data):
-        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
         atts = data['attachments']
         # print(atts)
         Topost = []

@@ -1,10 +1,8 @@
 import json
 import random
 import urllib.request
-from io import StringIO
 from json import loads
 from urllib.request import urlopen
-from xml.etree import ElementTree
 
 import requests
 from bs4 import BeautifulSoup
@@ -98,14 +96,7 @@ def e926(tags, n, page, sort_=None):
         return ss[:n]
 
 
-
-
-
-
-        # return link
-
-
-def e926v2(tags, n, sort_=None):
+def e926v2(tags, n, sort_='score'):
     hdr = {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -113,22 +104,18 @@ def e926v2(tags, n, sort_=None):
         'Accept-Encoding': 'none',
         'Accept-Language': 'en-US,en;q=0.8',
         'Connection': 'keep-alive'}
+    linkTemplate = "http://e926.net/post/show/{}/"
     js = json.loads(requests.request('GET', 'http://e926.net/post/index.json?tags={}'.format(' '.join(tags))).text)
+    Posts = []
 
-    aa = {}
     for post in js:
-
-        try:
-            if sort_:
-                aa[post['file_url']] = int(post[sort_])
-
-
-        except:
+        if post['file_ext'] in ['jpg', 'png', 'jpeg']:
+            Posts.append({'url': post['file_url'], 'link': linkTemplate.format(post['id']),
+                          'sources': post['sources'] if 'sources' in post else ['None']})
+        else:
             continue
 
-    ss = sorted(aa, key=aa.__getitem__)
-    ss = ss[::-1]
-    return ss[:n]
+    return Posts[:n]
 
 
 def e621v2(tags, n, sort_=None):
@@ -139,23 +126,18 @@ def e621v2(tags, n, sort_=None):
         'Accept-Encoding': 'none',
         'Accept-Language': 'en-US,en;q=0.8',
         'Connection': 'keep-alive'}
+    linkTemplate = "http://e621.net/post/show/{}/"
     js = json.loads(requests.request('GET', 'http://e621.net/post/index.json?tags={}'.format(' '.join(tags))).text)
+    print(js)
+    Posts = []
+    for post in js[:n]:
+        Posts.append({'url': post['file_url'], 'link': linkTemplate.format(post['id']),
+                      'sources': post['sources'] if 'sources' in post else ['None']})
 
-    aa = {}
-    for post in js:
-
-        try:
-            if sort_:
-                aa[post['file_url']] = int(post[sort_])
+    return Posts
 
 
-        except:
-            continue
 
-    ss = sorted(aa, key=aa.__getitem__)
-    ss = ss[::-1]
-    print(ss)
-    return ss[:n]
 def get(tags, n, page, sort_):
     return e621v2(tags, n, sort_)
 
@@ -163,4 +145,6 @@ def get(tags, n, page, sort_):
 def getSafe(tags, n, page, sort_):
     return e926v2(tags, n, sort_)
 
-# print(e926v2(['female', 'order:score', '-animated', 'fnaf', 'rating:q'],50,'score'))
+
+if __name__ == "__main__":
+    print(e621v2(['female', 'order:score', 'animated', 'fnaf', 'rating:q'], 50, 'score'))

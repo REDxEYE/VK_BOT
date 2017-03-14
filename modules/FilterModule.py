@@ -10,7 +10,8 @@ xrange = range
 
 
 class Filter_PencilSketch:
-    name = "Карандашный набросок"
+    name = 'PencilSketch'
+    desc = "Карандашный набросок"
     """Pencil sketch effect
 
         A class that applies a pencil sketch effect to an image.
@@ -55,7 +56,8 @@ class Filter_PencilSketch:
 
 
 class Filter_WarmingFilter:
-    name = "Тёплый фильтр"
+    name = 'WarmingFilter'
+    desc = "Тёплый фильтр"
     """Warming filter
 
         A class that applies a warming filter to an image.
@@ -99,7 +101,8 @@ class Filter_WarmingFilter:
 
 
 class Filter_CoolingFilter:
-    name = "Холодный фильтр"
+    name = 'CoolingFilter'
+    desc = "Холодный фильтр"
     # охлаждает ваше трахатье
     """Cooling filter
 
@@ -144,7 +147,8 @@ class Filter_CoolingFilter:
 
 
 class Filter_Cartoonizer:
-    name = "Мультфильм фильтр"
+    name = 'Cartoonizer'
+    desc = "Мультфильм фильтр"
     """Cartoonizer effect
 
         A class that applies a cartoon effect to an image.
@@ -197,7 +201,8 @@ class Filter_Cartoonizer:
 
 
 class Filter_Equal:
-    name = "Уравнивающий фильтр"
+    name = 'Equal'
+    desc = "Уравнивающий фильтр"
 
     def __init__(self):
         pass
@@ -209,7 +214,8 @@ class Filter_Equal:
 
 
 class Filter_AutoContrast:
-    name = "Автоконтраст"
+    name = 'AutoContrast'
+    desc = "Автоконтраст"
 
     def __init__(self):
         pass
@@ -221,7 +227,8 @@ class Filter_AutoContrast:
 
 
 class Filter_Tlen:
-    name = "Тлен"
+    name = 'Tlen'
+    desc = "Тлен"
 
     def __init__(self):
         pass
@@ -234,7 +241,8 @@ class Filter_Tlen:
 
 
 class Filter_Neural:
-    name = "Нейронный фильтр"
+    name = 'Neural'
+    desc = "Нейронный фильтр"
 
     def __init__(self):
         pass
@@ -282,7 +290,8 @@ class Filter_Neural:
 
 
 class Filter_Neural2:
-    name = "Нейронный фильтр Sigma 6"
+    name = 'Neural2'
+    desc = "Нейронный фильтр Sigma 6"
 
     def __init__(self):
         pass
@@ -329,7 +338,8 @@ class Filter_Neural2:
 
 
 class Filter_Neural3:
-    name = "Нейронный фильтр sigma 5"
+    name = 'Neural3'
+    desc = "Нейронный фильтр sigma 5"
 
     def __init__(self):
         pass
@@ -376,7 +386,8 @@ class Filter_Neural3:
 
 
 class Filter_Neural_Edges:
-    name = "Нейронный фильтр глубокий"
+    name = 'Neural_Edges'
+    desc = "Нейронный фильтр глубокий"
 
     def __init__(self):
         pass
@@ -423,7 +434,8 @@ class Filter_Neural_Edges:
 
 
 class Filter_Neural_Edges2:
-    name = "Нейронный фильтр глубокий 2"
+    name = 'Neural_Edges2'
+    desc = "Нейронный фильтр глубокий 2"
 
     def __init__(self):
         pass

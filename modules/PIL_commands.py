@@ -13,15 +13,22 @@ HDR = {
     'Accept-Language': 'en-US,en;q=0.8',
     'Connection': 'keep-alive'}
 
+try:
+    from .__Command_template import *
+except:
+    from __Command_template import *
 
-class Command_Glitch_:
-    name = "глюк"
+
+class Command_Glitch_(Command_template):
+    name = ["глюк"]
     access = ['all']
     desc = "Глючная обработка"
     perm = 'photo.glitch2'
     @staticmethod
-    def execute(bot, data):
-        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
         sigma = int(data['custom']['sigma']) if 'sigma' in data['custom'] else 5
         iter = int(data['custom']['iter']) if 'iter' in data['custom'] else 150
         size = int(data['custom']['size']) if 'size' in data['custom'] else 32
@@ -51,14 +58,16 @@ class Command_Glitch_:
         return True
 
 
-class Command_GlitchGif_:
-    name = "глюкгиф"
+class Command_GlitchGif_(Command_template):
+    name = ["глюкгиф"]
     access = ['admin', "editor", "moderator"]
     desc = "Глючная обработка гифки"
     perm = 'photo.glitchGif'
     @staticmethod
-    def execute(bot, data):
-        args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
         sigma = int(data['custom']['sigma']) if 'sigma' in data['custom'] else 5
         iter = int(data['custom']['iter']) if 'iter' in data['custom'] else 150
         size = int(data['custom']['size']) if 'size' in data['custom'] else 32
