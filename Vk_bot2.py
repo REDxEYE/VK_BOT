@@ -356,28 +356,65 @@ class Bot:
                     pass
 
             return data
-        while True:
-            data = self.Checkqueue.get()
-            sleep(0.3)
-            self.Stat['messages'] = self.Stat['messages'] + 1
-            self.SaveConfig()
-            if self.AdminModeOnly:
-                if 0 <= self.USERS.GetStatusId(data['user_id']):
-                    continue
-            defargs = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
 
-            p = '[\U0001F600-\U0001F64F]|[\U0001F300-\U0001F5FF]|[\U0001F680-\U0001F6FF]|[\U0001F1E0-\U0001F1FF]'
-            emoji_pattern = re.compile(p, re.VERBOSE)
+        def print_message(self, data):
+            print_(data)
 
-            data['message'] = emoji_pattern.sub('', data['message'])
+            def process_attachments(atts, message_id):
+                fwdMessages = []
+                attachments = []
+
+                def process_FWD(fwds, depth=0):
+                    return
+                    for fwd in fwds:
+                        if ':' in fwd:
+                            process_FWD(fwd.split(':')[-1][1:-1].split(','), depth + 1)
+                        message = self.UserApi.messages.getById(message_ids=[int(fwd.split('_')[-1])], v='5.60')
+                        print_(fwd.split('_')[-1], message)
+                        templateFWD = '{}{} : {} : \n| {}\n'
+                        user = self.GetUserNameById(fwd.split('_')[0])
+
+                        usr = user['first_name'] + ' ' + user['last_name']
+
+                        subj = "PM" if "..." in message['title'] else message['title']
+
+                        msg = message['body'].replace('<br>', '\n| ')
+
+                        fwdMessages.append(templateFWD.format('    ' * depth, subj, usr, msg))
+
+                attach_reg = r'attach(?P<num>\d)_type'
+                for t in atts:
+                    if re.search(attach_reg, t):
+                        type_ = atts[t]
+                        num = re.search(attach_reg, t).group('num')
+                        photo = self.GetBiggesPic(atts['attach{}'.format(num)], message_id)
+                        sleep(0.25)
+                        template_attach = "{} : {}"
+                        attachments.append(template_attach.format(type_, photo))
+                if 'fwd' in atts:
+                    fwd = atts['fwd'].split(',')
+                    process_FWD(fwd)
+                out = ''
+                out += ''.join(fwdMessages) if len(fwdMessages) > 0 else ''
+                out += '\n'
+                out += ('Attachments :\n ' + '\n'.join(attachments)) if len(attachments) > 0 else ""
+                out += '\n'
+                return out
             try:
                 user = self.GetUserNameById(data['user_id'])
+
                 template = '{} : {} : \n| {}\n'
+
                 template2 = '[ message_id : {} | peer_id : {} ]\n'
+
                 subj = "PM" if "..." in data['subject'] else data['subject']
+
                 usr = user['first_name'] + ' ' + user['last_name']
+
                 msg = data['message'].replace('<br>', '\n| ')
-                toPrint = template.format(subj, usr, msg) + template2.format(str(data['message_id']), str(
+
+                attachments = process_attachments(data['atts'], data['message_id'])
+                toPrint = template.format(subj, usr, msg) + attachments + template2.format(str(data['message_id']), str(
                     data['peer_id'])) if self.DEBUG else '\n'
                 print(toPrint, type_='message')
                 self.log.write(toPrint)
@@ -392,6 +429,21 @@ class Bot:
                 TB = traceback.format_tb(exc_traceback)
                 print(exc_type, exc_value, ''.join(TB))
                 pass
+
+        while True:
+            data = self.Checkqueue.get()
+            sleep(0.3)
+            self.Stat['messages'] = self.Stat['messages'] + 1
+            self.SaveConfig()
+            if self.AdminModeOnly:
+                if 0 <= self.USERS.GetStatusId(data['user_id']):
+                    continue
+            defargs = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
+            p = '[\U0001F600-\U0001F64F]|[\U0001F300-\U0001F5FF]|[\U0001F680-\U0001F6FF]|[\U0001F1E0-\U0001F1FF]'
+            emoji_pattern = re.compile(p, re.VERBOSE)
+
+            data['message'] = emoji_pattern.sub('', data['message'])
+            print_message(self, data)
             comm = data["message"]
             comm = comm.split("<br>")
             args = {}
@@ -568,31 +620,31 @@ class Bot:
     def GetBiggesPic(self, att, mid=0):
         try:
             data = self.UserApi.photos.getById(photos=att, v=5.60)[0]
-            print('using GBI')
+            # print('using GBI')
         except:
 
-            print('using MID')
+            #print('using MID')
             data = self.UserApi.messages.getById(message_ids=mid, v=5.60)
-            print('mid data', data)
+            #print('mid data', data)
             data = data['items']
-            print('mid items', data)
+            #print('mid items', data)
             data = data[0]
-            print('mid 0', data)
+            #print('mid 0', data)
             if 'attachments' not in data:
                 data = data['fwd_messages'][0]['attachments']
             else:
                 data = data['attachments']
-            print('mid atts', data)
+            #print('mid atts', data)
             # self.LOG('log',sys._getframe().f_code.co_name, 'mid data', data)
             for i in data:
-                print("[MID]", i)
+                #print("[MID]", i)
                 if i['type'] == 'photo' and (int(i['photo']['id']) == int(att.split('_')[1])):
                     key = i['photo']['access_key']
                     data = self.UserApi.photos.getById(photos=att, v=5.57, access_key=key)[0]
 
-        print(data)
+        #print(data)
         sizes = re.findall(r'(?P<photo>photo_\d+)', str(data))
-        print(sizes)
+        #print(sizes)
         sizesToSort = {int(size.split('_')[1]): size for size in sizes}
 
         sizesSorted = sorted(sizesToSort, reverse=True)[0]

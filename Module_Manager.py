@@ -1,5 +1,4 @@
 import importlib
-import math
 import os
 import os.path
 import sys
@@ -39,7 +38,7 @@ class ModuleManager:
                     if class_.startswith("Filter"):
                         funk = getattr(module, class_)
 
-                        impModuleStr = ("   ║ Importing command {}".format(class_))
+                        impModuleStr = ("   ║ Importing {}".format(class_))
                         toPrint.append(impModuleStr)
                         longest = len(impModuleStr) if len(impModuleStr) > longest else longest
                         self.FILTERS[funk.name] = Filter(funk, funk.name, funk.desc)
@@ -47,21 +46,21 @@ class ModuleManager:
                     if class_.startswith("Command"):
                         funk = getattr(module, class_)
 
-                        impModuleStr = ("   ║ Importing command {}".format(class_))
+                        impModuleStr = ("   ║ Importing {}".format(class_))
                         toPrint.append(impModuleStr)
                         longest = len(impModuleStr) if len(impModuleStr) > longest else longest
 
                         self.MODULES.append(Module(funk, funk.name, funk.perm, funk.access, funk.template, funk.desc))
 
                 print("Importing module {}\n".format(module.__name__))
-                longest += 5
-                print_('   ╔{}╗'.format("═" * int(longest / 2)))
+                longest += 3
+                print_('   ╔{}╗'.format("═" * int(longest / 1)))
                 for p in toPrint:
                     Plen = len(p)
-                    sp = math.floor((longest - Plen)) - 3
+                    sp = (longest - Plen) + 4
                     pp = p + " " * sp + "║"
                     print_(pp)
-                print_('   ╚{}╝'.format('═' * int(longest / 2)))
+                print_('   ╚{}╝'.format('═' * int(longest / 1)))
 
     def GetModule(self, name):
         for module in self.MODULES:

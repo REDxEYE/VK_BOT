@@ -5,6 +5,7 @@ from urllib.request import urlopen
 
 from PIL import ImageGrab
 
+import EveryPixel
 import e621_Api as e6
 from GlitchLib import Merge
 from PIL_module import kok, kek, roll, rollsmast, add, resize_, Glitch2
@@ -444,4 +445,25 @@ class Command_GlitchImg(Command_template):
             Tmp.cachefile(Tmp.path_)
             Tmp.rem()
         args['attachment'] = Topost
+        bot.Replyqueue.put(args)
+
+
+class Command_everyPixel(Command_template):
+    name = ['everypixel']
+    access = ['all']
+    desc = 'Описывает ваше фото'
+    perm = 'photo.everypixel'
+
+    @staticmethod
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
+        att = data['attachments'][0]
+        photo = bot.GetBiggesPic(att, data['message_id'])
+        tags, quality = EveryPixel.GetTags(photo)
+        tags_template = 'Я вижу тут:\n{}\n'
+        tags_msg = tags_template.format('\n'.join(tags))
+
+        args['message'] = tags_msg + 'Годнота это пикчи - {}\n'.format(int(quality))
         bot.Replyqueue.put(args)
