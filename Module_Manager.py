@@ -28,8 +28,10 @@ class ModuleManager:
         sys.path.append(os.path.join(getpath(), "modules"))
         for module in self.modules:
             if not module.startswith("__"):
-
-                module = importlib.import_module(str(module.split(".")[0]))
+                try:
+                    module = importlib.import_module(str(module.split(".")[0]))
+                except:
+                    print("can't module " + str(module.split(".")[0]), type_='err')
                 longest = 0
                 toPrint = []
 
