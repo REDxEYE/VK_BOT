@@ -401,35 +401,8 @@ class Command_ExecCode(Command_template):
             args.update({"forward_messages": data['message_id']})
         code = bot.html_decode(data['message'])
         code = '\n'.join(code.split('<br>')[1:]).replace('|', '  ')
-        SandBox = \
-            """import os
-            import sys
-            class Forbid(object):
-                name = ''
-                def __call__(self, *args, **kwargs):
-                    import sys
-                    print_(sys._getframe(1).f_code.co_name)
-                    print_('Вызов' ,'с параметрами: ',args,kwargs,' запрещён')
-                def __getattribute__(self, item):
-                    if item == "__spec__":
-                        return
-                    print_(sys._getframe(1).f_code.co_name)
-                    print_('Вызов ',item,' запрещён')
-                    return self
-                def __getattr__(self, item):
-                    print_('Вызов атрибута ',item,' запрещён')
-                    return self
-                def __getitem__(self, item):
-                    print_('Вызов слота ',item,' запрещён')
-                    return self
-                def __setattr__(self, key, value):
-                    print_('Присваивание ',key,' значения ', value, 'запрещено')
-                    return self
-            da = Forbid()
-            #sys.modules['os'] = da
-            #sys.modules['subprocess'] = da
-            """
-        code = SandBox + code.replace('print', 'print_')
+
+        code = code.replace('print', 'print_')
         a = compile(code, '<string>', 'exec')
         from io import StringIO
         import contextlib, sys, traceback

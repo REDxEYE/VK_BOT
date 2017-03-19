@@ -75,10 +75,10 @@ class ModuleManager:
                 print_('   ╚{}╝'.format('═' * int(longest / 1)))
 
     def GetModule(self, name):
-        '''
+        """
         :param name - module name
         :rtype Module
-        '''
+        """
         for module in self.MODULES:
             if name in module.names:
                 return module
