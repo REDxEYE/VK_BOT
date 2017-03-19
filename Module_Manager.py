@@ -64,7 +64,7 @@ class ModuleManager:
                         self.MODULES.append(
                             Module(funk, funk.name, funk.perm, funk.access, funk.template, funk.desc, funk.cost))
 
-                print("Importing module {}\n".format(module.__name__))
+                print("Importing module {}\n".format(module))
                 longest += 3
                 print_('   ╔{}╗'.format("═" * int(longest / 1)))
                 for p in toPrint:
