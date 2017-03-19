@@ -23,7 +23,7 @@ try:
 except:
     from __Command_template import *
 
-class Filter_PencilSketch(__Filter_template):
+class Filter_PencilSketch(F_template):
     enabled = cv2Avalible
     name = 'PencilSketch'
     desc = "Карандашный набросок"
@@ -70,7 +70,7 @@ class Filter_PencilSketch(__Filter_template):
         # return
 
 
-class Filter_WarmingFilter(__Filter_template):
+class Filter_WarmingFilter(F_template):
     enabled = cv2Avalible and scipyAvalible
     name = 'WarmingFilter'
     desc = "Тёплый фильтр"
@@ -116,7 +116,7 @@ class Filter_WarmingFilter(__Filter_template):
         return spl(xrange(256))
 
 
-class Filter_CoolingFilter(__Filter_template):
+class Filter_CoolingFilter(F_template):
     enabled = cv2Avalible and scipyAvalible
     name = 'CoolingFilter'
     desc = "Холодный фильтр"
@@ -163,7 +163,7 @@ class Filter_CoolingFilter(__Filter_template):
         return spl(xrange(256))
 
 
-class Filter_Cartoonizer(__Filter_template):
+class Filter_Cartoonizer(F_template):
     enabled = cv2Avalible
     name = 'Cartoonizer'
     desc = "Мультфильм фильтр"
@@ -218,7 +218,7 @@ class Filter_Cartoonizer(__Filter_template):
         # return cv2.bitwise_and(img_color, img_edge)
 
 
-class Filter_Equal(__Filter_template):
+class Filter_Equal(F_template):
     name = 'Equal'
     desc = "Уравнивающий фильтр"
 
@@ -231,7 +231,7 @@ class Filter_Equal(__Filter_template):
         im.save(img, 'PNG')
 
 
-class Filter_AutoContrast(__Filter_template):
+class Filter_AutoContrast(F_template):
     name = 'AutoContrast'
     desc = "Автоконтраст"
 
@@ -244,7 +244,7 @@ class Filter_AutoContrast(__Filter_template):
         im.save(img, 'PNG')
 
 
-class Filter_Tlen(__Filter_template):
+class Filter_Tlen(F_template):
     name = 'Tlen'
     desc = "Тлен"
 
@@ -258,7 +258,7 @@ class Filter_Tlen(__Filter_template):
         im.save(img, 'JPEG')
 
 
-class Filter_Neural(__Filter_template):
+class Filter_Neural(F_template):
     enabled = cv2Avalible
     name = 'Neural'
     desc = "Нейронный фильтр"
@@ -308,7 +308,7 @@ class Filter_Neural(__Filter_template):
         return accum
 
 
-class Filter_Neural2(__Filter_template):
+class Filter_Neural2(F_template):
     enabled = cv2Avalible
     name = 'Neural2'
     desc = "Нейронный фильтр Sigma 6"
@@ -357,7 +357,7 @@ class Filter_Neural2(__Filter_template):
         return accum
 
 
-class Filter_Neural3(__Filter_template):
+class Filter_Neural3(F_template):
     enabled = cv2Avalible
     name = 'Neural3'
     desc = "Нейронный фильтр sigma 5"
@@ -406,7 +406,7 @@ class Filter_Neural3(__Filter_template):
         return accum
 
 
-class Filter_Neural_Edges(__Filter_template):
+class Filter_Neural_Edges(F_template):
     enabled = cv2Avalible
     name = 'Neural_Edges'
     desc = "Нейронный фильтр глубокий"
@@ -456,7 +456,7 @@ class Filter_Neural_Edges(__Filter_template):
         return accum
 
 
-class Filter_Neural_Edges2(__Filter_template):
+class Filter_Neural_Edges2(F_template):
     enabled = cv2Avalible
     name = 'Neural_Edges2'
     desc = "Нейронный фильтр глубокий 2"

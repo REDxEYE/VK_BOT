@@ -14,7 +14,7 @@ class C_template:
 
 
 
-class __Filter_template:
+class F_template:
 
     enabled = True
     name = 'Change me'

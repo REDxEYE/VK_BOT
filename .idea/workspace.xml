@@ -3,9 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="8e8d7c2a-d8a5-4bd1-9412-f3862de24023" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/Currency.py" afterPath="$PROJECT_DIR$/modules/Currency.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/FilterModule.py" afterPath="$PROJECT_DIR$/modules/FilterModule.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/OpenCV.py" afterPath="$PROJECT_DIR$/modules/OpenCV.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/__Command_template.py" afterPath="$PROJECT_DIR$/modules/__Command_template.py" />
     </list>
     <ignored path="VK_BOT.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -118,17 +117,17 @@
         <entry file="file://$PROJECT_DIR$/modules/__Command_template.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <caret line="16" column="16" selection-start-line="16" selection-start-column="6" selection-end-line="16" selection-end-column="16" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FilterModule.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="FilterModule.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modules/FilterModule.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="13" column="50" selection-start-line="13" selection-start-column="50" selection-end-line="13" selection-end-column="50" />
+            <state vertical-scroll-proportion="8.708705">
+              <caret line="459" column="4" selection-start-line="459" selection-start-column="4" selection-end-line="459" selection-end-column="4" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -148,10 +147,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="OpenCV.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="OpenCV.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/modules/OpenCV.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.094866075">
+            <state vertical-scroll-proportion="0.0">
               <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
               <folding />
             </state>
@@ -188,15 +187,15 @@
       <list>
         <option value="$PROJECT_DIR$/modules/__init__.py" />
         <option value="$PROJECT_DIR$/Module_Manager.py" />
-        <option value="$PROJECT_DIR$/modules/__Command_template.py" />
         <option value="$PROJECT_DIR$/modules/Berry.py" />
         <option value="$PROJECT_DIR$/modules/CommandModule.py" />
         <option value="$PROJECT_DIR$/modules/ImageEdits.py" />
         <option value="$PROJECT_DIR$/modules/Permissions.py" />
         <option value="$PROJECT_DIR$/modules/PIL_commands.py" />
         <option value="$PROJECT_DIR$/modules/Currency.py" />
-        <option value="$PROJECT_DIR$/modules/FilterModule.py" />
         <option value="$PROJECT_DIR$/modules/OpenCV.py" />
+        <option value="$PROJECT_DIR$/modules/__Command_template.py" />
+        <option value="$PROJECT_DIR$/modules/FilterModule.py" />
       </list>
     </option>
   </component>
@@ -578,7 +577,13 @@
       <option name="project" value="LOCAL" />
       <updated>1489959391822</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Raspberry Pi support">
+      <created>1489959477291</created>
+      <option name="number" value="00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1489959477291</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -966,14 +971,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/modules/__Command_template.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/modules/Permissions.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -990,6 +987,22 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/modules/OpenCV.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/__Command_template.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="16" column="16" selection-start-line="16" selection-start-column="6" selection-end-line="16" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/modules/Currency.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1000,19 +1013,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/modules/FilterModule.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="13" column="50" selection-start-line="13" selection-start-column="50" selection-end-line="13" selection-end-column="50" />
+        <state vertical-scroll-proportion="8.708705">
+          <caret line="459" column="4" selection-start-line="459" selection-start-column="4" selection-end-line="459" selection-end-column="4" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/OpenCV.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.094866075">
-          <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
