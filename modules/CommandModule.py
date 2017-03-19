@@ -15,6 +15,10 @@ from html.parser import HTMLParser
 from math import log
 from time import sleep
 from urllib.request import urlopen
+import logging
+
+import psutil
+
 
 
 
@@ -570,8 +574,17 @@ class Command_quit(C_template):
         sleep(2)
         os._exit(0)
 
-
 class Command_restart(C_template):
+    name = ["рестарт"]
+    access = ['admin']
+    desc = "Рестарт бота"
+    perm = 'core.restart'
+    @staticmethod
+    def execute(bot, data, forward=True):
+        from subprocess import Popen
+        Popen("updater.py", shell=True)
+        exit('Restarting')
+class _Command_restart(C_template):
     name = ["рестарт"]
     access = ['admin']
     desc = "Рестарт бота"
