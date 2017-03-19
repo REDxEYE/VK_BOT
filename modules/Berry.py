@@ -40,7 +40,8 @@ class Command_GITPULL(C_template):
         if forward:
             args.update({"forward_messages": data['message_id']})
         text = []
-        p = os.popen('git pull')
+        p = os.popen('git pull -f')
+        os.system('sudo python3 Vk_bot2.py')
         text.append(p.readline())
         t = 0
         while p != '':
@@ -50,3 +51,4 @@ class Command_GITPULL(C_template):
                 break
         args['message'] = '\n'.join(text)
         bot.Replyqueue.put(args)
+        os._exit(0)
