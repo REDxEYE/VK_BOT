@@ -582,7 +582,7 @@ class Command_restart(C_template):
     @staticmethod
     def execute(bot, data, forward=True):
         from subprocess import Popen
-        os.execl('python3 ', os.path.join(bot.ROOT, "updater.py"))
+        os.execl('python3', os.path.join(bot.ROOT, __file__))
 class _Command_restart(C_template):
     name = ["рестарт"]
     access = ['admin']
