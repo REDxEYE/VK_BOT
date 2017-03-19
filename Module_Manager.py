@@ -32,6 +32,7 @@ class ModuleManager:
                     module = importlib.import_module(str(module.split(".")[0]))
                 except:
                     print("can't import module " + str(module.split(".")[0]), type_='err')
+                    continue
                 longest = 0
                 toPrint = []
 
@@ -64,7 +65,7 @@ class ModuleManager:
                         self.MODULES.append(
                             Module(funk, funk.name, funk.perm, funk.access, funk.template, funk.desc, funk.cost))
 
-                print("Importing module {}\n".format(module))
+                print("Importing module {}\n".format(module.__name__))
                 longest += 3
                 print_('   ╔{}╗'.format("═" * int(longest / 1)))
                 for p in toPrint:
