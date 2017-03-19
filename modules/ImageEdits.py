@@ -407,6 +407,7 @@ class Command_merge(__Command_template):
         bot.Replyqueue.put(args)
 
 
+
 class Command_screen(__Command_template):
     enabled = windows
     name = ["скрин"]

@@ -1,7 +1,7 @@
-try:
-    from .__Command_template import *
-except:
-    from __Command_template import *
+from modules.__Command_template import __Command_template
+
+
+
 
 
 class Command_SetStatus(__Command_template):
@@ -10,8 +10,10 @@ class Command_SetStatus(__Command_template):
     desc = "Устанавливает права на пользователя"
     perm = 'core.SetStatus'
 
+
     @staticmethod
     def execute(bot, data, forward=True):
+
         args = {"peer_id": data['peer_id'], "v": "5.60", }
         if forward:
             args.update({"forward_messages": data['message_id']})

@@ -1,3 +1,5 @@
+from modules.__Command_template import __Command_template
+
 try:
     from .__Command_template import *
 except:

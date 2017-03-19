@@ -436,6 +436,7 @@ class Filter_Neural_Edges(__Filter_template):
         else:
             cv2.imwrite(im, res2)
 
+
     def build_filters(self):
         filters = []
 

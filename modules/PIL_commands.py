@@ -3,6 +3,7 @@ import urllib
 from urllib.request import urlopen
 
 from PIL_module import Glitch, GlitchGif, MakeGlitchGifVSH, MakeGlitchGif
+from modules.__Command_template import __Command_template
 from tempfile_ import TempFile
 
 HDR = {

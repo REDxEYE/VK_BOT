@@ -47,6 +47,7 @@ import VK_foaf
 from Vk_bot2 import SessionCapchaFix
 from tempfile_ import TempFile
 
+
 try:
     from .__Command_template import *
 except:

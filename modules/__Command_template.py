@@ -13,7 +13,9 @@ class __Command_template:
         bot.Replyqueue.put(args)
 
 
+
 class __Filter_template:
+    
     enabled = True
     name = 'Change me'
     desc = 'Change me'

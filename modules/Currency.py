@@ -1,7 +1,10 @@
+from modules.__Command_template import __Command_template
+
 try:
     from .__Command_template import *
 except:
     from __Command_template import *
+
 
 
 class Command_AddCurrency(__Command_template):
@@ -29,6 +32,7 @@ class Command_AddCurrency(__Command_template):
         except:
             args['message'] = 'Пользователю было добавлено {} валюты'.format(curr)
         bot.Replyqueue.put(args)
+
 
 
 class Command_SetCurrency(__Command_template):
