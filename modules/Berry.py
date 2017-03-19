@@ -19,11 +19,11 @@ class Command_PiStat(C_template):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
         if forward:
             args.update({"forward_messages": data['message_id']})
-        template = 'Темпуратура CPU {}\n' \
+        template = 'Темпуратура CPU {} градусов\n' \
                    'Загруженность CPU {}%\n' \
                    'Оперативная память {}Мб\n' \
                    'Места на диске {}\n'
-        msg = template.format(getCPUtemperature(), getCPUuse(), round(int(getRAMinfo()[2])/1024,3), getDiskSpace()[0])
+        msg = template.format(getCPUtemperature(), getCPUuse(), round(int(getRAMinfo()[2])/1024,3), getDiskSpace()[2])
         args['message'] = msg
         bot.Replyqueue.put(args)
 
