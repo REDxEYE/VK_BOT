@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="8e8d7c2a-d8a5-4bd1-9412-f3862de24023" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Module_Manager.py" afterPath="$PROJECT_DIR$/Module_Manager.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/Berry.py" afterPath="$PROJECT_DIR$/modules/Berry.py" />
     </list>
     <ignored path="VK_BOT.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -80,11 +80,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Berry.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Berry.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modules/Berry.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-4.4736843">
-              <caret line="24" column="37" selection-start-line="24" selection-start-column="37" selection-end-line="24" selection-end-column="37" />
+            <state vertical-scroll-proportion="0.41935483">
+              <caret line="22" column="41" selection-start-line="22" selection-start-column="41" selection-end-line="22" selection-end-column="41" />
               <folding />
             </state>
           </provider>
@@ -102,10 +102,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Module_Manager.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Module_Manager.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Module_Manager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.27226028">
+            <state vertical-scroll-proportion="0.0">
               <caret line="133" column="20" selection-start-line="133" selection-start-column="20" selection-end-line="133" selection-end-column="20" />
               <folding>
                 <element signature="e#0#16#0" expanded="true" />
@@ -141,8 +141,8 @@
         <option value="$PROJECT_DIR$/modules/__Command_template.py" />
         <option value="$PROJECT_DIR$/modules/FilterModule.py" />
         <option value="$PROJECT_DIR$/modules/CommandModule.py" />
-        <option value="$PROJECT_DIR$/modules/Berry.py" />
         <option value="$PROJECT_DIR$/Module_Manager.py" />
+        <option value="$PROJECT_DIR$/modules/Berry.py" />
       </list>
     </option>
   </component>
@@ -634,7 +634,13 @@
       <option name="project" value="LOCAL" />
       <updated>1489961635634</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="Raspberry Pi support">
+      <created>1489961922047</created>
+      <option name="number" value="00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1489961922047</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1037,6 +1043,24 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://D:/Program Files/Py35/Lib/importlib/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="125" column="44" selection-start-line="125" selection-start-column="39" selection-end-line="125" selection-end-column="44" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Module_Manager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="133" column="20" selection-start-line="133" selection-start-column="20" selection-end-line="133" selection-end-column="20" />
+          <folding>
+            <element signature="e#0#16#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1049,27 +1073,9 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/modules/Berry.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-4.4736843">
-          <caret line="24" column="37" selection-start-line="24" selection-start-column="37" selection-end-line="24" selection-end-column="37" />
+        <state vertical-scroll-proportion="0.41935483">
+          <caret line="22" column="41" selection-start-line="22" selection-start-column="41" selection-end-line="22" selection-end-column="41" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://D:/Program Files/Py35/Lib/importlib/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="125" column="44" selection-start-line="125" selection-start-column="39" selection-end-line="125" selection-end-column="44" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Module_Manager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.27226028">
-          <caret line="133" column="20" selection-start-line="133" selection-start-column="20" selection-end-line="133" selection-end-column="20" />
-          <folding>
-            <element signature="e#0#16#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
