@@ -22,7 +22,7 @@ class Command_PiStat(C_template):
         template = 'Темпуратура CPU {}\n' \
                    'Загруженность CPU {}\n' \
                    'Оперативная память {}Мб\n' \
-                   'Места на диске {} кек\n'
+                   'Места на диске {}\n'
         msg = template.format(getCPUtemperature(), getCPUuse(), round(int(getRAMinfo()[2])/1024,3), getDiskSpace()[0])
         args['message'] = msg
         bot.Replyqueue.put(args)

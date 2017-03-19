@@ -631,7 +631,7 @@ class Command_restart(C_template):
         bot.ReplyThread.start()
         print("Перезапуск закончен")
         Reloaded = 'Перезагружены\n'+'\n'.join(bot.MODULES.Reload())
-        args['message'] = Reloaded + "Перезапуск закончен"
+        args['message'] = Reloaded + "\nПерезапуск закончен"
         bot.Replyqueue.put(args)
         # os.system("RESTART.bat {}".format(os.getpid()))
         # #os.startfile(__file__,sys.executable)
