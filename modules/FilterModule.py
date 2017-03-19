@@ -1,8 +1,5 @@
 import random
 from multiprocessing.pool import ThreadPool
-
-from modules.__Command_template import __Filter_template
-
 try:
     import cv2
 
@@ -15,7 +12,6 @@ from PIL import Image, ImageOps, ImageChops
 
 try:
     from scipy.interpolate import UnivariateSpline
-
     scipyAvalible = True
 except:
     scipyAvalible = False

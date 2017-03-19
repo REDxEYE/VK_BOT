@@ -1,4 +1,4 @@
-from modules.__Command_template import C_template
+
 
 try:
     from .__Command_template import *
