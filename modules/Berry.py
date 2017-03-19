@@ -1,4 +1,4 @@
-
+from time import sleep
 
 try:
     from .__Command_template import *
@@ -51,4 +51,5 @@ class Command_GITPULL(C_template):
                 break
         args['message'] = '\n'.join(text)
         bot.Replyqueue.put(args)
+        sleep(2)
         os._exit(0)
