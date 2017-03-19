@@ -94,7 +94,7 @@
         <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.42024013">
-              <caret line="585" column="64" selection-start-line="585" selection-start-column="56" selection-end-line="585" selection-end-column="64" />
+              <caret line="585" column="67" selection-start-line="585" selection-start-column="67" selection-end-line="585" selection-end-column="67" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -719,7 +719,13 @@
       <option name="project" value="LOCAL" />
       <updated>1489963697845</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="Raspberry Pi support">
+      <created>1489964107031</created>
+      <option name="number" value="00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1489964107031</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1156,7 +1162,7 @@
     <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.42024013">
-          <caret line="585" column="64" selection-start-line="585" selection-start-column="56" selection-end-line="585" selection-end-column="64" />
+          <caret line="585" column="67" selection-start-line="585" selection-start-column="67" selection-end-line="585" selection-end-column="67" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
