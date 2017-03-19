@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$" />
-  </component>
   <component name="ChangeListManager">
     <list default="true" id="8e8d7c2a-d8a5-4bd1-9412-f3862de24023" name="Default" comment="Raspberry Pi support">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/.name" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/VK_BOT.iml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/encodings.xml" afterPath="$PROJECT_DIR$/.idea/encodings.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="VK_BOT.iws" />
@@ -65,13 +67,6 @@
   </component>
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
-  </component>
-  <component name="DatabaseView">
-    <option name="GROUP_SCHEMA" value="true" />
-    <option name="GROUP_CONTENTS" value="false" />
-    <option name="SORT_POSITIONED" value="false" />
-    <option name="SHOW_TABLE_DETAILS" value="true" />
-    <option name="SHOW_EMPTY_GROUPS" value="false" />
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FavoritesManager">
@@ -156,8 +151,8 @@
       <file leaf-file-name="Module_Manager.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Module_Manager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.22767857">
+              <caret line="12" column="30" selection-start-line="12" selection-start-column="30" selection-end-line="12" selection-end-column="30" />
               <folding>
                 <element signature="e#0#16#0" expanded="true" />
               </folding>
@@ -177,74 +172,12 @@
       </file>
     </leaf>
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Python Script" />
-      </list>
-    </option>
-  </component>
   <component name="Git.Settings">
-    <option name="ROOT_SYNC" value="DONT_SYNC" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-    <option name="FORCE_PUSH_ALLOWED" value="true" />
-    <option name="PUSH_TAGS">
-      <GitPushTagMode />
-    </option>
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="D:/Program Files/Py35/Lib/site-packages/aiml/Utils.py" />
-        <option value="$PROJECT_DIR$/AI.py" />
-        <option value="$PROJECT_DIR$/php.py" />
-        <option value="$PROJECT_DIR$/DA_Api.py" />
-        <option value="$PROJECT_DIR$/filters.py" />
-        <option value="$PROJECT_DIR$/modules/ImageModule.py" />
-        <option value="$PROJECT_DIR$/aliases.json" />
-        <option value="$PROJECT_DIR$/AIMLLib/std-translation.aiml" />
-        <option value="$PROJECT_DIR$/Vk_bot.py" />
-        <option value="E:/Python_projekts/Obsibelisc_bot.json" />
-        <option value="E:/Python_projekts/import_json.py" />
-        <option value="D:/SteamLibrary/SteamApps/common/Blender/2.78/scripts/addons/io_mesh_MJson/__init__.py" />
-        <option value="D:/SteamLibrary/SteamApps/common/Blender/2.78/scripts/addons/io_mesh_MJson/import_json.py" />
-        <option value="D:/SteamLibrary/SteamApps/common/SourceFilmmaker/game/usermod/scripts/sfm/animset/bip_universalV4.py" />
-        <option value="$PROJECT_DIR$/ExtLib/fontdemo.py" />
-        <option value="D:/Program Files/Py35/Lib/site-packages/freetype/raw.py" />
-        <option value="$PROJECT_DIR$/PillowTest.py" />
-        <option value="$PROJECT_DIR$/PIL_module.py" />
-        <option value="$PROJECT_DIR$/ExtLib/ASCII_ART.py" />
-        <option value="$PROJECT_DIR$/Vk_bot_RssModule.py" />
-        <option value="$PROJECT_DIR$/Serialiser.py" />
-        <option value="$PROJECT_DIR$/sandbox_test.py" />
-        <option value="$PROJECT_DIR$/modules/COMMAND_TEMPLATES/Command_template.py" />
-        <option value="$PROJECT_DIR$/modules/COMMAND_TEMPLATES/__Command_template.py" />
-        <option value="$PROJECT_DIR$/modules/COMMAND_TEMPLATES/__init__.py" />
-        <option value="$PROJECT_DIR$/modules/__init__.py" />
-        <option value="$PROJECT_DIR$/AIML_module.py" />
-        <option value="D:/Program Files/Py35/Lib/site-packages/execjs/_runtimes.py" />
-        <option value="$PROJECT_DIR$/settings.json" />
-        <option value="E:/OpenCV/OpenCV3/opencv/sources/samples/python/deconvolution.py" />
-        <option value="$PROJECT_DIR$/Codetest.py" />
-        <option value="$PROJECT_DIR$/VK_foaf.py" />
-        <option value="$PROJECT_DIR$/CustomPrint.py" />
-        <option value="$PROJECT_DIR$/e621_Api.py" />
-        <option value="$PROJECT_DIR$/modules/Currency.py" />
-        <option value="$PROJECT_DIR$/Users.json" />
-        <option value="$PROJECT_DIR$/modules/Permissions.py" />
-        <option value="$PROJECT_DIR$/EveryPixel.py" />
-        <option value="$PROJECT_DIR$/modules/OpenCV.py" />
-        <option value="$PROJECT_DIR$/modules/PIL_commands.py" />
-        <option value="$PROJECT_DIR$/Module_struct.py" />
-        <option value="$PROJECT_DIR$/modules/__Command_template.py" />
-        <option value="$PROJECT_DIR$/modules/FilterModule.py" />
-        <option value="$PROJECT_DIR$/modules/ImageEdits.py" />
-        <option value="$PROJECT_DIR$/ExtLib/Raspberry_PI.py" />
-        <option value="$PROJECT_DIR$/modules/Berry.py" />
-        <option value="$PROJECT_DIR$/tempfile_.py" />
-        <option value="$PROJECT_DIR$/Vk_bot2.py" />
-        <option value="$PROJECT_DIR$/modules/CommandModule.py" />
-        <option value="$PROJECT_DIR$/User_Manager.py" />
         <option value="$PROJECT_DIR$/Module_Manager.py" />
       </list>
     </option>
@@ -259,22 +192,6 @@
     <option name="y" value="-8" />
     <option name="width" value="1936" />
     <option name="height" value="1056" />
-  </component>
-  <component name="ProjectInspectionProfilesVisibleTreeState">
-    <entry key="Project Default">
-      <profile-state>
-        <expanded-state>
-          <State>
-            <id />
-          </State>
-        </expanded-state>
-        <selected-state>
-          <State>
-            <id>Buildout</id>
-          </State>
-        </selected-state>
-      </profile-state>
-    </entry>
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <OptionsSetting value="true" id="Add" />
@@ -301,7 +218,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -322,46 +239,16 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="E:/Discord_bot" />
-    <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
-    <property name="last.edited.regexp" value="" />
-    <property name="full.screen.before.presentation.mode" value="false" />
     <property name="js-jscs-nodeInterpreter" value="D:\program\NODEJS\node.exe" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
   </component>
-  <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="E:\VK_BOT\modules" />
-    </key>
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="E:\VK_BOT\E621Sorter" />
-      <recent name="E:\VK_BOT" />
-    </key>
-  </component>
-  <component name="RunManager" selected="Python.Vk_bot2">
-    <configuration default="false" name="Vk_bot2" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="VK_BOT" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Vk_bot2.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
+  <component name="RunManager" selected="Python.Module_Manager">
     <configuration default="false" name="Module_Manager" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -370,66 +257,12 @@
       </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="VK_BOT" />
+      <module name="" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Module_Manager.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
-    <configuration default="false" name="e621_Api" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="VK_BOT" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/e621_Api.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
-    <configuration default="false" name="User_Manager" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="VK_BOT" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/User_Manager.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
-    <configuration default="false" name="EveryPixel" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="VK_BOT" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/EveryPixel.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -445,7 +278,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="VK_BOT" />
+      <module name="" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="TARGET" value="" />
       <option name="SETTINGS_FILE" value="" />
@@ -466,7 +299,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="VK_BOT" />
+      <module name="" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="ADDITIONAL_ARGS" value="" />
       <method />
@@ -480,7 +313,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="VK_BOT" />
+      <module name="" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="ADDITIONAL_ARGS" value="" />
       <method />
@@ -496,7 +329,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="VK_BOT" />
+      <module name="" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="" />
       <option name="PARAMETERS" value="" />
@@ -526,7 +359,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="VK_BOT" />
+      <module name="" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="" />
       <option name="CLASS_NAME" value="" />
@@ -546,7 +379,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="VK_BOT" />
+      <module name="" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="" />
       <option name="CLASS_NAME" value="" />
@@ -566,7 +399,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="VK_BOT" />
+      <module name="" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="" />
       <option name="CLASS_NAME" value="" />
@@ -588,7 +421,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="VK_BOT" />
+      <module name="" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="" />
       <option name="CLASS_NAME" value="" />
@@ -611,7 +444,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="VK_BOT" />
+      <module name="" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="" />
       <option name="CLASS_NAME" value="" />
@@ -627,20 +460,12 @@
       <option name="USE_KEYWORD" value="false" />
       <method />
     </configuration>
-    <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python.Vk_bot2" />
-      <item index="1" class="java.lang.String" itemvalue="Python.Module_Manager" />
-      <item index="2" class="java.lang.String" itemvalue="Python.e621_Api" />
-      <item index="3" class="java.lang.String" itemvalue="Python.User_Manager" />
-      <item index="4" class="java.lang.String" itemvalue="Python.EveryPixel" />
+    <list size="1">
+      <item index="0" class="java.lang.String" itemvalue="Python.Module_Manager" />
     </list>
     <recent_temporary>
-      <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.Vk_bot2" />
-        <item index="1" class="java.lang.String" itemvalue="Python.EveryPixel" />
-        <item index="2" class="java.lang.String" itemvalue="Python.User_Manager" />
-        <item index="3" class="java.lang.String" itemvalue="Python.e621_Api" />
-        <item index="4" class="java.lang.String" itemvalue="Python.Module_Manager" />
+      <list size="1">
+        <item index="0" class="java.lang.String" itemvalue="Python.Module_Manager" />
       </list>
     </recent_temporary>
   </component>
@@ -650,329 +475,32 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="8e8d7c2a-d8a5-4bd1-9412-f3862de24023" name="Default" comment="" />
-      <created>1467227534050</created>
+      <changelist id="8e8d7c2a-d8a5-4bd1-9412-f3862de24023" name="Default" comment="Raspberry Pi support" />
+      <created>1489957518103</created>
       <option name="number" value="Default" />
-      <updated>1467227534050</updated>
+      <updated>1489957518103</updated>
     </task>
-    <task id="LOCAL-00024" summary="Пофиксил капчу">
-      <created>1467484368874</created>
-      <option name="number" value="00024" />
+    <task id="LOCAL-00001" summary="Raspberry Pi support">
+      <created>1489957615926</created>
+      <option name="number" value="00001" />
       <option name="project" value="LOCAL" />
-      <updated>1467484368874</updated>
+      <updated>1489957615926</updated>
     </task>
-    <task id="LOCAL-00025" summary="Пофиксил капчу">
-      <created>1467485429736</created>
-      <option name="number" value="00025" />
-      <option name="project" value="LOCAL" />
-      <updated>1467485429736</updated>
-    </task>
-    <task id="LOCAL-00026" summary="updates">
-      <created>1467567806752</created>
-      <option name="number" value="00026" />
-      <option name="project" value="LOCAL" />
-      <updated>1467567806752</updated>
-    </task>
-    <task id="LOCAL-00027" summary="updates">
-      <created>1467569145488</created>
-      <option name="number" value="00027" />
-      <option name="project" value="LOCAL" />
-      <updated>1467569145488</updated>
-    </task>
-    <task id="LOCAL-00028" summary="Rss всё еще не работает">
-      <created>1467752336611</created>
-      <option name="number" value="00028" />
-      <option name="project" value="LOCAL" />
-      <updated>1467752336611</updated>
-    </task>
-    <task id="LOCAL-00029" summary="-\\-">
-      <created>1471869310905</created>
-      <option name="number" value="00029" />
-      <option name="project" value="LOCAL" />
-      <updated>1471869310905</updated>
-    </task>
-    <task id="LOCAL-00030" summary="Добавлены функции:&#10;Музыка&#10;Котики">
-      <created>1472210304216</created>
-      <option name="number" value="00030" />
-      <option name="project" value="LOCAL" />
-      <updated>1472210304216</updated>
-    </task>
-    <task id="LOCAL-00031" summary="Поправлены функции">
-      <created>1472301885829</created>
-      <option name="number" value="00031" />
-      <option name="project" value="LOCAL" />
-      <updated>1472301885829</updated>
-    </task>
-    <task id="LOCAL-00032" summary="Теперь бот многопоточен">
-      <created>1472587452492</created>
-      <option name="number" value="00032" />
-      <option name="project" value="LOCAL" />
-      <updated>1472587452492</updated>
-    </task>
-    <task id="LOCAL-00033" summary="Мелкие фиксы">
-      <created>1472675716030</created>
-      <option name="number" value="00033" />
-      <option name="project" value="LOCAL" />
-      <updated>1472675716030</updated>
-    </task>
-    <task id="LOCAL-00034" summary="Мелкие фиксы">
-      <created>1472758287662</created>
-      <option name="number" value="00034" />
-      <option name="project" value="LOCAL" />
-      <updated>1472758287662</updated>
-    </task>
-    <task id="LOCAL-00035" summary="Мелкие фиксы">
-      <created>1472758763613</created>
-      <option name="number" value="00035" />
-      <option name="project" value="LOCAL" />
-      <updated>1472758763613</updated>
-    </task>
-    <task id="LOCAL-00036" summary="Мелкие фиксы">
-      <created>1472799697271</created>
-      <option name="number" value="00036" />
-      <option name="project" value="LOCAL" />
-      <updated>1472799697271</updated>
-    </task>
-    <task id="LOCAL-00037" summary="Припручен API ютуба">
-      <created>1472938578949</created>
-      <option name="number" value="00037" />
-      <option name="project" value="LOCAL" />
-      <updated>1472938578949</updated>
-    </task>
-    <task id="LOCAL-00038" summary="Добавлены команды обычных чат ботов">
-      <created>1473105281008</created>
-      <option name="number" value="00038" />
-      <option name="project" value="LOCAL" />
-      <updated>1473105281008</updated>
-    </task>
-    <task id="LOCAL-00039" summary="Добавлены команды обычных чат ботов">
-      <created>1473107190777</created>
-      <option name="number" value="00039" />
-      <option name="project" value="LOCAL" />
-      <updated>1473107190777</updated>
-    </task>
-    <task id="LOCAL-00040" summary="Добавлены команды обычных чат ботов">
-      <created>1473367557708</created>
-      <option name="number" value="00040" />
-      <option name="project" value="LOCAL" />
-      <updated>1473367557708</updated>
-    </task>
-    <task id="LOCAL-00041" summary="Добавлены команды обычных чат ботов">
-      <created>1473552259347</created>
-      <option name="number" value="00041" />
-      <option name="project" value="LOCAL" />
-      <updated>1473552259347</updated>
-    </task>
-    <task id="LOCAL-00042" summary="-//-&#10;">
-      <created>1473633600617</created>
-      <option name="number" value="00042" />
-      <option name="project" value="LOCAL" />
-      <updated>1473633600617</updated>
-    </task>
-    <task id="LOCAL-00043" summary="-//-&#10;">
-      <created>1473670511562</created>
-      <option name="number" value="00043" />
-      <option name="project" value="LOCAL" />
-      <updated>1473670511562</updated>
-    </task>
-    <task id="LOCAL-00044" summary="-//-&#10;">
-      <created>1473874848061</created>
-      <option name="number" value="00044" />
-      <option name="project" value="LOCAL" />
-      <updated>1473874848061</updated>
-    </task>
-    <task id="LOCAL-00045" summary="-//-&#10;">
-      <created>1473936721059</created>
-      <option name="number" value="00045" />
-      <option name="project" value="LOCAL" />
-      <updated>1473936721060</updated>
-    </task>
-    <task id="LOCAL-00046" summary="-//-&#10;">
-      <created>1475348393143</created>
-      <option name="number" value="00046" />
-      <option name="project" value="LOCAL" />
-      <updated>1475348393143</updated>
-    </task>
-    <task id="LOCAL-00047" summary="Добавлено больше интерактивности">
-      <created>1475485259574</created>
-      <option name="number" value="00047" />
-      <option name="project" value="LOCAL" />
-      <updated>1475485259574</updated>
-    </task>
-    <task id="LOCAL-00048" summary="Добавлено больше интерактивности">
-      <created>1475693248304</created>
-      <option name="number" value="00048" />
-      <option name="project" value="LOCAL" />
-      <updated>1475693248304</updated>
-    </task>
-    <task id="LOCAL-00049" summary="Добавлен базовый ИИ на основе AIML">
-      <created>1476828462726</created>
-      <option name="number" value="00049" />
-      <option name="project" value="LOCAL" />
-      <updated>1476828462726</updated>
-    </task>
-    <task id="LOCAL-00050" summary="Huge update">
-      <created>1478644081365</created>
-      <option name="number" value="00050" />
-      <option name="project" value="LOCAL" />
-      <updated>1478644081365</updated>
-    </task>
-    <task id="LOCAL-00051" summary="Huge update">
-      <created>1480117972620</created>
-      <option name="number" value="00051" />
-      <option name="project" value="LOCAL" />
-      <updated>1480117972635</updated>
-    </task>
-    <task id="LOCAL-00052" summary="New version &#10;">
-      <created>1483879801508</created>
-      <option name="number" value="00052" />
-      <option name="project" value="LOCAL" />
-      <updated>1483879801509</updated>
-    </task>
-    <task id="LOCAL-00053" summary="New version &#10;">
-      <created>1485817822562</created>
-      <option name="number" value="00053" />
-      <option name="project" value="LOCAL" />
-      <updated>1485817822563</updated>
-    </task>
-    <task id="LOCAL-00054" summary="New version &#10;">
-      <created>1488032480354</created>
-      <option name="number" value="00054" />
-      <option name="project" value="LOCAL" />
-      <updated>1488032480354</updated>
-    </task>
-    <task id="LOCAL-00055" summary="Nah, i'm bad at commit messages xD.&#10;">
-      <created>1488633319827</created>
-      <option name="number" value="00055" />
-      <option name="project" value="LOCAL" />
-      <updated>1488633319827</updated>
-    </task>
-    <task id="LOCAL-00056" summary="Nah, i'm bad at commit messages xD.&#10;">
-      <created>1488633499192</created>
-      <option name="number" value="00056" />
-      <option name="project" value="LOCAL" />
-      <updated>1488633499192</updated>
-    </task>
-    <task id="LOCAL-00057" summary="Huge update.&#10;Added perms and status&#10;">
-      <created>1489134425325</created>
-      <option name="number" value="00057" />
-      <option name="project" value="LOCAL" />
-      <updated>1489134425326</updated>
-    </task>
-    <task id="LOCAL-00058" summary="Some missing files">
-      <created>1489134638306</created>
-      <option name="number" value="00058" />
-      <option name="project" value="LOCAL" />
-      <updated>1489134638306</updated>
-    </task>
-    <task id="LOCAL-00059" summary="Module manage - more control over modules&#10;VK_foaf - removed debug&#10;Module_struct - small class helper &#10;">
-      <created>1489489970437</created>
-      <option name="number" value="00059" />
-      <option name="project" value="LOCAL" />
-      <updated>1489489970438</updated>
-    </task>
-    <task id="LOCAL-00060" summary="NEW - everypixel\aesthetics API">
-      <created>1489659512391</created>
-      <option name="number" value="00060" />
-      <option name="project" value="LOCAL" />
-      <updated>1489659512407</updated>
-    </task>
-    <task id="LOCAL-00061" summary="try/except wrap in module manager">
-      <created>1489659761462</created>
-      <option name="number" value="00061" />
-      <option name="project" value="LOCAL" />
-      <updated>1489659761462</updated>
-    </task>
-    <task id="LOCAL-00062" summary="Raspberry Pi support">
-      <created>1489915426560</created>
-      <option name="number" value="00062" />
-      <option name="project" value="LOCAL" />
-      <updated>1489915426561</updated>
-    </task>
-    <task id="LOCAL-00063" summary="small fixes">
-      <created>1489930674062</created>
-      <option name="number" value="00063" />
-      <option name="project" value="LOCAL" />
-      <updated>1489930674063</updated>
-    </task>
-    <task id="LOCAL-00064" summary="Фикс -  Неправильный путь к файлу">
-      <created>1489930825582</created>
-      <option name="number" value="00064" />
-      <option name="project" value="LOCAL" />
-      <updated>1489930825582</updated>
-    </task>
-    <task id="LOCAL-00065" summary="Raspberry Pi support">
-      <created>1489931091944</created>
-      <option name="number" value="00065" />
-      <option name="project" value="LOCAL" />
-      <updated>1489931091944</updated>
-    </task>
-    <task id="LOCAL-00066" summary="Raspberry Pi support">
-      <created>1489931224548</created>
-      <option name="number" value="00066" />
-      <option name="project" value="LOCAL" />
-      <updated>1489931224548</updated>
-    </task>
-    <task id="LOCAL-00067" summary="Raspberry Pi support">
-      <created>1489956084058</created>
-      <option name="number" value="00067" />
-      <option name="project" value="LOCAL" />
-      <updated>1489956084058</updated>
-    </task>
-    <task id="LOCAL-00068" summary="Raspberry Pi support">
-      <created>1489956647153</created>
-      <option name="number" value="00068" />
-      <option name="project" value="LOCAL" />
-      <updated>1489956647158</updated>
-    </task>
-    <task id="LOCAL-00069" summary="Raspberry Pi support">
-      <created>1489956793507</created>
-      <option name="number" value="00069" />
-      <option name="project" value="LOCAL" />
-      <updated>1489956793507</updated>
-    </task>
-    <task id="LOCAL-00070" summary="Raspberry Pi support">
-      <created>1489956874498</created>
-      <option name="number" value="00070" />
-      <option name="project" value="LOCAL" />
-      <updated>1489956874498</updated>
-    </task>
-    <task id="LOCAL-00071" summary="Raspberry Pi support">
-      <created>1489957197888</created>
-      <option name="number" value="00071" />
-      <option name="project" value="LOCAL" />
-      <updated>1489957197888</updated>
-    </task>
-    <task id="LOCAL-00072" summary="Raspberry Pi support">
-      <created>1489957293704</created>
-      <option name="number" value="00072" />
-      <option name="project" value="LOCAL" />
-      <updated>1489957293704</updated>
-    </task>
-    <option name="localTasksCounter" value="73" />
+    <option name="localTasksCounter" value="2" />
     <servers />
-  </component>
-  <component name="TodoView">
-    <todo-panel id="selected-file">
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
-    <todo-panel id="all">
-      <are-packages-shown value="true" />
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.19509594" sideWeight="0.4949785" order="1" side_tool="false" content_ui="combo" x="715" y="162" width="489" height="693" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19722815" sideWeight="0.4949785" order="1" side_tool="false" content_ui="combo" x="715" y="162" width="489" height="693" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32792208" sideWeight="0.50479746" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32792208" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32792208" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32467532" sideWeight="0.5021322" order="11" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32995737" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32" sideWeight="0.49573562" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32467532" sideWeight="0.4978678" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.23614073" sideWeight="0.5050215" order="2" side_tool="false" content_ui="tabs" x="93" y="168" width="643" height="697" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.23603794" sideWeight="0.5050215" order="2" side_tool="false" content_ui="tabs" x="93" y="168" width="643" height="697" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32629356" sideWeight="0.4978678" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.32995737" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -999,40 +527,8 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="true" />
-    <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
-    <option name="CHECK_NEW_TODO" value="false" />
-    <ignored-roots>
-      <path value="$PROJECT_DIR$/vkbot" />
-    </ignored-roots>
-    <MESSAGE value="Оверрайднул класс сессии у API" />
-    <MESSAGE value="Пофиксил капчу" />
-    <MESSAGE value="updates" />
-    <MESSAGE value="Rss всё еще не работает" />
-    <MESSAGE value="-\\-" />
-    <MESSAGE value="Добавлены функции:&#10;Музыка&#10;Котики" />
-    <MESSAGE value="Поправлены функции" />
-    <MESSAGE value="Теперь бот многопоточен" />
-    <MESSAGE value="Мелкие фиксы" />
-    <MESSAGE value="Припручен API ютуба" />
-    <MESSAGE value="Добавлены команды обычных чат ботов" />
-    <MESSAGE value="-//-&#10;" />
-    <MESSAGE value="Добавлено больше интерактивности" />
-    <MESSAGE value="Добавлен базовый ИИ на основе AIML" />
-    <MESSAGE value="Huge update" />
-    <MESSAGE value="New version &#10;" />
-    <MESSAGE value="Nah, i'm bad at commit messages xD.&#10;" />
-    <MESSAGE value="Huge update.&#10;Added perms and status&#10;" />
-    <MESSAGE value="Some missing files" />
-    <MESSAGE value="Module manage - more control over modules&#10;VK_foaf - removed debug&#10;Module_struct - small class helper &#10;" />
-    <MESSAGE value="NEW - everypixel\aesthetics API" />
-    <MESSAGE value="try/except wrap in module manager" />
-    <MESSAGE value="small fixes" />
-    <MESSAGE value="Фикс -  Неправильный путь к файлу" />
     <MESSAGE value="Raspberry Pi support" />
     <option name="LAST_COMMIT_MESSAGE" value="Raspberry Pi support" />
-    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
-    <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1322,7 +818,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.13266444">
           <caret line="7" column="18" selection-start-line="7" selection-start-column="18" selection-end-line="7" selection-end-column="18" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1363,14 +858,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Vk_bot2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="283" column="42" selection-start-line="283" selection-start-column="42" selection-end-line="283" selection-end-column="42" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1407,30 +894,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Module_Manager.py">
+    <entry file="file://$PROJECT_DIR$/Vk_bot2.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+          <caret line="283" column="42" selection-start-line="283" selection-start-column="42" selection-end-line="283" selection-end-column="42" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Module_Manager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.22767857">
+          <caret line="12" column="30" selection-start-line="12" selection-start-column="30" selection-end-line="12" selection-end-column="30" />
           <folding>
             <element signature="e#0#16#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-  </component>
-  <component name="masterDetails">
-    <states>
-      <state key="ScopeChooserConfigurable.UI">
-        <settings>
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-    </states>
   </component>
 </project>
