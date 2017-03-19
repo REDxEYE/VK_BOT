@@ -31,7 +31,7 @@ class ModuleManager:
                 try:
                     module = importlib.import_module(str(module.split(".")[0]))
                 except:
-                    print("can't module " + str(module.split(".")[0]), type_='err')
+                    print("can't import module " + str(module.split(".")[0]), type_='err')
                 longest = 0
                 toPrint = []
 
@@ -39,6 +39,11 @@ class ModuleManager:
 
                     if class_.startswith("Filter"):
                         funk = getattr(module, class_)
+                        if funk.enabled == False:
+                            impModuleStr = ("   ║ skipping {}".format(class_))
+                            toPrint.append(impModuleStr)
+                            longest = len(impModuleStr) if len(impModuleStr) > longest else longest
+                            continue
 
                         impModuleStr = ("   ║ Importing {}".format(class_))
                         toPrint.append(impModuleStr)
@@ -47,12 +52,17 @@ class ModuleManager:
 
                     if class_.startswith("Command"):
                         funk = getattr(module, class_)
-
+                        if funk.enabled == False:
+                            impModuleStr = ("   ║ skipping {}".format(class_))
+                            toPrint.append(impModuleStr)
+                            longest = len(impModuleStr) if len(impModuleStr) > longest else longest
+                            continue
                         impModuleStr = ("   ║ Importing {}".format(class_))
                         toPrint.append(impModuleStr)
                         longest = len(impModuleStr) if len(impModuleStr) > longest else longest
 
-                        self.MODULES.append(Module(funk, funk.name, funk.perm, funk.access, funk.template, funk.desc))
+                        self.MODULES.append(
+                            Module(funk, funk.name, funk.perm, funk.access, funk.template, funk.desc, funk.cost))
 
                 print("Importing module {}\n".format(module.__name__))
                 longest += 3
@@ -65,6 +75,10 @@ class ModuleManager:
                 print_('   ╚{}╝'.format('═' * int(longest / 1)))
 
     def GetModule(self, name):
+        '''
+        :param name - module name
+        :rtype Module
+        '''
         for module in self.MODULES:
             if name in module.names:
                 return module
@@ -77,6 +91,13 @@ class ModuleManager:
             if name in module.names:
                 return True
         return False
+
+    def CanAfford(self, user_curr, name):
+        comm = self.GetModule(name)
+        if user_curr > comm.cost:
+            return True
+        else:
+            return False
 
     def GetAvailable(self, perms):
         Available = []

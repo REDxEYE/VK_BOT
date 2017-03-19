@@ -1,15 +1,28 @@
 import random
 from multiprocessing.pool import ThreadPool
 
-import cv2
+try:
+    import cv2
+
+    cv2Avalible = True
+except:
+    cv2 = None
+    cv2Avalible = False
 import numpy as np
 from PIL import Image, ImageOps, ImageChops
-from scipy.interpolate import UnivariateSpline
 
+try:
+    from scipy.interpolate import UnivariateSpline
+
+    scipyAvalible = True
+except:
+    scipyAvalible = False
+    UnivariateSpline = None
 xrange = range
 
 
 class Filter_PencilSketch:
+    enabled = cv2Avalible
     name = 'PencilSketch'
     desc = "Карандашный набросок"
     """Pencil sketch effect
@@ -56,6 +69,7 @@ class Filter_PencilSketch:
 
 
 class Filter_WarmingFilter:
+    enabled = cv2Avalible and scipyAvalible
     name = 'WarmingFilter'
     desc = "Тёплый фильтр"
     """Warming filter
@@ -101,6 +115,7 @@ class Filter_WarmingFilter:
 
 
 class Filter_CoolingFilter:
+    enabled = cv2Avalible and scipyAvalible
     name = 'CoolingFilter'
     desc = "Холодный фильтр"
     # охлаждает ваше трахатье
@@ -147,6 +162,7 @@ class Filter_CoolingFilter:
 
 
 class Filter_Cartoonizer:
+    enabled = cv2Avalible
     name = 'Cartoonizer'
     desc = "Мультфильм фильтр"
     """Cartoonizer effect
@@ -241,6 +257,7 @@ class Filter_Tlen:
 
 
 class Filter_Neural:
+    enabled = cv2Avalible
     name = 'Neural'
     desc = "Нейронный фильтр"
 
@@ -290,6 +307,7 @@ class Filter_Neural:
 
 
 class Filter_Neural2:
+    enabled = cv2Avalible
     name = 'Neural2'
     desc = "Нейронный фильтр Sigma 6"
 
@@ -338,6 +356,7 @@ class Filter_Neural2:
 
 
 class Filter_Neural3:
+    enabled = cv2Avalible
     name = 'Neural3'
     desc = "Нейронный фильтр sigma 5"
 
@@ -386,6 +405,7 @@ class Filter_Neural3:
 
 
 class Filter_Neural_Edges:
+    enabled = cv2Avalible
     name = 'Neural_Edges'
     desc = "Нейронный фильтр глубокий"
 
@@ -434,6 +454,7 @@ class Filter_Neural_Edges:
 
 
 class Filter_Neural_Edges2:
+    enabled = cv2Avalible
     name = 'Neural_Edges2'
     desc = "Нейронный фильтр глубокий 2"
 

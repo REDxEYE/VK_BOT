@@ -24,6 +24,7 @@ class Command_WantedFunk(Command_template):
     access = ["all"]
     desc = "Вставляет 2 фото внутрь фото с написью Разыскивается"
     perm = 'photo.wanted'
+    cost = 5
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -65,6 +66,7 @@ class Command_JonTronFunk(Command_template):
     access = ['all']
     desc = "Вставляет фото в фото с ДжонТроном"
     perm = 'photo.jontron'
+    cost = 5
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -110,6 +112,7 @@ class Command_SayMaxFunk(Command_template):
     access = ['all']
     desc = "Даёте подержать ваше фото Сойке"
     perm = 'photo.saymax'
+    cost = 5
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }

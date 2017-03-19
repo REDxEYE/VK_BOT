@@ -4,7 +4,8 @@ class Command_template:
     desc = "Change me"
     template = "{}, change me"
     perm = 'change.me'
-
+    cost = 0
+    enabled = True
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}

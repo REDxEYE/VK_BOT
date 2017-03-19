@@ -3,7 +3,14 @@ import re
 import urllib
 from urllib.request import urlopen
 
-from PIL import ImageGrab
+try:
+
+    from PIL import ImageGrab
+
+    windows = True
+except:
+    windows = False
+    ImageGrab = None
 
 import EveryPixel
 import e621_Api as e6
@@ -84,6 +91,7 @@ class Command_Filter(Command_template):
     access = ["all"]
     desc = "Позволяет применять фильтры к фото"
     perm = 'photo.filter'
+    cost = 15
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -224,6 +232,7 @@ class Command_e926(Command_template):
            page:страница на которой искать"""
     desc = "Ищет пикчи на e926"
     perm = 'photo.e926'
+    cost = 15
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -399,6 +408,7 @@ class Command_merge(Command_template):
 
 
 class Command_screen(Command_template):
+    enabled = windows
     name = ["скрин"]
     access = ['admin']
     desc = "Скрин экрана"
@@ -422,7 +432,7 @@ class Command_GlitchImg(Command_template):
     access = ["all"]
     desc = "Глючит фото"
     perm = 'photo.glitch'
-
+    cost = 0
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -465,5 +475,5 @@ class Command_everyPixel(Command_template):
         tags_template = 'Я вижу тут:\n{}\n'
         tags_msg = tags_template.format('\n'.join(tags))
 
-        args['message'] = tags_msg + 'Годнота это пикчи - {}\n'.format(int(quality))
+        args['message'] = tags_msg + 'Годнота этой пикчи - {}\n'.format(int(quality))
         bot.Replyqueue.put(args)

@@ -358,7 +358,7 @@ class Bot:
             return data
 
         def print_message(self, data):
-            print_(data)
+            # print_(data)
 
             def process_attachments(atts, message_id):
                 fwdMessages = []
@@ -476,10 +476,12 @@ class Bot:
                 if self.MODULES.isValid(Command):
                     funk = self.MODULES.GetModule(Command)
                     user = data["user_id"]
-                    if self.USERS.HasPerm(user, funk.perms):
+                    if self.USERS.HasPerm(user, funk.perms) and self.MODULES.CanAfford(self.USERS.GetCurrency(user),
+                                                                                       Command):
                         try:
                             print("Trying to execute commnad {},\n arguments:{}".format(Command, args))
                             stat = funk.funk.execute(self, args)
+                            self.USERS.pay(user, funk.cost)
                             if stat == False:
                                 defargs['message'] = 'Неправильно оформлен запрос. Пример запроса : {}'.format(
                                     funk.template.format(self.MyName['first_name']))
@@ -511,6 +513,11 @@ class Bot:
                             # self.Reply(self.UserApi, args)
                             self.Checkqueue.task_done()
                             self.Replyqueue.put(defargs)
+                    elif not self.MODULES.CanAfford(self.USERS.GetCurrency(user), Command):
+                        defargs["message"] = "Нехватает валюты. Попробуйте обратиться к администрации"
+                        self.Checkqueue.task_done()
+                        self.Replyqueue.put(defargs)
+
 
                     else:
                         print('"Недостаточно прав"')

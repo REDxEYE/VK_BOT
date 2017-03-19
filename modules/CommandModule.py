@@ -16,9 +16,27 @@ from math import log
 from time import sleep
 from urllib.request import urlopen
 
-import execjs
-import feedparser
-import gtts
+try:
+    import execjs
+
+    execjsAvalible = True
+except:
+    execjsAvalible = False
+    execjs = None
+try:
+    import feedparser
+
+    feedparserAvalible = True
+except:
+    feedparser = None
+    feedparserAvalible = False
+try:
+    import gtts
+
+    gttsAvalable = True
+except:
+    gtts = None
+    gttsAvalable = False
 import pymorphy2
 import requests
 from vk import API
@@ -268,7 +286,7 @@ class Command_Help(Command_template):
         a = "Вам доступны:\n"
         UserPerms = bot.USERS.GetPerms(data['user_id'])
         for command in bot.MODULES.GetAvailable(UserPerms):
-            a += 'Команда: "{}", {}\n'.format('" или "'.join(command.names), command.desc)
+            a += 'Команда: "{}", {}. Стоимость: {}\n'.format('" или "'.join(command.names), command.desc, command.cost)
         args['message'] = str(a)
         bot.Replyqueue.put(args)
         return True
@@ -731,6 +749,7 @@ class Command_Choice(Command_template):
 
 
 class Command_EvalJS(Command_template):
+    enabled = execjsAvalible
     name = ['EvalJS']
     access = ['admin']
     desc = 'Выполняет JS скрипт'
@@ -750,6 +769,7 @@ class Command_EvalJS(Command_template):
 
 
 class Command_ExecJS(Command_template):
+    enabled = execjsAvalible
     name = ['ExecJS']
     access = ['admin']
     desc = 'Выполняет JS скрипт, (вызываетмый метод - exec)'
@@ -784,6 +804,7 @@ class Command_ExecJS(Command_template):
 #        args['message'] = l
 #        bot.Replyqueue.put(args)
 class Command_TTS(Command_template):
+    enabled = gttsAvalable
     name = ["скажи"]
     access = ['all']
     desc = 'Произносит ваш текст на выбранном языке ("Имя бота", "нужный язык (2буквы)" " ВАШ ТЕКСТ")'

@@ -152,10 +152,18 @@ class UserManager:
         user = str(user)
         return self.DB[user][UserManager.currency]
 
-    def UpdateCuttency(self, user, ammount):
-        ammount = int(ammount)
-        self.DB[user][UserManager.currency] += ammount
+    def UpdateCuttency(self, user, amount):
+        amount = int(amount)
+        self.DB[user][UserManager.currency] += amount
         self.SaveConfig()
+
+    def pay(self, user: str, amount: int):
+        amount = int(amount)
+        user = str(user)
+        self.DB[user][UserManager.currency] -= amount
+        self.SaveConfig()
+
+
 
     def SetCuttency(self, user, ammount):
         ammount = int(ammount)

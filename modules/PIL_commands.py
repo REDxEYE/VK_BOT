@@ -24,6 +24,7 @@ class Command_Glitch_(Command_template):
     access = ['all']
     desc = "Глючная обработка"
     perm = 'photo.glitch2'
+    cost = 10
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -63,6 +64,7 @@ class Command_GlitchGif_(Command_template):
     access = ['admin', "editor", "moderator"]
     desc = "Глючная обработка гифки"
     perm = 'photo.glitchGif'
+    cost = 20
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
