@@ -131,7 +131,7 @@ class ModuleManager:
                     name = str(module.split(".")[0])
                     mod = sys.modules[name]
                     reloaded.append(name)
-                    sys.modules[name] = importlib.reload(mod)
+                    sys.modules[name] = importlib.import_module(name)
                 except Exception as ex:
                     print("can't import module " + str(module.split(".")[0]), type_='err')
 
