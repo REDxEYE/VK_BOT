@@ -124,16 +124,33 @@ class ModuleManager:
                     continue
         return Available
     def Reload(self):
+        del self.FILTERS
+        del self.MODULES
+        self.FILTERS = {}
+        self.MODULES = []
         reloaded = []
         for module in self.modules:
             if not module.startswith("__"):
                 try:
                     name = str(module.split(".")[0])
-                    mod = sys.modules[name]
                     reloaded.append(name)
-                    sys.modules[name] = importlib.import_module(name)
+                    module = importlib.import_module(name)
+                    for class_ in dir(module):
+
+                        if class_.startswith("Filter"):
+                            funk = getattr(module, class_)
+                            if funk.enabled == False:
+                                continue
+                            self.FILTERS[funk.name] = Filter(funk, funk.name, funk.desc)
+
+                        if class_.startswith("Command"):
+                            funk = getattr(module, class_)
+                            if funk.enabled == False:
+                                continue
+                            self.MODULES.append(
+                                Module(funk, funk.name, funk.perm, funk.access, funk.template, funk.desc, funk.cost))
                 except Exception as ex:
-                    print("can't import module " + str(module.split(".")[0]), type_='err')
+                    print("can't reload module " + str(module.split(".")[0]), type_='err')
 
                     print(ex.__traceback__)
                     print(ex.__cause__)
