@@ -1,4 +1,4 @@
-from modules.__Command_template import __Command_template
+from modules.__Command_template import C_template
 
 try:
     from .__Command_template import *
@@ -7,7 +7,7 @@ except:
 
 
 
-class Command_AddCurrency(__Command_template):
+class Command_AddCurrency(C_template):
     name = ['addmoney', 'addcurr']
     access = ['admin']
     perm = 'core.currency'
@@ -35,7 +35,7 @@ class Command_AddCurrency(__Command_template):
 
 
 
-class Command_SetCurrency(__Command_template):
+class Command_SetCurrency(C_template):
     name = ['setmoney', 'setcurr']
     access = ['admin']
     perm = 'core.currency'

@@ -1,10 +1,10 @@
-from modules.__Command_template import __Command_template
+from modules.__Command_template import C_template
 
 
 
 
 
-class Command_SetStatus(__Command_template):
+class Command_SetStatus(C_template):
     name = ["status"]
     access = ["admin"]
     desc = "Устанавливает права на пользователя"
@@ -37,7 +37,7 @@ class Command_SetStatus(__Command_template):
         bot.SaveConfig()
 
 
-class Command_RemovePerms(__Command_template):
+class Command_RemovePerms(C_template):
     name = ["rperms"]
     access = ["admin"]
     desc = "Снимает права у пользователя"
@@ -66,7 +66,7 @@ class Command_RemovePerms(__Command_template):
         bot.SaveConfig()
 
 
-class Command_WritePerms(__Command_template):
+class Command_WritePerms(C_template):
     name = ["perms"]
     access = ["admin"]
     desc = "Устанавливает права на пользователя"

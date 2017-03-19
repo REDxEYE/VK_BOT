@@ -3,7 +3,7 @@ import urllib
 from urllib.request import urlopen
 
 from PIL_module import Glitch, GlitchGif, MakeGlitchGifVSH, MakeGlitchGif
-from modules.__Command_template import __Command_template
+from modules.__Command_template import C_template
 from tempfile_ import TempFile
 
 HDR = {
@@ -20,7 +20,7 @@ except:
     from __Command_template import *
 
 
-class Command_Glitch_(__Command_template):
+class Command_Glitch_(C_template):
     name = ["глюк"]
     access = ['all']
     desc = "Глючная обработка"
@@ -60,7 +60,7 @@ class Command_Glitch_(__Command_template):
         return True
 
 
-class Command_GlitchGif_(__Command_template):
+class Command_GlitchGif_(C_template):
     name = ["глюкгиф"]
     access = ['admin', "editor", "moderator"]
     desc = "Глючная обработка гифки"

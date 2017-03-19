@@ -1,4 +1,4 @@
-class __Command_template:
+class C_template:
     name = ['Change me']
     access = ['admin']
     desc = "Change me"

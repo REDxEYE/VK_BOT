@@ -32,7 +32,7 @@ except:
     from __Command_template import *
 
 
-class Command_Kok(__Command_template):
+class Command_Kok(C_template):
     name = ["кок"]
     access = ["all"]
     desc = "Зеркалит картинку"
@@ -59,7 +59,7 @@ class Command_Kok(__Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_Kek(__Command_template):
+class Command_Kek(C_template):
     name = ["кек"]
     access = ["all"]
     desc = "Зеркалит картинку"
@@ -86,7 +86,7 @@ class Command_Kek(__Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_Filter(__Command_template):
+class Command_Filter(C_template):
     name = ["обработай"]
     access = ["all"]
     desc = "Позволяет применять фильтры к фото"
@@ -134,7 +134,7 @@ class Command_Filter(__Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_Resize(__Command_template):
+class Command_Resize(C_template):
     name = ["увеличь"]
     access = ["all"]
     desc = "Позволяет увеличивать\уменьшать фото"
@@ -186,7 +186,7 @@ class Command_Resize(__Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_e621(__Command_template):
+class Command_e621(C_template):
     name = ["e621"]
     access = ["admin", "editor", "moderator"]
     info = """Ищет пикчи на e612, форма запроса:\n
@@ -221,7 +221,7 @@ class Command_e621(__Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_e926(__Command_template):
+class Command_e926(C_template):
     name = ["e926"]
     access = ["all"]
     info = """Ищет пикчи на e926, форма запроса:\n
@@ -257,7 +257,7 @@ class Command_e926(__Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_rollRows(__Command_template):
+class Command_rollRows(C_template):
     name = ["rollrows"]
     access = ["all"]
     desc = "Сдвигает строки в фото"
@@ -289,7 +289,7 @@ class Command_rollRows(__Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_rollRowssmart(__Command_template):
+class Command_rollRowssmart(C_template):
     name = ["rollsmart"]
     access = ["all"]
     desc = "Сдвигает строки в фото"
@@ -321,7 +321,7 @@ class Command_rollRowssmart(__Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_AddImages(__Command_template):
+class Command_AddImages(C_template):
     name = ["сложи"]
     access = ['all']
     desc = "Соединяет 2 фото"
@@ -364,7 +364,7 @@ class Command_AddImages(__Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_merge(__Command_template):
+class Command_merge(C_template):
     name = ["совмести"]
     access = ['all']
     desc = "Соединяет 2 фото"
@@ -408,7 +408,7 @@ class Command_merge(__Command_template):
 
 
 
-class Command_screen(__Command_template):
+class Command_screen(C_template):
     enabled = windows
     name = ["скрин"]
     access = ['admin']
@@ -428,7 +428,7 @@ class Command_screen(__Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_GlitchImg(__Command_template):
+class Command_GlitchImg(C_template):
     name = ["глитч"]
     access = ["all"]
     desc = "Глючит фото"
@@ -459,7 +459,7 @@ class Command_GlitchImg(__Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_everyPixel(__Command_template):
+class Command_everyPixel(C_template):
     name = ['everypixel']
     access = ['all']
     desc = 'Описывает ваше фото'
