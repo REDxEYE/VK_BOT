@@ -583,7 +583,7 @@ class Command_restart(C_template):
     def execute(bot, data, forward=True):
         from subprocess import Popen
         print(sys.executable, os.path.join(bot.ROOT, __file__))
-        os.execl(sys.executable, (os.path.join(bot.ROOT, __file__),))
+        os.execl(sys.executable, os.path.join(bot.ROOT, __file__))
 class _Command_restart(C_template):
     name = ["рестарт"]
     access = ['admin']
