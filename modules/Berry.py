@@ -6,7 +6,7 @@ except:
 from ExtLib.Raspberry_PI import *
 
 
-class Command_PiStat(Command_template):
+class Command_PiStat(__Command_template):
     name = ['pistat', 'PI', 'малина']
     access = ['admin']
     perm = 'core.PI'
@@ -26,7 +26,7 @@ class Command_PiStat(Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_GITPULL(Command_template):
+class Command_GITPULL(__Command_template):
     name = ['update', 'git']
     access = ['admin']
     perm = 'core.update'

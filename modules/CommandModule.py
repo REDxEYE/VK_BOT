@@ -16,6 +16,8 @@ from math import log
 from time import sleep
 from urllib.request import urlopen
 
+from modules.__Command_template import __Command_template
+
 try:
     import execjs
 
@@ -68,7 +70,7 @@ def prettier_size(n, pow=0, b=1024, u='B', pre=[''] + [p + 'i' for p in 'KMGTPEZ
     return (f % (abs(r % (-r - 1)), pre[r], u)).format(n * b ** pow / b ** float(r))
 
 
-class Command_Whom(Command_template):
+class Command_Whom(__Command_template):
     name = ["кого"]
     access = ["all"]
     desc = "Выбирает случайного человека"
@@ -127,7 +129,7 @@ class Command_Whom(Command_template):
             bot.Replyqueue.put(args)
 
 
-class Command_Who(Command_template):
+class Command_Who(__Command_template):
     name = ["кто?"]
     access = ["all"]
     desc = "Выбирает случайного человека"
@@ -202,7 +204,7 @@ class Command_Who(Command_template):
             bot.Replyqueue.put(args)
 
 
-class Command_Prob(Command_template):
+class Command_Prob(__Command_template):
     name = ["вероятность"]
     access = ["all"]
     desc = "Процент правдивости инфы"
@@ -223,7 +225,7 @@ class Command_Prob(Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_Where(Command_template):
+class Command_Where(__Command_template):
     name = ["где"]
     access = ["all"]
     desc = "Говорит где что находится "
@@ -240,7 +242,7 @@ class Command_Where(Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_You(Command_template):
+class Command_You(__Command_template):
     name = ["ты!"]
     access = ['all']
     desc = "Не обзывай бота"
@@ -272,7 +274,7 @@ class Command_You(Command_template):
         return True
 
 
-class Command_Help(Command_template):
+class Command_Help(__Command_template):
     name = ["команды", "помощь"]
     access = ['all']
     desc = "Выводит это сообщение"
@@ -292,7 +294,7 @@ class Command_Help(Command_template):
         return True
 
 
-class Command_resend(Command_template):
+class Command_resend(__Command_template):
     name = ["перешли"]
     access = ['all']
     desc = "Пересылает фото"
@@ -327,7 +329,7 @@ class Command_resend(Command_template):
         return True
 
 
-class Command_kick(Command_template):
+class Command_kick(__Command_template):
     name = ["изгнать", "kick", "votekick"]
     access = ['admin', 'moderator', 'editor']
     desc = "Изгоняет пользователя"
@@ -355,7 +357,7 @@ class Command_kick(Command_template):
         return True
 
 
-class Command_JoinFiveNigths(Command_template):
+class Command_JoinFiveNigths(__Command_template):
     name = ["5nights"]
     access = ["all"]
     desc = "Добавляет в беседу"
@@ -389,7 +391,7 @@ class Command_JoinFiveNigths(Command_template):
             return True
 
 
-class Command_ExecCode(Command_template):
+class Command_ExecCode(__Command_template):
     name = ["py", "python"]
     access = ['admin']
     desc = "Выполняет код из сообщения"
@@ -439,7 +441,7 @@ class Command_ExecCode(Command_template):
         return True
 
 
-class Command_StatComm(Command_template):
+class Command_StatComm(__Command_template):
     name = ["инфо", "инфа", "info", 'stats', 'stat']
     access = ["all"]
     desc = "Статистика"
@@ -456,7 +458,7 @@ class Command_StatComm(Command_template):
         return True
 
 
-class Command_AdminOnly(Command_template):
+class Command_AdminOnly(__Command_template):
     name = ["дебаг"]
     access = ["admin"]
     desc = "Врубает режим АдминОнли"
@@ -474,7 +476,7 @@ class Command_AdminOnly(Command_template):
         return True
 
 
-class _Command_BanAllGroupUsers(Command_template):
+class _Command_BanAllGroupUsers(__Command_template):
     name = ["забанитьнафигвсех"]
     access = ["admin"]
     desc = "Банит всех участников группы к фигам"
@@ -508,7 +510,7 @@ class _Command_BanAllGroupUsers(Command_template):
             bot.GroupApi.groups.banUser(**args)
 
 
-class Command_About(Command_template):
+class Command_About(__Command_template):
     name = ['about', 'ктоты']
     access = ['all']
     desc = 'Выводит информацию о боте'
@@ -529,7 +531,7 @@ class Command_About(Command_template):
 
 
 
-class Command_LockName(Command_template):
+class Command_LockName(__Command_template):
     name = ["namelock"]
     access = ["admin"]
     desc = "Лочит имя беседы"
@@ -554,7 +556,7 @@ class Command_LockName(Command_template):
         return True
 
 
-class Command_quit(Command_template):
+class Command_quit(__Command_template):
     name = ["shutdown"]
     access = ["admin"]
     desc = "Выключение бота"
@@ -568,7 +570,7 @@ class Command_quit(Command_template):
         os._exit(0)
 
 
-class Command_restart(Command_template):
+class Command_restart(__Command_template):
     name = ["рестарт"]
     access = ['admin']
     desc = "Рестарт бота"
@@ -645,7 +647,7 @@ class Command_restart(Command_template):
         # #os.execv(__file__, sys.argv)
 
 
-class Command_ithappens(Command_template):
+class Command_ithappens(__Command_template):
     name = ["этослучилось", 'ithappens']
     access = ["all"]
     desc = "Рандомная история с ithappens.me"
@@ -688,7 +690,7 @@ class Command_ithappens(Command_template):
         #    Command_Zadolbali().execute(None,{})
 
 
-class Command_banCommand(Command_template):
+class Command_banCommand(__Command_template):
     name = ["блок"]
     access = ["admin", "editor", "moderator"]
     desc = "блокирует команду в чате"
@@ -702,7 +704,7 @@ class Command_banCommand(Command_template):
             bot.Settings['bannedCommands'][comm] = [str(data['peer_id'])]
 
 
-class Command_Choice(Command_template):
+class Command_Choice(__Command_template):
     name = ["выбери"]
     access = ["all"]
     desc = "Выбирает из представленных вариантов"
@@ -719,7 +721,7 @@ class Command_Choice(Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_EvalJS(Command_template):
+class Command_EvalJS(__Command_template):
     enabled = execjsAvalible
     name = ['EvalJS']
     access = ['admin']
@@ -739,7 +741,7 @@ class Command_EvalJS(Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_ExecJS(Command_template):
+class Command_ExecJS(__Command_template):
     enabled = execjsAvalible
     name = ['ExecJS']
     access = ['admin']
@@ -774,7 +776,7 @@ class Command_ExecJS(Command_template):
 #        l = lua.eval(code)
 #        args['message'] = l
 #        bot.Replyqueue.put(args)
-class Command_TTS(Command_template):
+class Command_TTS(__Command_template):
     enabled = gttsAvalable
     name = ["скажи"]
     access = ['all']
@@ -824,7 +826,7 @@ class Command_TTS(Command_template):
             bot.Replyqueue.put(args)
 
 
-class Command_RemoteExec(Command_template):
+class Command_RemoteExec(__Command_template):
     name = ["безпалева"]
     access = ['admin']
     desc = "Выполняет команду в лс/беседе другого человека"
@@ -877,7 +879,7 @@ class Command_RemoteExec(Command_template):
             bot.Replyqueue.put(args)
 
 
-class Command_AboutUser(Command_template):
+class Command_AboutUser(__Command_template):
     name = ['whoami', "uname"]
     access = ['user']
     desc = 'Выводит информацию о вашем статусе и правах у бота'
@@ -899,7 +901,7 @@ class Command_AboutUser(Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_Whois(Command_template):
+class Command_Whois(__Command_template):
     name = ['whois']
     access = ['user']
     desc = 'Выводит информацию о вашем статусе и правах у бота'
@@ -934,7 +936,7 @@ class Command_Whois(Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_Zashkvar(Command_template):
+class Command_Zashkvar(__Command_template):
     name = ['зашквар', "жир"]
     access = ['user']
     desc = 'Замеряет зашкварность сообщения'

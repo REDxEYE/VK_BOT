@@ -19,7 +19,7 @@ except:
     from __Command_template import *
 
 
-class Command_WantedFunk(Command_template):
+class Command_WantedFunk(__Command_template):
     name = ["wanted"]
     access = ["all"]
     desc = "Вставляет 2 фото внутрь фото с написью Разыскивается"
@@ -61,7 +61,7 @@ class Command_WantedFunk(Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_JonTronFunk(Command_template):
+class Command_JonTronFunk(__Command_template):
     name = ["jontron"]
     access = ['all']
     desc = "Вставляет фото в фото с ДжонТроном"
@@ -107,7 +107,7 @@ class Command_JonTronFunk(Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_SayMaxFunk(Command_template):
+class Command_SayMaxFunk(__Command_template):
     name = ["saymax"]
     access = ['all']
     desc = "Даёте подержать ваше фото Сойке"

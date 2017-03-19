@@ -1,4 +1,4 @@
-class Command_template:
+class __Command_template:
     name = ['Change me']
     access = ['admin']
     desc = "Change me"
@@ -11,3 +11,8 @@ class Command_template:
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id']}
         args['message'] = 'Change me'
         bot.Replyqueue.put(args)
+
+class __Filter_template:
+    enabled = True
+    name = 'Change me'
+    desc = 'Change me'

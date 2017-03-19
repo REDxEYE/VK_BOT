@@ -19,7 +19,7 @@ except:
     from __Command_template import *
 
 
-class Command_Glitch_(Command_template):
+class Command_Glitch_(__Command_template):
     name = ["глюк"]
     access = ['all']
     desc = "Глючная обработка"
@@ -59,7 +59,7 @@ class Command_Glitch_(Command_template):
         return True
 
 
-class Command_GlitchGif_(Command_template):
+class Command_GlitchGif_(__Command_template):
     name = ["глюкгиф"]
     access = ['admin', "editor", "moderator"]
     desc = "Глючная обработка гифки"

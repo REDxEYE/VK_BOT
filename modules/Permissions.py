@@ -4,7 +4,7 @@ except:
     from __Command_template import *
 
 
-class Command_SetStatus(Command_template):
+class Command_SetStatus(__Command_template):
     name = ["status"]
     access = ["admin"]
     desc = "Устанавливает права на пользователя"
@@ -35,7 +35,7 @@ class Command_SetStatus(Command_template):
         bot.SaveConfig()
 
 
-class Command_RemovePerms(Command_template):
+class Command_RemovePerms(__Command_template):
     name = ["rperms"]
     access = ["admin"]
     desc = "Снимает права у пользователя"
@@ -64,7 +64,7 @@ class Command_RemovePerms(Command_template):
         bot.SaveConfig()
 
 
-class Command_WritePerms(Command_template):
+class Command_WritePerms(__Command_template):
     name = ["perms"]
     access = ["admin"]
     desc = "Устанавливает права на пользователя"

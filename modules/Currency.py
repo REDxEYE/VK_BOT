@@ -4,7 +4,7 @@ except:
     from __Command_template import *
 
 
-class Command_AddCurrency(Command_template):
+class Command_AddCurrency(__Command_template):
     name = ['addmoney', 'addcurr']
     access = ['admin']
     perm = 'core.currency'
@@ -31,7 +31,7 @@ class Command_AddCurrency(Command_template):
         bot.Replyqueue.put(args)
 
 
-class Command_SetCurrency(Command_template):
+class Command_SetCurrency(__Command_template):
     name = ['setmoney', 'setcurr']
     access = ['admin']
     perm = 'core.currency'
