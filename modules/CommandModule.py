@@ -450,8 +450,7 @@ class Command_StatComm(Command_template):
         if forward:
             args.update({"forward_messages": data['message_id']})
         msg = 'Кол-во обработанных сообщений: {}\nКол-во выполеных команд: {}\nЗарегестрировано польхователей: {}\nРазмер кэша: {}\nКол-во живых потоков: {}\n'
-        args['message'] = msg.format(bot.Stat['messages'], bot.Stat['commands'], len(bot.USERS.DB), str(
-            prettier_size((os.path.getsize(os.path.join(getpath(), "../", 'tmp', 'cache.zip'))))),
+        args['message'] = msg.format(bot.Stat['messages'], bot.Stat['commands'], len(bot.USERS.DB), bot.Stat['cache'],
                                      len([thread for thread in bot.EX_threadList if thread.is_alive()]))
         bot.Replyqueue.put(args)
         return True

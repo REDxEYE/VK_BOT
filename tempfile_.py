@@ -1,5 +1,4 @@
 import os
-import shutil
 import uuid
 from os.path import isdir
 from random import randint
@@ -12,11 +11,15 @@ def getpath():
 
 class TempFile:
     def __init__(self, data, ras, file=None, NoCache=False):
-        print('temp', os.path.join(getpath(), 'tmp', 'cache.zip'))
-        if os.path.isfile(os.path.join(getpath(), 'tmp', 'cache.zip')):
-            self.cache = ZipFile(os.path.join(getpath(), 'tmp', 'cache.zip'), 'a', compression=ZIP_LZMA)
-        else:
-            self.cache = ZipFile(os.path.join(getpath(), 'tmp', 'cache.zip'), 'w', compression=ZIP_LZMA)
+        try:
+            print('temp', os.path.join(getpath(), 'tmp', 'cache.zip'))
+            if os.path.isfile(os.path.join(getpath(), 'tmp', 'cache.zip')):
+                self.cache = ZipFile(os.path.join(getpath(), 'tmp', 'cache.zip'), 'a', compression=ZIP_LZMA)
+            else:
+                self.cache = ZipFile(os.path.join(getpath(), 'tmp', 'cache.zip'), 'w', compression=ZIP_LZMA)
+            self.NoZip = False
+        except:
+            self.NoZip = True
 
         if not isdir('tmp'):
             os.mkdir('tmp')
@@ -37,6 +40,8 @@ class TempFile:
         return str(self.path_)
 
     def cachefile(self, path_):
+        if self.NoZip:
+            return
         self.cache = ZipFile(os.path.join(getpath(), 'tmp', 'cache.zip'), 'a', compression=ZIP_LZMA) if os.path.isfile(
             os.path.join(getpath(), 'tmp', 'cache.zip')) else ZipFile(os.path.join(getpath(), 'tmp', 'cache.zip'), 'w',
                                                                       compression=ZIP_LZMA)

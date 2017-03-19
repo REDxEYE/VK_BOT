@@ -2,7 +2,6 @@ try:
     from .__Command_template import *
 except:
     from __Command_template import *
-import os
 
 from ExtLib.Raspberry_PI import *
 
@@ -39,7 +38,7 @@ class Command_GITPULL(Command_template):
         if forward:
             args.update({"forward_messages": data['message_id']})
         text = []
-        p = os.popen('git checkout')
+        p = os.popen('git pull')
         text.append(p.readline())
         t = 0
         while p != '':

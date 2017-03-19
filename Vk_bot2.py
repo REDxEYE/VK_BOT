@@ -278,7 +278,10 @@ class Bot:
         return atts
 
     def UploadFromDisk(self, file):
-        self.Stat['cache'] = str(prettier_size((os.path.getsize(os.path.join(getpath(), 'tmp', 'cache.zip')))))
+        try:
+            self.Stat['cache'] = str(prettier_size((os.path.getsize(os.path.join(getpath(), 'tmp', 'cache.zip')))))
+        except:
+            self.Stat['cache'] = 'NO CACHE'
         atts = []
         server = self.GetUploadServer()['upload_url']
         args = {}
