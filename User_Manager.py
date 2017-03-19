@@ -52,16 +52,16 @@ class UserManager:
 
     def LoadConfig(self):
         path = getpath()
-        if not os.path.exists(path + '\\Users.json'):
+        if not os.path.exists(os.path.join(path, 'Users.json')):
             USERS = {}
             return USERS
-        with open(path + '\\Users.json', 'r') as config:
+        with open(os.path.join(path, 'Users.json'), 'r') as config:
             USERS = json.load(config)
         return USERS
 
     def SaveConfig(self):
         path = getpath()
-        with open(path + '\\Users.json', 'w') as config:
+        with open(os.path.join(path, 'Users.json'), 'w') as config:
             json.dump(self.DB, config, indent=4, sort_keys=True)
 
     def WriteUser(self, user, status, action=99, *perms):
