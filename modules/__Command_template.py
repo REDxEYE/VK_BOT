@@ -15,7 +15,7 @@ class __Command_template:
 
 
 class __Filter_template:
-    
+
     enabled = True
     name = 'Change me'
     desc = 'Change me'

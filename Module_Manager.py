@@ -2,6 +2,7 @@ import importlib
 import os
 import os.path
 import sys
+import traceback
 
 from Module_struct import Module, Filter
 import CustomPrint
@@ -30,8 +31,16 @@ class ModuleManager:
             if not module.startswith("__"):
                 try:
                     module = importlib.import_module(str(module.split(".")[0]))
-                except:
+                except Exception as ex:
                     print("can't import module " + str(module.split(".")[0]), type_='err')
+
+                    print(ex.__traceback__)
+                    print(ex.__cause__)
+
+                    exc_type, exc_value, exc_traceback = sys.exc_info()
+                    TB = traceback.format_tb(exc_traceback)
+                    print(exc_type, exc_value, ''.join(TB))
+                    pass
                     continue
                 longest = 0
                 toPrint = []
