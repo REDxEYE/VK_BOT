@@ -582,8 +582,8 @@ class Command_restart(C_template):
     @staticmethod
     def execute(bot, data, forward=True):
         from subprocess import Popen
-        print(sys.executable, os.path.join(bot.ROOT, __file__))
-        os.execl(sys.executable, os.path.join(bot.ROOT, 'Vk_bot2.py'))
+        print(sys.executable, os.path.join(bot.ROOT, 'Vk_bot2.py'),'',bot.ROOT)
+        os.execv(sys.executable, (os.path.join(bot.ROOT, 'Vk_bot2.py'),))
 class _Command_restart(C_template):
     name = ["рестарт"]
     access = ['admin']

@@ -94,7 +94,7 @@
         <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.42024013">
-              <caret line="585" column="67" selection-start-line="585" selection-start-column="67" selection-end-line="585" selection-end-column="67" />
+              <caret line="585" column="71" selection-start-line="585" selection-start-column="71" selection-end-line="585" selection-end-column="71" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -118,7 +118,7 @@
         <entry file="file://D:/Program Files/Py35/Lib/os.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="533" column="23" selection-start-line="533" selection-start-column="23" selection-end-line="533" selection-end-column="23" />
+              <caret line="538" column="9" selection-start-line="538" selection-start-column="4" selection-end-line="538" selection-end-column="9" />
               <folding />
             </state>
           </provider>
@@ -725,7 +725,13 @@
       <option name="project" value="LOCAL" />
       <updated>1489964107031</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="Raspberry Pi support">
+      <created>1489964276276</created>
+      <option name="number" value="00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1489964276276</updated>
+    </task>
+    <option name="localTasksCounter" value="38" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1125,14 +1131,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Vk_bot2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="32" column="53" selection-start-line="31" selection-start-column="0" selection-end-line="32" selection-end-column="53" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharm50/system/python_stubs/-2073368585/nt.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.3327616">
@@ -1141,10 +1139,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Vk_bot2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="32" column="53" selection-start-line="31" selection-start-column="0" selection-end-line="32" selection-end-column="53" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://D:/Program Files/Py35/Lib/os.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="533" column="23" selection-start-line="533" selection-start-column="23" selection-end-line="533" selection-end-column="23" />
+          <caret line="538" column="9" selection-start-line="538" selection-start-column="4" selection-end-line="538" selection-end-column="9" />
           <folding />
         </state>
       </provider>
@@ -1162,7 +1168,7 @@
     <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.42024013">
-          <caret line="585" column="67" selection-start-line="585" selection-start-column="67" selection-end-line="585" selection-end-column="67" />
+          <caret line="585" column="71" selection-start-line="585" selection-start-column="71" selection-end-line="585" selection-end-column="71" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
