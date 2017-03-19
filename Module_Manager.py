@@ -124,12 +124,13 @@ class ModuleManager:
                     continue
         return Available
     def Reload(self):
+        reloaded = []
         for module in self.modules:
             if not module.startswith("__"):
                 try:
                     name = str(module.split(".")[0])
                     mod = sys.modules[name]
-
+                    reloaded.append(name)
                     sys.modules[name] = importlib.reload(mod)
                 except Exception as ex:
                     print("can't import module " + str(module.split(".")[0]), type_='err')
@@ -140,9 +141,7 @@ class ModuleManager:
                     exc_type, exc_value, exc_traceback = sys.exc_info()
                     TB = traceback.format_tb(exc_traceback)
                     print(exc_type, exc_value, ''.join(TB))
-                    pass
-                    continue
-
+        return reloaded
 if __name__ == '__main__':
     a = ModuleManager()
     print(a.GetAvailable(['core.*', 'photo.kek']))
