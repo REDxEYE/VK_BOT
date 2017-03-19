@@ -21,9 +21,9 @@ class Command_PiStat(C_template):
             args.update({"forward_messages": data['message_id']})
         template = 'Темпуратура CPU {}\n' \
                    'Загруженность CPU {}\n' \
-                   'Оперативная память {}\n' \
+                   'Оперативная память {}Мб\n' \
                    'Места на диске {}\n'
-        msg = template.format(getCPUtemperature(), getCPUuse(), getRAMinfo()[2], getDiskSpace()[1])
+        msg = template.format(getCPUtemperature(), getCPUuse(), round(int(getRAMinfo()[2])/1024,3), getDiskSpace()[1])
         args['message'] = msg
         bot.Replyqueue.put(args)
 
