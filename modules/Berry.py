@@ -20,7 +20,7 @@ class Command_PiStat(C_template):
         if forward:
             args.update({"forward_messages": data['message_id']})
         template = 'Темпуратура CPU {}\n' \
-                   'Загруженность CPU {}' \
+                   'Загруженность CPU {}\n' \
                    'Оперативная память {}\n' \
                    'Места на диске {}\n'
         msg = template.format(getCPUtemperature(), getCPUuse(), getRAMinfo()[2], getDiskSpace()[1])
