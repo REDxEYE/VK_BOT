@@ -630,13 +630,7 @@ class Command_restart(C_template):
         bot.ReplyThread.setDaemon(True)
         bot.ReplyThread.start()
         print("Перезапуск закончен")
-        for name, val in globals().items():
-            try:
-                if isinstance(val, types.ModuleType):
-                    print('RELOADING {} - {}'.format(name, val))
-                    importlib.reload(val)
-            except:
-                pass
+        bot.MODULES.Reload()
         args['message'] = "Перезапуск закончен"
         bot.Replyqueue.put(args)
         # os.system("RESTART.bat {}".format(os.getpid()))
