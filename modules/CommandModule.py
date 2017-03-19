@@ -401,7 +401,6 @@ class Command_ExecCode(Command_template):
             args.update({"forward_messages": data['message_id']})
         code = bot.html_decode(data['message'])
         code = '\n'.join(code.split('<br>')[1:]).replace('|', '  ')
-
         code = code.replace('print', 'print_')
         a = compile(code, '<string>', 'exec')
         from io import StringIO
