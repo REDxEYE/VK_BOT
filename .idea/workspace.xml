@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="8e8d7c2a-d8a5-4bd1-9412-f3862de24023" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/CommandModule.py" afterPath="$PROJECT_DIR$/modules/CommandModule.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/updater.py" afterPath="$PROJECT_DIR$/updater.py" />
     </list>
     <ignored path="VK_BOT.iws" />
@@ -90,11 +91,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CommandModule.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="CommandModule.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="584" column="47" selection-start-line="584" selection-start-column="8" selection-end-line="584" selection-end-column="47" />
+            <state vertical-scroll-proportion="0.39108062">
+              <caret line="584" column="66" selection-start-line="584" selection-start-column="66" selection-end-line="584" selection-end-column="66" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -102,14 +103,24 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="updater.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="updater.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/updater.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.20411664">
-              <caret line="7" column="17" selection-start-line="7" selection-start-column="17" selection-end-line="7" selection-end-column="17" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="11" column="5" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="5" />
               <folding>
                 <element signature="e#0#14#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="os.py" pinned="false" current-in-tab="false">
+        <entry file="file://D:/Program Files/Py35/Lib/os.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="538" column="7" selection-start-line="538" selection-start-column="7" selection-end-line="538" selection-end-column="7" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -162,8 +173,8 @@
         <option value="$PROJECT_DIR$/Module_Manager.py" />
         <option value="$PROJECT_DIR$/modules/Berry.py" />
         <option value="$PROJECT_DIR$/Vk_bot2.py" />
-        <option value="$PROJECT_DIR$/modules/CommandModule.py" />
         <option value="$PROJECT_DIR$/updater.py" />
+        <option value="$PROJECT_DIR$/modules/CommandModule.py" />
       </list>
     </option>
   </component>
@@ -679,7 +690,13 @@
       <option name="project" value="LOCAL" />
       <updated>1489962779430</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="Raspberry Pi support">
+      <created>1489962873161</created>
+      <option name="number" value="00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1489962873161</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -733,13 +750,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://D:/Program Files/Py35/Lib/threading.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.33333334">
-          <caret line="922" column="0" selection-start-line="922" selection-start-column="0" selection-end-line="922" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lunatic-python-1.0/tests/test_lua.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.12854442">
@@ -1093,16 +1103,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="584" column="47" selection-start-line="584" selection-start-column="8" selection-end-line="584" selection-end-column="47" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Vk_bot2.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1111,12 +1111,30 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://D:/Program Files/Py35/Lib/os.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="538" column="7" selection-start-line="538" selection-start-column="7" selection-end-line="538" selection-end-column="7" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/updater.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.20411664">
-          <caret line="7" column="17" selection-start-line="7" selection-start-column="17" selection-end-line="7" selection-end-column="17" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="11" column="5" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="5" />
           <folding>
             <element signature="e#0#14#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.39108062">
+          <caret line="584" column="66" selection-start-line="584" selection-start-column="66" selection-end-line="584" selection-end-column="66" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
           </folding>
         </state>
       </provider>
