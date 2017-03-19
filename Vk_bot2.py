@@ -85,7 +85,7 @@ class SessionCapchaFix(Session):
 
 class Bot:
     def __init__(self, threads=4, LP_Threads=1, DEBUG=False):
-
+        self.ROOT = getpath()
         self.Responder = Responder()
         self.Longpool = queue.Queue()
         self.Checkqueue = queue.Queue()
