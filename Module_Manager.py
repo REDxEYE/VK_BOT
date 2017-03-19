@@ -4,7 +4,7 @@ import os.path
 import sys
 
 from Module_struct import Module, Filter
-
+import CustomPrint
 
 def getpath():
     return os.path.dirname(os.path.abspath(__file__))
