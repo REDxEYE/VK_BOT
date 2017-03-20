@@ -12,7 +12,7 @@ class Command_AddCurrency(C_template):
     access = ['admin']
     perm = 'core.currency'
     desc = 'Редактирование кошелька пользователя'
-
+    template = '{}, id пользователя кол-во денег'
     @staticmethod
     def execute(bot, data, forward=True):
         text = data['text'].split(' ')
