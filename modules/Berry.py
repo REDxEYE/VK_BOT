@@ -1,5 +1,7 @@
 from time import sleep
 
+import sys
+
 try:
     from .__Command_template import *
 except:
@@ -52,3 +54,35 @@ class Command_GITPULL(C_template):
         args['message'] = '\n'.join(text)
         bot.Replyqueue.put(args)
 
+class Command_LevelUP(C_template):
+    name = ['levelUP']
+    access = ['admin']
+    perm = 'core.LEVELUP'
+    desc = 'FULL UPDATE AND RESTART'
+    template = 'THERE NO FUCKING HELP FOR YOU'
+
+    @staticmethod
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
+        args['title'] = 'Запущена процедура обновления!'
+        bot.Replyqueue.put(args)
+        p = os.popen('git pull -f')
+        text = []
+        text.append(p.readline())
+        t = 0
+        while p != '':
+            text.append(p.readline())
+            t += 1
+            if t > 100:
+                break
+        args['message'] = '\n'.join(text)
+        bot.Replyqueue.put(args)
+        sleep(0.5)
+        args['title'] = 'Загрузка обновления закончена'
+        bot.Replyqueue.put(args)
+        args['message'] = 'Перезагрузка!'
+        sleep(0.5)
+        bot.Replyqueue.put(args)
+        os.execl(sys.executable,sys.executable, os.path.join(bot.ROOT, 'Vk_bot2.py'))

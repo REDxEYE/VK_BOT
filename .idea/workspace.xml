@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="8e8d7c2a-d8a5-4bd1-9412-f3862de24023" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/CommandModule.py" afterPath="$PROJECT_DIR$/modules/CommandModule.py" />
     </list>
     <ignored path="VK_BOT.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -80,21 +79,23 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Berry.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Berry.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modules/Berry.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="21" column="47" selection-start-line="21" selection-start-column="47" selection-end-line="21" selection-end-column="47" />
-              <folding />
+            <state vertical-scroll-proportion="0.81026787">
+              <caret line="83" column="32" selection-start-line="83" selection-start-column="32" selection-end-line="83" selection-end-column="32" />
+              <folding>
+                <element signature="e#0#22#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CommandModule.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="CommandModule.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6171875">
-              <caret line="296" column="39" selection-start-line="296" selection-start-column="39" selection-end-line="296" selection-end-column="39" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="610" column="85" selection-start-line="610" selection-start-column="8" selection-end-line="610" selection-end-column="85" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -191,10 +192,10 @@
         <option value="$PROJECT_DIR$/Module_Manager.py" />
         <option value="$PROJECT_DIR$/Vk_bot2.py" />
         <option value="$PROJECT_DIR$/updater.py" />
-        <option value="$PROJECT_DIR$/modules/Berry.py" />
         <option value="$PROJECT_DIR$/User_Manager.py" />
         <option value="$PROJECT_DIR$/modules/Currency.py" />
         <option value="$PROJECT_DIR$/modules/CommandModule.py" />
+        <option value="$PROJECT_DIR$/modules/Berry.py" />
       </list>
     </option>
   </component>
@@ -530,12 +531,6 @@
       <option name="number" value="Default" />
       <updated>1489957518103</updated>
     </task>
-    <task id="LOCAL-00002" summary="Raspberry Pi support">
-      <created>1489958029433</created>
-      <option name="number" value="00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1489958029433</updated>
-    </task>
     <task id="LOCAL-00003" summary="Raspberry Pi support">
       <created>1489958255671</created>
       <option name="number" value="00003" />
@@ -824,7 +819,13 @@
       <option name="project" value="LOCAL" />
       <updated>1490033449836</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="small fixes">
+      <created>1490040932812</created>
+      <option name="number" value="00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1490040932812</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1221,14 +1222,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/modules/Berry.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="21" column="47" selection-start-line="21" selection-start-column="47" selection-end-line="21" selection-end-column="47" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Vk_bot2.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1255,10 +1248,20 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6171875">
-          <caret line="296" column="39" selection-start-line="296" selection-start-column="39" selection-end-line="296" selection-end-column="39" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="610" column="85" selection-start-line="610" selection-start-column="8" selection-end-line="610" selection-end-column="85" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/Berry.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.81026787">
+          <caret line="83" column="32" selection-start-line="83" selection-start-column="32" selection-end-line="83" selection-end-column="32" />
+          <folding>
+            <element signature="e#0#22#0" expanded="true" />
           </folding>
         </state>
       </provider>
