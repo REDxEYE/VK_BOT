@@ -294,6 +294,7 @@ class Command_Help(C_template):
             print(data['text'].split(' '))
             Command_Help.GetHelp(bot, data,data['text'].split(' ')[0], forward)
             return
+        args['title'] = 'Список команд'
         a = "Вам доступны:\n"
         UserPerms = bot.USERS.GetPerms(data['user_id'])
         for command in bot.MODULES.GetAvailable(UserPerms):
