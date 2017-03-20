@@ -3,9 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="8e8d7c2a-d8a5-4bd1-9412-f3862de24023" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/User_Manager.py" afterPath="$PROJECT_DIR$/User_Manager.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/CommandModule.py" afterPath="$PROJECT_DIR$/modules/CommandModule.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/Currency.py" afterPath="$PROJECT_DIR$/modules/Currency.py" />
     </list>
     <ignored path="VK_BOT.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -95,8 +93,8 @@
       <file leaf-file-name="CommandModule.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.31361607">
-              <caret line="295" column="19" selection-start-line="295" selection-start-column="19" selection-end-line="295" selection-end-column="19" />
+            <state vertical-scroll-proportion="0.25669643">
+              <caret line="292" column="42" selection-start-line="292" selection-start-column="42" selection-end-line="292" selection-end-column="42" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -790,7 +788,13 @@
       <option name="project" value="LOCAL" />
       <updated>1490031049314</updated>
     </task>
-    <option name="localTasksCounter" value="44" />
+    <task id="LOCAL-00044" summary="small fixes">
+      <created>1490031558592</created>
+      <option name="number" value="00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1490031558592</updated>
+    </task>
+    <option name="localTasksCounter" value="45" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1221,8 +1225,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.31361607">
-          <caret line="295" column="19" selection-start-line="295" selection-start-column="19" selection-end-line="295" selection-end-column="19" />
+        <state vertical-scroll-proportion="0.25669643">
+          <caret line="292" column="42" selection-start-line="292" selection-start-column="42" selection-end-line="292" selection-end-column="42" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>

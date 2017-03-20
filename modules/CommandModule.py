@@ -290,7 +290,7 @@ class Command_Help(C_template):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
         if forward:
             args.update({"forward_messages": data['message_id']})
-        if len(data['text'].split(' ')) > 1 and data['text'].split(' ')[0] != "" :
+        if len(data['text'].split(' ')) >= 1 and data['text'].split(' ')[0] != "" :
             print(data['text'].split(' '))
             Command_Help.GetHelp(bot, data,data['text'].split(' ')[0], forward)
             return
