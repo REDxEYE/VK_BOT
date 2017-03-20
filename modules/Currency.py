@@ -60,3 +60,27 @@ class Command_SetCurrency(C_template):
         except:
             args['message'] = 'Пользователю было изменено кол-во валюты на {}'.format(curr)
         bot.Replyqueue.put(args)
+class Command_GiveCurr(C_template):
+    name = ['скинуть', 'отдолжить']
+    access = ['all']
+    perm = 'text.giveCurr'
+    desc = 'Позволяет передать валюту'
+
+    @staticmethod
+    def execute(bot, data, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
+        text = data['text'].split(' ')
+        user = text[0]
+        curr = text[-1]
+        #from
+        bot.USERS.AddCuttency(user, -curr)
+        #to
+        bot.USERS.AddCuttency(data['user_id'], curr)
+        userName = bot.GetUserNameById(user)
+        try:
+            args['message'] = 'Вы перевели {} {} валюты'.format(userName['first_name'], userName['last_name'], curr)
+
+        except:
+            args['message'] = 'Вы перевели пользователю {} валюты'.format(curr)
