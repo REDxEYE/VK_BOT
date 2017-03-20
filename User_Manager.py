@@ -163,9 +163,10 @@ class UserManager:
         self.DB[user][UserManager.currency] -= amount
         self.SaveConfig()
 
+    def isValid(self,user:str):
+        return user in self.DB
 
-
-    def SetCuttency(self, user, ammount):
+    def SetCurrency(self, user, ammount):
         ammount = int(ammount)
         self.DB[user][UserManager.currency] = ammount
         self.SaveConfig()

@@ -46,7 +46,7 @@ class Command_SetCurrency(C_template):
         text = data['text'].split(' ')
         user = text[0]
         curr = text[-1]
-        bot.USERS.SetCuttency(user, curr)
+        bot.USERS.SetCurrency(user, curr)
         args = {"peer_id": data['peer_id'], "v": "5.60", }
         if forward:
             args.update({"forward_messages": data['message_id']})
@@ -74,13 +74,18 @@ class Command_GiveCurr(C_template):
         text = data['text'].split(' ')
         user = text[0]
         curr = text[-1]
+        if not bot.USERS.isValid(user):
+            args['message'] = 'Неизвестный пользователь. Проверьте правильность указанного вами id'
+            bot.Replyqueue.put(args)
+            return
         #from
-        bot.USERS.AddCuttency(user, -curr)
+        bot.USERS.AddCurrency(user, -curr)
         #to
-        bot.USERS.AddCuttency(data['user_id'], curr)
+        bot.USERS.AddCurrency(data['user_id'], curr)
         userName = bot.GetUserNameById(user)
         try:
             args['message'] = 'Вы перевели {} {} валюты'.format(userName['first_name'], userName['last_name'], curr)
 
         except:
             args['message'] = 'Вы перевели пользователю {} валюты'.format(curr)
+        bot.Replyqueue.put(args)

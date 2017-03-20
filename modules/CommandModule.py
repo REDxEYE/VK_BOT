@@ -290,6 +290,10 @@ class Command_Help(C_template):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
         if forward:
             args.update({"forward_messages": data['message_id']})
+        if len(data['text'].split(' ')) > 1 and data['text'].split(' ')[0] != "" :
+            print(data['text'].split(' '))
+            Command_Help.GetHelp(bot, data,data['text'].split(' ')[0], forward)
+            return
         a = "Вам доступны:\n"
         UserPerms = bot.USERS.GetPerms(data['user_id'])
         for command in bot.MODULES.GetAvailable(UserPerms):
@@ -297,6 +301,14 @@ class Command_Help(C_template):
         args['message'] = str(a)
         bot.Replyqueue.put(args)
         return True
+    @staticmethod
+    def GetHelp(bot, data,command, forward=True):
+        args = {"peer_id": data['peer_id'], "v": "5.60", }
+        if forward:
+            args.update({"forward_messages": data['message_id']})
+            mod = bot.MODULES.GetModule(command)
+            args['message'] = mod.template
+            bot.Replyqueue.put(args)
 
 
 class Command_resend(C_template):
