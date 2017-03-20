@@ -928,8 +928,8 @@ class Command_Whois(C_template):
             userstatus = bot.USERS.GetStatus(user)
             UD = VK_foaf.GetUser(user)
         except:
-            userperms = "Незарегестрирован"
-            userstatus = "Незарегестрирован"
+            userperms = "Не зарегестрирован"
+            userstatus = "Не зарегестрирован"
             UD = {}
             UD['reg'] = "ОШИБКА"
             UD['Bday'] = "ОШИБКА"
