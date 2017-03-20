@@ -64,8 +64,6 @@ class Command_LevelUP(C_template):
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
-        if forward:
-            args.update({"forward_messages": data['message_id']})
         args['message'] = 'Запущена процедура обновления!'
         bot.Replyqueue.put(args)
         p = os.popen('git pull -f')
