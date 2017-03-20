@@ -926,10 +926,13 @@ class Command_Whois(C_template):
         try:
             userperms = bot.USERS.GetPerms(user)
             userstatus = bot.USERS.GetStatus(user)
-            UD = VK_foaf.GetUser(user)
         except:
             userperms = "Не зарегестрирован"
             userstatus = "Не зарегестрирован"
+
+        try:
+            UD = VK_foaf.GetUser(user)
+        except:
             UD = {}
             UD['reg'] = "ОШИБКА"
             UD['Bday'] = "ОШИБКА"
