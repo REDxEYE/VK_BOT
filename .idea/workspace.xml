@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="8e8d7c2a-d8a5-4bd1-9412-f3862de24023" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/Currency.py" afterPath="$PROJECT_DIR$/modules/Currency.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/Berry.py" afterPath="$PROJECT_DIR$/modules/Berry.py" />
     </list>
     <ignored path="VK_BOT.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -80,11 +80,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Berry.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Berry.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modules/Berry.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="57" column="20" selection-start-line="57" selection-start-column="20" selection-end-line="57" selection-end-column="20" />
+            <state vertical-scroll-proportion="1.1895974">
+              <caret line="82" column="21" selection-start-line="82" selection-start-column="21" selection-end-line="82" selection-end-column="21" />
               <folding>
                 <element signature="e#0#22#0" expanded="true" />
               </folding>
@@ -104,10 +104,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Currency.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Currency.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/modules/Currency.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6395089">
+            <state vertical-scroll-proportion="0.0">
               <caret line="67" column="49" selection-start-line="67" selection-start-column="49" selection-end-line="67" selection-end-column="49" />
               <folding />
             </state>
@@ -195,8 +195,8 @@
         <option value="$PROJECT_DIR$/updater.py" />
         <option value="$PROJECT_DIR$/User_Manager.py" />
         <option value="$PROJECT_DIR$/modules/CommandModule.py" />
-        <option value="$PROJECT_DIR$/modules/Berry.py" />
         <option value="$PROJECT_DIR$/modules/Currency.py" />
+        <option value="$PROJECT_DIR$/modules/Berry.py" />
       </list>
     </option>
   </component>
@@ -279,6 +279,22 @@
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="js-jscs-nodeInterpreter" value="D:\program\NODEJS\node.exe" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth0" value="267" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder0" value="0" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth1" value="296" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder1" value="1" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth2" value="298" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder2" value="2" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth3" value="972" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder3" value="3" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth0" value="290" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder0" value="0" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth1" value="289" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder1" value="1" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth2" value="290" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder2" value="2" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth3" value="964" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder3" value="3" />
   </component>
   <component name="RunManager" selected="Python.Vk_bot2">
     <configuration default="false" name="Module_Manager" type="PythonConfigurationType" factoryName="Python" temporary="true">
@@ -531,12 +547,6 @@
       <created>1489957518103</created>
       <option name="number" value="Default" />
       <updated>1489957518103</updated>
-    </task>
-    <task id="LOCAL-00006" summary="Raspberry Pi support">
-      <created>1489958623041</created>
-      <option name="number" value="00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1489958623041</updated>
     </task>
     <task id="LOCAL-00007" summary="Raspberry Pi support">
       <created>1489958795640</created>
@@ -826,24 +836,30 @@
       <option name="project" value="LOCAL" />
       <updated>1490041341893</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="small fixes">
+      <created>1490041400850</created>
+      <option name="number" value="00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1490041400850</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32792208" sideWeight="0.50479746" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32792208" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32467532" sideWeight="0.5021322" order="11" side_tool="true" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31926408" sideWeight="0.49573562" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32467532" sideWeight="0.4978678" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32467532" sideWeight="0.4978678" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33874458" sideWeight="0.47974414" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32629356" sideWeight="0.4978678" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.19722815" sideWeight="0.4949785" order="1" side_tool="false" content_ui="combo" x="715" y="162" width="489" height="693" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19722815" sideWeight="0.4949785" order="1" side_tool="false" content_ui="combo" x="715" y="162" width="489" height="693" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32995737" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32575756" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.23507462" sideWeight="0.5050215" order="2" side_tool="false" content_ui="tabs" x="93" y="168" width="643" height="697" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.23507462" sideWeight="0.5050215" order="2" side_tool="false" content_ui="tabs" x="93" y="168" width="643" height="697" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.32995737" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39502165" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1249,21 +1265,21 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/modules/Berry.py">
+    <entry file="file://$PROJECT_DIR$/modules/Currency.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="57" column="20" selection-start-line="57" selection-start-column="20" selection-end-line="57" selection-end-column="20" />
-          <folding>
-            <element signature="e#0#22#0" expanded="true" />
-          </folding>
+          <caret line="67" column="49" selection-start-line="67" selection-start-column="49" selection-end-line="67" selection-end-column="49" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/modules/Currency.py">
+    <entry file="file://$PROJECT_DIR$/modules/Berry.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6395089">
-          <caret line="67" column="49" selection-start-line="67" selection-start-column="49" selection-end-line="67" selection-end-column="49" />
-          <folding />
+        <state vertical-scroll-proportion="1.1895974">
+          <caret line="82" column="21" selection-start-line="82" selection-start-column="21" selection-end-line="82" selection-end-column="21" />
+          <folding>
+            <element signature="e#0#22#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

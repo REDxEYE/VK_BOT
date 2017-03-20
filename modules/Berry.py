@@ -66,7 +66,7 @@ class Command_LevelUP(C_template):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
         if forward:
             args.update({"forward_messages": data['message_id']})
-        args['title'] = 'Запущена процедура обновления!'
+        args['message'] = 'Запущена процедура обновления!'
         bot.Replyqueue.put(args)
         p = os.popen('git pull -f')
         text = []
@@ -80,7 +80,7 @@ class Command_LevelUP(C_template):
         args['message'] = '\n'.join(text)
         bot.Replyqueue.put(args)
         sleep(0.5)
-        args['title'] = 'Загрузка обновления закончена'
+        args['message'] = 'Загрузка обновления закончена'
         bot.Replyqueue.put(args)
         args['message'] = 'Перезагрузка!'
         sleep(0.5)
