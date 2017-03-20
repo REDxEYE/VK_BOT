@@ -85,4 +85,5 @@ class Command_LevelUP(C_template):
         args['message'] = 'Перезагрузка!'
         sleep(0.5)
         bot.Replyqueue.put(args)
+        sleep(2)
         os.execl(sys.executable,sys.executable, os.path.join(bot.ROOT, 'Vk_bot2.py'))
