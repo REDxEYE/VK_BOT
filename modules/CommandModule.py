@@ -283,7 +283,7 @@ class Command_Help(C_template):
     name = ["команды", "помощь"]
     access = ['all']
     desc = "Выводит это сообщение"
-    template = '"помощь" или "команды" - выводится список команд, а "помощь НАЗВАНИЕ КОМАНДЫ" или "команды НАЗВАНИЕ_КОМАНДЫ" - Выведет шаблон запроса'
+    template = '"{}, помощь" или "{}, команды" - выводится список команд,\nа "{}, помощь НАЗВАНИЕ КОМАНДЫ" или "{}, команды НАЗВАНИЕ_КОМАНДЫ" - Выведет шаблон запроса'
     perm = 'text.help'
     @staticmethod
     def execute(bot, data, forward=True):
@@ -307,7 +307,7 @@ class Command_Help(C_template):
         if forward:
             args.update({"forward_messages": data['message_id']})
             mod = bot.MODULES.GetModule(command)
-            args['message'] = mod.template
+            args['message'] = mod.template.format(bot.MyName['first_name'])
             bot.Replyqueue.put(args)
 
 
@@ -315,7 +315,7 @@ class Command_resend(C_template):
     name = ["перешли"]
     access = ['all']
     desc = "Пересылает фото"
-    template = "Чё блоть? Это сообщение не должно выводится ни в каком случае. Что вы сделали что б бот его написал? Это невозможно блоть"
+    template = "{}, перешли"
     perm = 'text.resend'
     @staticmethod
     def execute(bot, data, forward=True):
@@ -379,6 +379,7 @@ class Command_JoinFiveNigths(C_template):
     access = ["all"]
     desc = "Добавляет в беседу"
     perm = 'text.joinChat'
+    template = '{}, 5nights'
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -413,6 +414,7 @@ class Command_ExecCode(C_template):
     access = ['admin']
     desc = "Выполняет код из сообщения"
     perm = 'core.PY'
+    template = '{}, py\nВаш код здесь'
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -463,6 +465,7 @@ class Command_StatComm(C_template):
     access = ["all"]
     desc = "Статистика"
     perm = 'text.info'
+    template = '{}, инфо'
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -480,6 +483,7 @@ class Command_AdminOnly(C_template):
     access = ["admin"]
     desc = "Врубает режим АдминОнли"
     perm = 'core.debug'
+    template = '{}, дебаг'
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -498,14 +502,19 @@ class _Command_BanAllGroupUsers(C_template):
     access = ["admin"]
     desc = "Банит всех участников группы к фигам"
     perm = 'core.banNahoi'
+    template = '{}, забанитьнафигвсех\n' \
+               'причина:цифра\n' \
+               'группа:ИД группы\n' \
+               'комантарий:Ваш комент\n' \
+               'время:срок в часах'
     @staticmethod
     def execute(bot, data, forward=True):
         exclude = 75615891
-        ToBan = bot.GroupApi.groups.getMembers(group_id=data['custom']["id"])['items']
+        ToBan = bot.GroupApi.groups.getMembers(group_id=data['custom']["id"],count=1000)['items']
         if data['custom']["id"] == exclude:
             return
         args = {'v': "5.60", 'group_id': exclude}
-        uid = int(data['custom']["id"])
+
         if "причина" in data['custom']:
             reason = int(args["причина"])
             args['reason'] = reason
@@ -513,7 +522,6 @@ class _Command_BanAllGroupUsers(C_template):
             args['group_id'] = data['custom']["группа"]
         else:
             args['group_id'] = bot.Group.replace("-", "")
-        args['user_id'] = uid
         if data['custom']["комментарий"]:
             comment = data['custom']["комментарий"]
             args['comment'] = comment
@@ -525,6 +533,7 @@ class _Command_BanAllGroupUsers(C_template):
         for user in ToBan:
             args['user_id'] = user
             bot.GroupApi.groups.banUser(**args)
+            sleep(1)
 
 
 class Command_About(C_template):
@@ -532,7 +541,7 @@ class Command_About(C_template):
     access = ['all']
     desc = 'Выводит информацию о боте'
     perm = 'text.about'
-
+    template = '{}, about'
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -553,6 +562,7 @@ class Command_LockName(C_template):
     access = ["admin"]
     desc = "Лочит имя беседы"
     perm = 'chat.LockName'
+    template = '{}, namelock'
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -578,6 +588,7 @@ class Command_quit(C_template):
     access = ["admin"]
     desc = "Выключение бота"
     perm = 'core.shutdown'
+    template = '{}, shutdown'
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", "forward_messages": data['message_id'],
@@ -591,6 +602,7 @@ class Command_restart(C_template):
     access = ['admin']
     desc = "Рестарт бота"
     perm = 'core.restart'
+    template = '{}, рестарт'
     @staticmethod
     def execute(bot, data, forward=True):
         from subprocess import Popen
@@ -672,6 +684,7 @@ class Command_ithappens(C_template):
     access = ["all"]
     desc = "Рандомная история с ithappens.me"
     perm = 'text.Zadolbali'
+    template = '{}, этослучилось'
     class MLStripper(HTMLParser):
         def __init__(self):
             super().__init__()
@@ -715,6 +728,8 @@ class Command_banCommand(C_template):
     access = ["admin", "editor", "moderator"]
     desc = "блокирует команду в чате"
     perm = 'chat.BlockCommand'
+    template = '{}, блок\n' \
+               'команда:название команды\n'
     @staticmethod
     def execute(bot, data, forward=True):
         comm = data['custom']['команда']
@@ -729,12 +744,13 @@ class Command_Choice(C_template):
     access = ["all"]
     desc = "Выбирает из представленных вариантов"
     perm = 'text.choice'
+    template = '{}, вариант1 вариант2 вариант3 вариантN '
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
         if forward:
             args.update({"forward_messages": data['message_id']})
-        vars = data['text'].split(',')
+        vars = data['text'].split(' ')
         var = random.choice(vars)
         templates = ['Я выбираю: {}', "Вот это: {}", "Думаю это лучший вариант: {}"]
         args['message'] = random.choice(templates).format(var)
@@ -802,6 +818,7 @@ class Command_TTS(C_template):
     access = ['all']
     desc = 'Произносит ваш текст на выбранном языке ("Имя бота", "нужный язык (2буквы)" " ВАШ ТЕКСТ")'
     perm = 'text.tts'
+    template = '{}, нужный язык(2буквы) ВАШ ТЕКСТ)'
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -904,6 +921,7 @@ class Command_AboutUser(C_template):
     access = ['user']
     desc = 'Выводит информацию о вашем статусе и правах у бота'
     perm = 'text.whoami'
+    template = '{}, whoami'
 
     @staticmethod
     def execute(bot, data, forward=True):
@@ -926,7 +944,7 @@ class Command_Whois(C_template):
     access = ['user']
     desc = 'Выводит информацию о вашем статусе и правах у бота'
     perm = 'text.whois'
-
+    template = '{}, whois'
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -964,7 +982,7 @@ class Command_Zashkvar(C_template):
     access = ['user']
     desc = 'Замеряет зашкварность сообщения'
     perm = 'text.zashkvar'
-
+    template = '{}, зашквар'
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
