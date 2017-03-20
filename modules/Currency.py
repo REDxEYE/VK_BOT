@@ -79,9 +79,9 @@ class Command_GiveCurr(C_template):
             bot.Replyqueue.put(args)
             return
         #from
-        bot.USERS.pay(user, -curr)
+        bot.USERS.pay(str(user), -int(curr))
         #to
-        bot.USERS.pay(data['user_id'], curr)
+        bot.USERS.pay(str(data['user_id']), int(curr))
         userName = bot.GetUserNameById(user)
         try:
             args['message'] = 'Вы перевели {} {} валюты'.format(userName['first_name'], userName['last_name'], curr)
