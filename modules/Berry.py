@@ -55,7 +55,7 @@ class Command_GITPULL(C_template):
         bot.Replyqueue.put(args)
 
 class Command_LevelUP(C_template):
-    name = ['levelUP']
+    name = ['levelup']
     access = ['admin']
     perm = 'core.LEVELUP'
     desc = 'FULL UPDATE AND RESTART'
