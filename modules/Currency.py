@@ -65,7 +65,7 @@ class Command_GiveCurr(C_template):
     access = ['all']
     perm = 'text.giveCurr'
     desc = 'Позволяет передать валюту'
-
+    template = '{}, id пользователя кол-во денег'
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
