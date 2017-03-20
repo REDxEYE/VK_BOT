@@ -93,8 +93,8 @@
       <file leaf-file-name="CommandModule.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.25669643">
-              <caret line="292" column="42" selection-start-line="292" selection-start-column="42" selection-end-line="292" selection-end-column="42" />
+            <state vertical-scroll-proportion="0.123883925">
+              <caret line="285" column="149" selection-start-line="285" selection-start-column="149" selection-end-line="285" selection-end-column="149" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -794,7 +794,13 @@
       <option name="project" value="LOCAL" />
       <updated>1490031558592</updated>
     </task>
-    <option name="localTasksCounter" value="45" />
+    <task id="LOCAL-00045" summary="small fixes">
+      <created>1490031686331</created>
+      <option name="number" value="00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1490031686331</updated>
+    </task>
+    <option name="localTasksCounter" value="46" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1225,8 +1231,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.25669643">
-          <caret line="292" column="42" selection-start-line="292" selection-start-column="42" selection-end-line="292" selection-end-column="42" />
+        <state vertical-scroll-proportion="0.123883925">
+          <caret line="285" column="149" selection-start-line="285" selection-start-column="149" selection-end-line="285" selection-end-column="149" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
