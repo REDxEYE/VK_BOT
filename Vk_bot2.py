@@ -620,10 +620,24 @@ class Bot:
         if type == 'chat_kick_user':
             if int(data['from']) == int(self.MyUId):
                 return
-            user = self.GetUserNameById(data['source_mid'], case='gen')
+
+
+
             if int(data['from']) == int(data['source_mid']):
-                Targs['message'] = 'Оп, {} {} ливнул с подливой &#9786;'.format(user['first_name'], user['last_name'])
+                user = self.GetUserNameById(data['source_mid'])
+                try:
+                    sex = user['sex']
+                    if sex ==2:
+                        end = ''
+                    if sex == 1:
+                        end = 'а'
+                    else:
+                        end = 'о'
+                except:
+                    end = 'о'
+                Targs['message'] = 'Оп, {} {} ливнул{} с подливой &#9786;'.format(user['first_name'], user['last_name'], end)
             else:
+                user = self.GetUserNameById(data['source_mid'],case = 'acc')
                 Targs['message'] = 'Оп, {} {} кикнули &#127770;'.format(user['first_name'], user['last_name'])
             self.Replyqueue.put(Targs)
 
