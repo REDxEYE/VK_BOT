@@ -84,7 +84,7 @@ class Command_GiveCurr(C_template):
         bot.USERS.pay(str(data['user_id']), int(curr))
         userName = bot.GetUserNameById(user)
         try:
-            args['message'] = 'Вы перевели {} {} валюты'.format(userName['first_name'], userName['last_name'], curr)
+            args['message'] = 'Вы перевели {} {} {} валюты'.format(userName['first_name'], userName['last_name'], curr)
 
         except:
             args['message'] = 'Вы перевели пользователю {} валюты'.format(curr)
