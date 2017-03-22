@@ -2,7 +2,7 @@ import os
 import re
 import urllib
 from urllib.request import urlopen
-
+import html
 try:
 
     from PIL import ImageGrab
@@ -184,7 +184,7 @@ class Command_Resize(C_template):
             Tmp.rem()
         args['attachment'] = Topost
         bot.Replyqueue.put(args)
-
+from bs4 import *
 
 class Command_e621(C_template):
     name = ["e621"]
@@ -202,6 +202,7 @@ class Command_e621(C_template):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
         if forward:
             args.update({"forward_messages": data['message_id']})
+        data['custom']['tags'] = BeautifulSoup(data['custom']['tags'], "html.parser").get_text()
         tags = data['custom']['tags'].replace(' ', '').split(';') if 'tags' in data['custom'] else None
         if tags == None:
             args['message'] = Command_e926.info
@@ -211,10 +212,11 @@ class Command_e621(C_template):
         page = int(data['custom']['page']) if 'page' in data['custom'] else 1
         sort_ = data['custom']['sort'].replace(' ', '') if 'sort' in data['custom'] else 'score'
         posts = e6.get(tags=tags, n=n, page=page, sort_=sort_)
-        msg_template = '{} - {}\nSources:\n{}\n'
+        msg_template = '{} - {}\n'
         msg = ""
         for n, post in enumerate(posts):
-            msg += msg_template.format(n + 1, post['link'], '\n'.join(post['sources']))
+            #msg += msg_template.format(n + 1, post['link'], '\n'.join(post['sources']))
+            msg += msg_template.format(n + 1, post['link'],)
         atts = bot.UploadPhoto(list([post['url'] for post in posts]))
         args['attachment'] = atts
         args['message'] = 'Вот порнушка по твоему запросу, шалунишка...\n' + msg
@@ -238,6 +240,7 @@ class Command_e926(C_template):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
         if forward:
             args.update({"forward_messages": data['message_id']})
+        data['custom']['tags'] = BeautifulSoup(data['custom']['tags'] , "html.parser").get_text()
         tags = data['custom']['tags'].replace(' ', '').split(';') if 'tags' in data['custom'] else None
         if tags == None:
             args['message'] = Command_e926.info
@@ -247,10 +250,11 @@ class Command_e926(C_template):
         page = int(data['custom']['page']) if 'page' in data['custom'] else 1
         sort_ = data['custom']['sort'].replace(' ', '') if 'sort' in data['custom'] else 'score'
         posts = e6.getSafe(tags=tags, n=n, page=page, sort_=sort_)
-        msg_template = '{} - {}\nSources:\n{}\n'
+        msg_template = '{} - {}\n'
         msg = ""
         for n, post in enumerate(posts):
-            msg += msg_template.format(n + 1, post['link'], '\n'.join(post['sources']))
+            #msg += msg_template.format(n + 1, post['link'], '\n'.join(post['sources']))
+            msg += msg_template.format(n + 1, post['link'],)
         atts = bot.UploadPhoto(list([post['url'] for post in posts]))
         args['attachment'] = atts
         args['message'] = 'Вот пикчи по твоему запросу\n' + msg

@@ -625,6 +625,7 @@ class Bot:
 
             if int(data['from']) == int(data['source_mid']):
                 user = self.GetUserNameById(data['source_mid'])
+                print(user)
                 try:
                     sex = user['sex']
                     if sex ==2:

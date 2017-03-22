@@ -18,7 +18,8 @@ class Status:
     moder = 1
     user = 99
     Ян = 9999
-    superadmin = -1
+    Супер_Зуйков = 621
+    Лис_с_метровым_Уем = -1
 
     @staticmethod
     def getId(id):

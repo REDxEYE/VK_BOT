@@ -128,7 +128,7 @@ def e621v2(tags, n, sort_=None):
         'Connection': 'keep-alive'}
     linkTemplate = "http://e621.net/post/show/{}/"
     js = json.loads(requests.request('GET', 'http://e621.net/post/index.json?tags={}'.format(' '.join(tags))).text)
-    print(js)
+    #print(js)
     Posts = []
     for post in js[:n]:
         Posts.append({'url': post['file_url'], 'link': linkTemplate.format(post['id']),
@@ -139,10 +139,12 @@ def e621v2(tags, n, sort_=None):
 
 
 def get(tags, n, page, sort_):
+    print(tags)
     return e621v2(tags, n, sort_)
 
 
 def getSafe(tags, n, page, sort_):
+    print(tags)
     return e926v2(tags, n, sort_)
 
 
