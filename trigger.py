@@ -1,6 +1,5 @@
 import time
 
-
 class Trigger:
     def __init__(self,cond,callback,onetime = True,timeout = 20,*callbackArgs,**callbackKwArgs):
         """

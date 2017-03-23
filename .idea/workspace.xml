@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="8e8d7c2a-d8a5-4bd1-9412-f3862de24023" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/ImageEdits.py" afterPath="$PROJECT_DIR$/modules/ImageEdits.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/trigger.py" afterPath="$PROJECT_DIR$/trigger.py" />
     </list>
     <ignored path="VK_BOT.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -95,20 +95,20 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="trigger.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="trigger.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/trigger.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="32" column="36" selection-start-line="32" selection-start-column="36" selection-end-line="32" selection-end-column="36" />
+            <state vertical-scroll-proportion="0.018973215">
+              <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ImageEdits.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ImageEdits.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/modules/ImageEdits.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5792411">
+            <state vertical-scroll-proportion="0.0">
               <caret line="172" column="38" selection-start-line="172" selection-start-column="38" selection-end-line="172" selection-end-column="38" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
@@ -171,8 +171,8 @@
         <option value="$PROJECT_DIR$/trigget.py" />
         <option value="$PROJECT_DIR$/Vk_bot2.py" />
         <option value="$PROJECT_DIR$/modules/CommandModule.py" />
-        <option value="$PROJECT_DIR$/trigger.py" />
         <option value="$PROJECT_DIR$/modules/ImageEdits.py" />
+        <option value="$PROJECT_DIR$/trigger.py" />
       </list>
     </option>
   </component>
@@ -558,12 +558,6 @@
       <option name="number" value="Default" />
       <updated>1489957518103</updated>
     </task>
-    <task id="LOCAL-00035" summary="Raspberry Pi support">
-      <created>1489963697845</created>
-      <option name="number" value="00035" />
-      <option name="project" value="LOCAL" />
-      <updated>1489963697845</updated>
-    </task>
     <task id="LOCAL-00036" summary="Raspberry Pi support">
       <created>1489964107031</created>
       <option name="number" value="00036" />
@@ -852,7 +846,13 @@
       <option name="project" value="LOCAL" />
       <updated>1490304858614</updated>
     </task>
-    <option name="localTasksCounter" value="84" />
+    <task id="LOCAL-00084" summary="small fixes">
+      <created>1490305256669</created>
+      <option name="number" value="00084" />
+      <option name="project" value="LOCAL" />
+      <updated>1490305256669</updated>
+    </task>
+    <option name="localTasksCounter" value="85" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1251,14 +1251,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/trigger.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="32" column="36" selection-start-line="32" selection-start-column="36" selection-end-line="32" selection-end-column="36" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/modules/CommandModule.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.54241073">
@@ -1291,11 +1283,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/modules/ImageEdits.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5792411">
+        <state vertical-scroll-proportion="0.0">
           <caret line="172" column="38" selection-start-line="172" selection-start-column="38" selection-end-line="172" selection-end-column="38" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/trigger.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.018973215">
+          <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
