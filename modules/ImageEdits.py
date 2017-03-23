@@ -122,7 +122,7 @@ class Command_Filter(C_template):
             Tmp.rem()
             args['message'] = "Время ожидания ответа истекло"
             bot.Replyqueue.put(args)
-        ans = int(data['message'])
+        ans = int(data['message'])-1
         filter_ = bot.MODULES.FILTERS[FArr[ans]].funk
         print('used filter {}'.format(filter_.name))
         filter_().render(Tmp.path_)

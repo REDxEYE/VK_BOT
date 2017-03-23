@@ -120,8 +120,8 @@
       <file leaf-file-name="ImageEdits.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modules/ImageEdits.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.36049107">
-              <caret line="114" column="43" selection-start-line="114" selection-start-column="43" selection-end-line="114" selection-end-column="43" />
+            <state vertical-scroll-proportion="0.64508927">
+              <caret line="124" column="36" selection-start-line="124" selection-start-column="36" selection-end-line="124" selection-end-column="36" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -570,12 +570,6 @@
       <option name="number" value="Default" />
       <updated>1489957518103</updated>
     </task>
-    <task id="LOCAL-00029" summary="Raspberry Pi support">
-      <created>1489962533599</created>
-      <option name="number" value="00029" />
-      <option name="project" value="LOCAL" />
-      <updated>1489962533599</updated>
-    </task>
     <task id="LOCAL-00030" summary="Raspberry Pi support">
       <created>1489962779430</created>
       <option name="number" value="00030" />
@@ -864,7 +858,13 @@
       <option name="project" value="LOCAL" />
       <updated>1490302818536</updated>
     </task>
-    <option name="localTasksCounter" value="78" />
+    <task id="LOCAL-00078" summary="small fixes">
+      <created>1490303818112</created>
+      <option name="number" value="00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1490303818112</updated>
+    </task>
+    <option name="localTasksCounter" value="79" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1302,8 +1302,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/modules/ImageEdits.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.36049107">
-          <caret line="114" column="43" selection-start-line="114" selection-start-column="43" selection-end-line="114" selection-end-column="43" />
+        <state vertical-scroll-proportion="0.64508927">
+          <caret line="124" column="36" selection-start-line="124" selection-start-column="36" selection-end-line="124" selection-end-column="36" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
