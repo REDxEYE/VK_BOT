@@ -118,7 +118,7 @@ class Command_Filter(C_template):
         #ans = int(bot.WaitForMSG(5, data)) - 1
 
     @staticmethod
-    def Render(data,Tmp,bot,args,FArr,result):
+    def Render(data,result,Tmp,bot,args,FArr):
         if result == False:
             Tmp.rem()
             args['message'] = "Время ожидания ответа истекло"
