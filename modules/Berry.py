@@ -71,7 +71,7 @@ class Command_LevelUP(C_template):
         text.append(p.readline())
         a = 0
         t = 0
-        while a != '':
+        while p != '':
             a = p.readline()
             text.append(a)
             t += 1
