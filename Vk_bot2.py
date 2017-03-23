@@ -86,6 +86,7 @@ class SessionCapchaFix(Session):
 class Bot:
     def __init__(self, threads=4, LP_Threads=1, DEBUG=False):
         self.ROOT = getpath()
+        self.IMAGES = os.path.join(self.ROOT,'IMAGES')
         self.Responder = Responder()
         self.Longpool = queue.Queue()
         self.Checkqueue = queue.Queue()
@@ -134,6 +135,14 @@ class Bot:
         self.MyName = self.GetUserNameById(self.MyUId)
 
         print('LOADED')
+
+
+    def GetImg(self,name):
+        if name in os.listdir(self.IMAGES):
+            return os.path.join(self.IMAGES,name)
+
+        else:
+            raise FileNotFoundError('There is no file named {} in images folder'.format(name))
     def GetUserFromMessage(self, message_id):
         sleep(0.25)
 
@@ -533,7 +542,8 @@ class Bot:
                     if ans == "":
                         continue
                     if ans == "IT'S HIGH NOON":
-                        att = self.UploadFromDisk(choice(['Noon1.jpg', 'Noon2.jpg']))
+
+                        att = self.UploadFromDisk(choice([self.GetImg('Noon1.jpg'), self.GetImg('Noon2.jpg')]))
                         defargs['attachment'] = att
                     defargs['message'] = ans
                     self.Checkqueue.task_done()
@@ -572,11 +582,11 @@ class Bot:
         if type == 'chat_photo_update':
             if int(data['from']) == int(self.MyUId):
                 return
-            img = Image.open('CHAT_IMG.jpg')
+            img = Image.open(os.path.join(self.IMAGES,'CHAT_IMG.jpg'))
             tmpf = {'chat_id': int(MSData['peer_id']) - 2000000000, "crop_x": ((img.size[0] - 350) / 2),
                     'crop_y': (((img.size[1] - 350) / 2) - 30), 'crop_width': 350}
             Uurl = self.UserApi.photos.getChatUploadServer(**tmpf)
-            req = requests.post(Uurl['upload_url'], files={'file1': open('CHAT_IMG.jpg', 'rb')})
+            req = requests.post(Uurl['upload_url'], files={'file1': open(self.GetImg('CHAT_IMG.jpg'), 'rb')})
             self.UserApi.messages.setChatPhoto(**{'file': req.json()['response']})
 
         if type == 'chat_title_update':

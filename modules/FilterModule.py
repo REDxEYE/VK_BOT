@@ -1,3 +1,4 @@
+import os.path
 import random
 from multiprocessing.pool import ThreadPool
 try:
@@ -42,7 +43,7 @@ class Filter_PencilSketch(F_template):
                             that the pencil sketch was drawn on a canvas.
         """
 
-        self.bg = bg_gray
+        self.bg = os.path.join('IMAGES',bg_gray)
 
     def render(self, img_rgb):
         """Applies pencil sketch effect to an RGB image
@@ -253,7 +254,7 @@ class Filter_Tlen(F_template):
 
     def render(self, img):
         im = Image.open(img).convert('L').convert('RGB')
-        im2 = Image.open(random.choice(['tlen.jpeg', 'tlen2.jpg', 'tlen3.jpg'])).resize(im.size).convert('RGB')
+        im2 = Image.open(random.choice([os.path.join('IMAGES','tlen.jpeg'), os.path.join('IMAGES','tlen2.jpg'), os.path.join('IMAGES','tlen3.jpg')])).resize(im.size).convert('RGB')
         im = ImageChops.multiply(im, im2)
         im.save(img, 'JPEG')
 

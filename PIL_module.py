@@ -1,6 +1,6 @@
 import math
 import random
-
+import os.path
 import cv2
 import imageio
 import numpy as np
@@ -196,7 +196,7 @@ def extendgif(gif, lenT):
 
 def MakeGlitchGifVSH(image, len_=60, blockSize=16, sigma=10, iterations=300, random_=True, Glitch_=False):
     im = Image.open(image)
-    VSH = imageio.mimread('vsh.gif')
+    VSH = imageio.mimread(os.path.join('IMAGES','vsh.gif'))
     VSH = extendgif(VSH, len_)
     nFrames = []
 
@@ -349,7 +349,7 @@ def Transorm(orig, im, origshape):
 
 
 def Wanted(im1, im2):
-    wanted = cv2.imread('Wanted.JPG')
+    wanted = cv2.imread(os.path.join('IMAGES','Wanted.JPG'))
     toplace1 = cv2.flip(cv2.imread(im1), 1)
     toplace2 = cv2.flip(cv2.imread(im2), 1)
     height2, width2, channels2 = wanted.shape
@@ -382,7 +382,7 @@ def textPlain(text, size, font='times.ttf', x=100, y=200, xsize=1280, ysize=720)
 
 
 def JonTron(im1):
-    JonTron = Image.open('JonTron.png')
+    JonTron = Image.open(os.path.join('IMAGES','JonTron.png'))
     toplace = cv2.flip(cv2.imread(im1), 1)
     width2, height2 = JonTron.size
     orig_pts = np.float32([[840, 238], [581, 233],
@@ -394,7 +394,7 @@ def JonTron(im1):
 
 
 def SayMax(im1):
-    JonTron = Image.open('SayMax.png')
+    JonTron = Image.open(os.path.join('IMAGES','SayMax.png'))
     toplace = cv2.flip(cv2.imread(im1), 1)
     width2, height2 = JonTron.size
     orig_pts = np.float32([[353, 243], [0, 280],

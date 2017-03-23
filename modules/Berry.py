@@ -79,10 +79,10 @@ class Command_LevelUP(C_template):
                 break
         args['message'] = '\n'.join(text)
         bot.Replyqueue.put(args)
-        sleep(0.5)
+        sleep(1)
         args['message'] = 'Загрузка обновления закончена'
         bot.Replyqueue.put(args)
-        sleep(0.5)
+        sleep(1)
         args['message'] = 'Перезагрузка!'
         bot.Replyqueue.put(args)
         sleep(3)

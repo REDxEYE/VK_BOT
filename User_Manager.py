@@ -19,7 +19,7 @@ class Status:
     user = 99
     Ян = 9999
     Супер_Зуйков = 621
-    Лис_с_метровым_Уем = -1
+    UberAdmin = -1
 
     @staticmethod
     def getId(id):
