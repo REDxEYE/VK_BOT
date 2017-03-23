@@ -126,7 +126,7 @@ class Command_Whom(C_template):
             if user['id'] == bot.MyUId:
                 args['message'] = 'Определённо меня'
                 bot.Replyqueue.put(args)
-            name = '*id{} ({} {})'.format(+str(user['id']),user['first_name'], user['last_name'])
+            name = '*id{} ({} {})'.format(str(user['id']),user['first_name'], user['last_name'])
             replies = ["Определённо {}", "Точно {}", "Я уверен что его -  {}"]
             msg = random.choice(replies)
             args['message'] = msg.format(name)
@@ -201,7 +201,7 @@ class Command_Who(C_template):
                 args['message'] = 'Определённо Я'
                 bot.Replyqueue.put(args)
                 return True
-            name = '*id{} ({} {})'.format(+str(user['id']),user['first_name'], user['last_name'])
+            name = '*id{} ({} {})'.format(str(user['id']),user['first_name'], user['last_name'])
 
             msg = random.choice(replies)
             args['message'] = msg.format(name, toins)

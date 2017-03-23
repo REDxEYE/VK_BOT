@@ -27,6 +27,7 @@ class TriggerHandler:
     def processTriggers(self,data):
         for trigger in self.triggers:
             try:
+                print(data,trigger.cond(data))
                 if time.time()-trigger.timestart > trigger.timeout*1000:
                     self.triggers.remove(trigger)
                     print('Trigger timeout!')
