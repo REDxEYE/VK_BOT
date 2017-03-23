@@ -30,7 +30,7 @@ class TriggerHandler:
                 self.triggers.remove(trigger)
                 trigger.callback(data,result = False)
             if trigger.cond(data):
-                trigger.callback(data,*trigger.callbackArgs,**trigger.callbackKwArgs)
+                trigger.callback(data,*trigger.callbackArgs,**trigger.callbackKwArgs,result = True)
                 if trigger.onetime:
                     self.triggers.remove(trigger)
 
