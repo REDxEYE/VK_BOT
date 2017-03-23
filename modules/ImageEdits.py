@@ -126,11 +126,13 @@ class Command_Filter(C_template):
         filter_ = bot.MODULES.FILTERS[FArr[ans]].funk
         print('used filter {}'.format(filter_.name))
         filter_().render(Tmp.path_)
-        print(args)
+
         args['message'] = filter_.name
+        print(args)
         Tmp.cachefile(Tmp.path_)
-        Tmp.rem()
         args['attachment'] = [bot.UploadFromDisk(Tmp.path_)]
+        Tmp.rem()
+
         bot.Replyqueue.put(args)
 
 
