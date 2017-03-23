@@ -2,7 +2,7 @@ import os
 import re
 import urllib
 from urllib.request import urlopen
-import html
+from trigger import Trigger
 try:
 
     from PIL import ImageGrab
@@ -98,39 +98,39 @@ class Command_Filter(C_template):
         if forward:
             args.update({"forward_messages": data['message_id']})
         atts = data['attachments']
-        Topost = []
-        for att in atts:
-            try:
-                photo = bot.GetBiggesPic(att, data['message_id'])
-            except:
-                return False
-            req = urllib.request.Request(photo, headers=HDR)
-            img = urlopen(req).read()
-            Tmp = TempFile(img, 'jpg', NoCache=True)
-            args['message'] = 'Список фильтров:\n'
-            FArr = dict(enumerate(bot.MODULES.FILTERS))
-            for filter_ in FArr:
-                Fname = bot.MODULES.FILTERS[FArr[filter_]].desc
-                args['message'] += "{}. {}\n".format(filter_ + 1, Fname)
-            bot.Replyqueue.put(args)
 
-            ans = int(bot.WaitForMSG(5, data)) - 1
-            if ans == None:
-                Tmp.rem()
-                args['message'] = "Время ожидания ответа истекло"
-                bot.Replyqueue.put(args)
-            filter_ = bot.MODULES.FILTERS[FArr[ans]].funk
+        try:
+            photo = bot.GetBiggesPic(atts[0], data['message_id'])
+        except:
+            return False
+        req = urllib.request.Request(photo, headers=HDR)
+        img = urlopen(req).read()
+        Tmp = TempFile(img, 'jpg', NoCache=True)
+        args['message'] = 'Список фильтров:\n'
+        FArr = dict(enumerate(bot.MODULES.FILTERS))
+        for filter_ in FArr:
+            Fname = bot.MODULES.FILTERS[FArr[filter_]].desc
+            args['message'] += "{}. {}\n".format(filter_ + 1, Fname)
+        bot.Replyqueue.put(args)
 
-            print('used filter {}'.format(filter_.name))
+        t = Trigger(cond = lambda Tdata:Tdata['user_id']==data['user_id'] and Tdata['message'].isnumeric(),callback=Command_Filter.Render,Tmp = Tmp,bot = bot,args = args, FArr = FArr)
+        bot.TRIGGERS.addTrigger(t)
+        #ans = int(bot.WaitForMSG(5, data)) - 1
 
-            filter_().render(Tmp.path_)
-
-            args['message'] = filter_.name
-
-            Topost.append(bot.UploadFromDisk(Tmp.path_))
-            Tmp.cachefile(Tmp.path_)
+    @staticmethod
+    def Render(data,Tmp,bot,args,FArr,result):
+        if result == False:
             Tmp.rem()
-        args['attachment'] = Topost
+            args['message'] = "Время ожидания ответа истекло"
+            bot.Replyqueue.put(args)
+        ans = int(data['message'])
+        filter_ = bot.MODULES.FILTERS[FArr[ans]].funk
+        print('used filter {}'.format(filter_.name))
+        filter_().render(Tmp.path_)
+        args['message'] = filter_.name
+        Tmp.cachefile(Tmp.path_)
+        Tmp.rem()
+        args['attachment'] = bot.UploadFromDisk(Tmp.path_)
         bot.Replyqueue.put(args)
 
 

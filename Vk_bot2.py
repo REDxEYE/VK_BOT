@@ -10,7 +10,7 @@ from random import choice
 from time import sleep
 from tkinter import ttk
 from urllib.request import urlopen
-
+import trigger
 import requests
 from PIL import Image, ImageTk
 from vk import *
@@ -106,7 +106,7 @@ class Bot:
         self.USERS = UserManager()
         self.MODULES = ModuleManager()
         self.DEBUG = DEBUG
-
+        self.TRIGGERS = trigger.TriggerHandler()
         self.AdminModeOnly = False
 
         self.defargs = {"v": "5.60"}
@@ -445,6 +445,7 @@ class Bot:
         while True:
             data = self.Checkqueue.get()
             sleep(0.3)
+            self.TRIGGERS.processTriggers(data)
             self.Stat['messages'] = self.Stat['messages'] + 1
             self.SaveConfig()
             if self.AdminModeOnly:
