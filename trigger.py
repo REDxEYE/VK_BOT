@@ -28,8 +28,10 @@ class TriggerHandler:
         for trigger in self.triggers:
             if time.time()-trigger.timestart > trigger.timeout*1000:
                 self.triggers.remove(trigger)
+                print('Trigger timeout!')
                 trigger.callback(data,result = False)
             if trigger.cond(data):
+                print('triggered!')
                 trigger.callback(data,result = True,*trigger.callbackArgs,**trigger.callbackKwArgs)
                 if trigger.onetime:
                     self.triggers.remove(trigger)

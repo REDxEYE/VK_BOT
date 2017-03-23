@@ -113,9 +113,8 @@ class Command_Filter(C_template):
             args['message'] += "{}. {}\n".format(filter_ + 1, Fname)
         bot.Replyqueue.put(args)
 
-        t = Trigger(cond = lambda Tdata:Tdata['user_id']==data['user_id'] and Tdata['message'].isnumeric(),callback=Command_Filter.Render,Tmp = Tmp,bot = bot,args = args, FArr = FArr)
+        t = Trigger(cond = lambda Tdata:Tdata['user_id']==data['user_id'] and Tdata['peed_id'] == data['peer_data'] and Tdata['message'].isnumeric(),callback=Command_Filter.Render,Tmp = Tmp,bot = bot,args = args, FArr = FArr)
         bot.TRIGGERS.addTrigger(t)
-        #ans = int(bot.WaitForMSG(5, data)) - 1
 
     @staticmethod
     def Render(data,result,Tmp,bot,args,FArr):
