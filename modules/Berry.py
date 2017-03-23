@@ -69,11 +69,9 @@ class Command_LevelUP(C_template):
         p = os.popen('git pull -f')
         text = []
         text.append(p.readline())
-        a = 0
         t = 0
         while p != '':
-            a = p.readline()
-            text.append(a)
+            text.append(p.readline())
             t += 1
             if t > 100:
                 break
