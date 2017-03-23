@@ -126,6 +126,7 @@ class Command_Filter(C_template):
         filter_ = bot.MODULES.FILTERS[FArr[ans]].funk
         print('used filter {}'.format(filter_.name))
         filter_().render(Tmp.path_)
+        print(args)
         args['message'] = filter_.name
         Tmp.cachefile(Tmp.path_)
         Tmp.rem()
