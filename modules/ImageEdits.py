@@ -129,7 +129,7 @@ class Command_Filter(C_template):
         args['message'] = filter_.name
         Tmp.cachefile(Tmp.path_)
         Tmp.rem()
-        args['attachment'] = bot.UploadFromDisk(Tmp.path_)
+        args['attachment'] = [bot.UploadFromDisk(Tmp.path_)]
         bot.Replyqueue.put(args)
 
 
