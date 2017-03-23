@@ -29,7 +29,7 @@ class TriggerHandler:
             try:
                 print(data,trigger.cond(data))
                 print(time.time()-trigger.timestart)
-                if time.time()-trigger.timestart > trigger.timeout*1000:
+                if time.time()-trigger.timestart > trigger.timeout:
                     self.triggers.remove(trigger)
                     print('Trigger timeout!')
                     trigger.callback(data,result = False)
