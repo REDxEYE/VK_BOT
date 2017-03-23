@@ -169,22 +169,25 @@ class Command_Resize(C_template):
             args['message'] = 'Поднимать резкость?\n Да\Нет'
             bot.Replyqueue.put(args)
             ans = bot.WaitForMSG(5, data)
-            if ans == None:
-                Tmp.rem()
-                args['message'] = "Время ожидания ответа истекло"
-                bot.Replyqueue.put(args)
-            sharp = False
-            if re.match(r'(Д|д)а', ans):
-                sharp = True
-            elif re.match(r'(Н|н)ет', ans):
-                sharp = False
-            resize_(x, Tmp.path_, sharp)
-            args['message'] = "Вотъ"
-
-            Topost.append(bot.UploadFromDisk(Tmp.path_))
-            Tmp.cachefile(Tmp.path_)
+            t = Trigger(cond = lambda Tdata:Tdata['user_id'] == data['user_id'] and Tdata['peer_id'] == data['peer_id'] and (re.match(r'(Д|д)а',Tdata['message']) or re.match(r'(Н|н)ет',Tdata['message']) ),callback=Command_Resize.resize,Tmp = Tmp,bot = bot,args = args)
+            bot.TRIGGERS.addTrigger(t)
+    @staticmethod
+    def resize(data,result,Tmp,bot,args,FArr):
+        ans = data['message']
+        if ans == None:
             Tmp.rem()
-        args['attachment'] = Topost
+            args['message'] = "Время ожидания ответа истекло"
+            bot.Replyqueue.put(args)
+        sharp = False
+        if re.match(r'(Д|д)а', ans):
+            sharp = True
+        elif re.match(r'(Н|н)ет', ans):
+            sharp = False
+        resize_(x, Tmp.path_, sharp)
+        args['message'] = "Вотъ"
+        args['attachment'] =[bot.UploadFromDisk(Tmp.path_)]
+        Tmp.cachefile(Tmp.path_)
+        Tmp.rem()
         bot.Replyqueue.put(args)
 from bs4 import *
 
