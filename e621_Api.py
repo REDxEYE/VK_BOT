@@ -111,7 +111,7 @@ def e926v2(tags, n, sort_='score'):
     for post in js:
         if post['file_ext'] in ['jpg', 'png', 'jpeg']:
             Posts.append({'url': post['file_url'], 'link': linkTemplate.format(post['id']),
-                          'sources': post['sources'] if 'sources' in post else ['None']})
+                      'sources': post['sources'] if 'sources' in post else ['None'],'ext':post['file_ext']})
         else:
             continue
 
@@ -132,7 +132,7 @@ def e621v2(tags, n, sort_=None):
     Posts = []
     for post in js[:n]:
         Posts.append({'url': post['file_url'], 'link': linkTemplate.format(post['id']),
-                      'sources': post['sources'] if 'sources' in post else ['None']})
+                      'sources': post['sources'] if 'sources' in post else ['None'],'ext':post['file_ext']})
 
     return Posts
 

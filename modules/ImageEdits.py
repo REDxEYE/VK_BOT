@@ -219,10 +219,14 @@ class Command_e621(C_template):
         posts = e6.get(tags=tags, n=n, page=page, sort_=sort_)
         msg_template = '{} - {}\n'
         msg = ""
+        atts  = []
         for n, post in enumerate(posts):
             #msg += msg_template.format(n + 1, post['link'], '\n'.join(post['sources']))
             msg += msg_template.format(n + 1, post['link'],)
-        atts = bot.UploadPhoto(list([post['url'] for post in posts]))
+        for post in posts:
+            if post['ext'] not in ['jpg','png','jpeg']:
+                continue
+            atts.append( bot.UploadPhoto(post['url']))
         args['attachment'] = atts
         args['message'] = 'Вот порнушка по твоему запросу, шалунишка...\n' + msg
         bot.Replyqueue.put(args)
@@ -260,7 +264,12 @@ class Command_e926(C_template):
         for n, post in enumerate(posts):
             #msg += msg_template.format(n + 1, post['link'], '\n'.join(post['sources']))
             msg += msg_template.format(n + 1, post['link'],)
-        atts = bot.UploadPhoto(list([post['url'] for post in posts]))
+
+        atts  = []
+        for post in posts:
+            if post['ext'] not in ['jpg','png','jpeg']:
+                continue
+            atts.append( bot.UploadPhoto(post['url']))
         args['attachment'] = atts
         args['message'] = 'Вот пикчи по твоему запросу\n' + msg
         bot.Replyqueue.put(args)
