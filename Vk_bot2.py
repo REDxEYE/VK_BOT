@@ -172,7 +172,7 @@ class Bot:
         try:
             User = self.DefApi.users.get(user_ids=Id, v="5.60", fields=['sex'], name_case=case)[0]
         except:
-            return None
+            User = None
         return User
 
     def WaitForMSG(self, tries, args):
@@ -581,6 +581,9 @@ class Bot:
         print('Что то с Актом пришло')
         Targs = {"peer_id": MSData['peer_id'], "v": "5.60"}
         if type == 'chat_photo_update':
+            ChatAdmin = self.UserApi.messages.getChat(chat_id=MSData['peer_id'] - 2000000000)['admin_id']
+            if int(ChatAdmin) == int(self.MyUId):
+                return
             if int(data['from']) == int(self.MyUId):
                 return
             img = Image.open(os.path.join(self.IMAGES,'CHAT_IMG.jpg'))

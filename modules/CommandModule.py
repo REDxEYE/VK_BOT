@@ -80,6 +80,7 @@ class Command_Whom(C_template):
     access = ["all"]
     desc = "Выбирает случайного человека"
     perm = 'text.whom'
+    cost = 2
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -139,6 +140,7 @@ class Command_Who(C_template):
     access = ["all"]
     desc = "Выбирает случайного человека"
     perm = 'text.who'
+    cost = 2
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -235,6 +237,7 @@ class Command_Where(C_template):
     access = ["all"]
     desc = "Говорит где что находится "
     perm = 'text.where'
+    cost = 2
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
@@ -283,18 +286,18 @@ class Command_Help(C_template):
     name = ["команды", "помощь"]
     access = ['all']
     desc = "Выводит это сообщение"
-    template = '"{}, помощь" или "{}, команды" - выводится список команд,\nа "{}, помощь НАЗВАНИЕ КОМАНДЫ" или "{}, команды НАЗВАНИЕ_КОМАНДЫ" - Выведет шаблон запроса'
+    template = '"{botname}, помощь" или "{botname}, команды" - выводится список команд,\nа "{botname}, помощь НАЗВАНИЕ КОМАНДЫ" или "{botname}, команды НАЗВАНИЕ_КОМАНДЫ" - Выведет шаблон запроса'
     perm = 'text.help'
     @staticmethod
     def execute(bot, data, forward=True):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
         if forward:
             args.update({"forward_messages": data['message_id']})
-        if len(data['text'].split(' ')) >= 1 and data['text'].split(' ')[0] != "" :
+        if len(data['text'].split(' ')) >= 1 and data['text'].split(' ')[0] != "":
             print(data['text'].split(' '))
             Command_Help.GetHelp(bot, data,data['text'].split(' ')[0], forward)
             return
-        args['title'] = 'Список команд'
+        args['topic'] = 'Список команд'
         a = "Вам доступны:\n"
         UserPerms = bot.USERS.GetPerms(data['user_id'])
         for command in bot.MODULES.GetAvailable(UserPerms):
@@ -307,8 +310,15 @@ class Command_Help(C_template):
         args = {"peer_id": data['peer_id'], "v": "5.60", }
         if forward:
             args.update({"forward_messages": data['message_id']})
+        if bot.MODULES.isValid(command):
             mod = bot.MODULES.GetModule(command)
-            args['message'] = mod.template.format(bot.MyName['first_name'])
+            try:
+                args['message'] = mod.template.format(botname = bot.MyName['first_name'])
+            except:
+                args['message'] = mod.template.format(botname = "Имя бота")
+
+        else:
+            args['message'] = 'Неизвестная команда'
             bot.Replyqueue.put(args)
 
 
@@ -316,7 +326,7 @@ class Command_resend(C_template):
     name = ["перешли"]
     access = ['all']
     desc = "Пересылает фото"
-    template = "{}, перешли"
+    template = "{botname}, перешли"
     perm = 'text.resend'
     @staticmethod
     def execute(bot, data, forward=True):

@@ -1,8 +1,8 @@
 class C_template:
     name = ['Change me']
     access = ['admin']
-    desc = "Change me"
-    template = "{}, change me"
+    desc = "описание данной команды не указано"
+    template = "{botname}, шаблон для данной команды еще не создан"
     perm = 'change.me'
     cost = 0
     enabled = True

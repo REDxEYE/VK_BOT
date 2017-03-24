@@ -59,7 +59,7 @@ class Command_LevelUP(C_template):
     access = ['admin']
     perm = 'core.LEVELUP'
     desc = 'FULL UPDATE AND RESTART'
-    template = 'THERE NO FUCKING HELP FOR YOU'
+    template = '{botname}, THERE NO FUCKING HELP FOR YOU'
 
     @staticmethod
     def execute(bot, data, forward=True):
