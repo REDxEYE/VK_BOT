@@ -44,6 +44,7 @@ class UserManager:
     status = 'status'
     exclude = 'exclude'
     currency = 'currency'
+    cache = 'cache'
 
     def __init__(self):
         self.Stats = Status
@@ -110,6 +111,13 @@ class UserManager:
                     continue
         self.SaveConfig()
 
+    def GetUser(self,user):
+        user = str(user)
+        if self.isValid(user):
+            return self.DB[user]
+        else:
+            raise Exception('NOT VALID USER')
+
     def GetPerms(self, user):
         user = str(user)
         return self.DB[user][UserManager.perms]
@@ -149,7 +157,6 @@ class UserManager:
         return self.DB[user][UserManager.status]
 
     def GetCurrency(self, user):
-        # Идея взята у Яна
         user = str(user)
         return self.DB[user][UserManager.currency]
 
@@ -180,7 +187,19 @@ class UserManager:
             self.DB[user] = data
         self.SaveConfig()
 
-
+    def cacheUser(self,user,data):
+        user = str(user)
+        self.DB[user][UserManager.cache] = data
+        self.SaveConfig()
+    def isCached(self,user):
+        user = str(user)
+        if self.isValid(user):
+            return UserManager.cache in self.DB[user]
+        else:
+            self.WriteUser(user, Status.user)
+            return self.isCached(user)
+    def getCache(self,user):
+        return self.DB[user][UserManager.cache]
 if __name__ == "__main__":
     a = UserManager()
     a._update()

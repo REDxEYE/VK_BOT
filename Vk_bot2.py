@@ -132,6 +132,7 @@ class Bot:
         self.ReplyThread.start()
 
         self.MyUId = self.UserApi.users.get()[0]['uid']
+
         self.MyName = self.GetUserNameById(self.MyUId)
 
         print('LOADED')
@@ -168,11 +169,31 @@ class Bot:
         return s
 
     def GetUserNameById(self, Id, case='nom'):
-        sleep(0.1)
+
         try:
-            User = self.DefApi.users.get(user_ids=Id, v="5.60", fields=['sex'], name_case=case)[0]
+            if self.USERS.isCached(Id):
+                User = self.USERS.getCache(Id)
+            else:
+                try:
+                    User = self.DefApi.users.get(user_ids=Id, v="5.60", fields=['sex'], name_case=case)[0]
+                    self.USERS.cacheUser(Id,User)
+                except Exception as Ex:
+
+
+                    exc_type, exc_value, exc_traceback = sys.exc_info()
+                    TB = traceback.format_tb(exc_traceback)
+                    print(TB,exc_type,exc_value)
+                    User = None
         except:
-            User = None
+            try:
+                User = self.DefApi.users.get(user_ids=Id, v="5.60", fields=['sex'], name_case=case)[0]
+                self.USERS.cacheUser(Id,User)
+            except Exception as Ex:
+
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                TB = traceback.format_tb(exc_traceback)
+                print(TB,exc_type,exc_value)
+                User = None
         return User
 
     def WaitForMSG(self, tries, args):
@@ -376,23 +397,19 @@ class Bot:
                 fwdMessages = []
                 attachments = []
 
-                def process_FWD(fwds, depth=0):
-                    return
+                def process_FWD(fwds, depth=1):
                     for fwd in fwds:
-                        if ':' in fwd:
-                            process_FWD(fwd.split(':')[-1][1:-1].split(','), depth + 1)
-                        message = self.UserApi.messages.getById(message_ids=[int(fwd.split('_')[-1])], v='5.60')
-                        print_(fwd.split('_')[-1], message)
-                        templateFWD = '{}{} : {} : \n| {}\n'
-                        user = self.GetUserNameById(fwd.split('_')[0])
+                        if 'fwd_messages' in fwd:
+                            process_FWD(fwd['fwd_messages'], depth + 1)
+
+                        templateFWD = '|{}{} : \n|{}| {}\n'
+                        user = self.GetUserNameById(fwd['user_id'])
 
                         usr = user['first_name'] + ' ' + user['last_name']
 
-                        subj = "PM" if "..." in message['title'] else message['title']
+                        msg = fwd['body'].replace('<br>', '\n| ')
 
-                        msg = message['body'].replace('<br>', '\n| ')
-
-                        fwdMessages.append(templateFWD.format('    ' * depth, subj, usr, msg))
+                        fwdMessages.append(templateFWD.format('    ' * depth, usr,' '+'    ' * depth, msg))
 
                 attach_reg = r'attach(?P<num>\d)_type'
                 for t in atts:
@@ -404,13 +421,14 @@ class Bot:
                         template_attach = "{} : {}"
                         attachments.append(template_attach.format(type_, photo))
                 if 'fwd' in atts:
-                    fwd = atts['fwd'].split(',')
-                    process_FWD(fwd)
+                    fwd = self.UserApi.messages.getById(v="5.60", message_ids=data['message_id'])['items'][0]
+
+                    process_FWD(fwd['fwd_messages'])
                 out = ''
                 out += ''.join(fwdMessages) if len(fwdMessages) > 0 else ''
-                out += '\n'
+                out += '\n' if (len(fwdMessages) > 0) and (len(attachments) > 0) else ''
                 out += ('Attachments :\n ' + '\n'.join(attachments)) if len(attachments) > 0 else ""
-                out += '\n'
+                out += '\n' if len(attachments) > 0 else ''
                 return out
             try:
                 user = self.GetUserNameById(data['user_id'])
@@ -424,10 +442,12 @@ class Bot:
                 usr = user['first_name'] + ' ' + user['last_name']
 
                 msg = data['message'].replace('<br>', '\n| ')
-
-                attachments = process_attachments(data['atts'], data['message_id'])
+                try:
+                    attachments = process_attachments(data['atts'], data['message_id'])
+                except:
+                    attachments = []
                 toPrint = template.format(subj, usr, msg) + attachments + template2.format(str(data['message_id']), str(
-                    data['peer_id'])) if self.DEBUG else '\n'
+~                    data['peer_id'])) if self.DEBUG else '\n'
                 print(toPrint, type_='message')
                 self.log.write(toPrint)
                 self.log.flush()
@@ -582,7 +602,7 @@ class Bot:
         Targs = {"peer_id": MSData['peer_id'], "v": "5.60"}
         if type == 'chat_photo_update':
             ChatAdmin = self.UserApi.messages.getChat(chat_id=MSData['peer_id'] - 2000000000)['admin_id']
-            if int(ChatAdmin) == int(self.MyUId):
+            if int(ChatAdmin) != int(self.MyUId):
                 return
             if int(data['from']) == int(self.MyUId):
                 return

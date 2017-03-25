@@ -1,7 +1,7 @@
 import time
 
 class Trigger:
-    def __init__(self,cond,callback,onetime = True,timeout = 20,*callbackArgs,**callbackKwArgs):
+    def __init__(self,cond,callback,onetime = True,timeout = 20,infinite = False,*callbackArgs,**callbackKwArgs):
         """
         :param cond: bool function
         :param callback: callback function
@@ -10,6 +10,7 @@ class Trigger:
         self.callback = callback
         self.onetime = onetime
         self.timeout = timeout
+        self.infinite = infinite
         self.timestart = time.time()
         self.callbackArgs = callbackArgs
         self.callbackKwArgs = callbackKwArgs
@@ -30,12 +31,10 @@ class TriggerHandler:
                 print(time.time()-trigger.timestart)
                 if time.time()-trigger.timestart > trigger.timeout:
                     self.triggers.remove(trigger)
-                    print('Trigger timeout!')
                     trigger.callback(data,result = False)
                 if trigger.cond(data):
-                    print('triggered!')
                     trigger.callback(data,result = True,*trigger.callbackArgs,**trigger.callbackKwArgs)
-                    if trigger.onetime:
+                    if trigger.onetime and not trigger.infinite:
                         self.triggers.remove(trigger)
             except:
                 continue
