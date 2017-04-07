@@ -1,0 +1,173 @@
+{
+    "Command_About": {
+        "enabled": true
+    },
+    "Command_AboutUser": {
+        "enabled": true
+    },
+    "Command_AddCurrency": {
+        "enabled": true
+    },
+    "Command_AddImages": {
+        "enabled": true
+    },
+    "Command_AdminOnly": {
+        "enabled": true
+    },
+    "Command_Choice": {
+        "enabled": true
+    },
+    "Command_CurChat": {
+        "enabled": true
+    },
+    "Command_EvalJS": {
+        "enabled": true
+    },
+    "Command_ExecCode": {
+        "enabled": true
+    },
+    "Command_ExecJS": {
+        "enabled": true
+    },
+    "Command_Filter": {
+        "enabled": true
+    },
+    "Command_GITPULL": {
+        "enabled": true
+    },
+    "Command_GetGroup": {
+        "enabled": true
+    },
+    "Command_GiveCurr": {
+        "enabled": true
+    },
+    "Command_GlitchGif_": {
+        "enabled": true
+    },
+    "Command_GlitchImg": {
+        "enabled": true
+    },
+    "Command_Glitch_": {
+        "enabled": true
+    },
+    "Command_Graphity": {
+        "enabled": true
+    },
+    "Command_Help": {
+        "enabled": true
+    },
+    "Command_JoinFiveNigths": {
+        "enabled": true
+    },
+    "Command_JonTronFunk": {
+        "enabled": true
+    },
+    "Command_Kek": {
+        "enabled": true
+    },
+    "Command_Kok": {
+        "enabled": true
+    },
+    "Command_LevelUP": {
+        "enabled": true
+    },
+    "Command_LockName": {
+        "enabled": true
+    },
+    "Command_PiStat": {
+        "enabled": true
+    },
+    "Command_Prob": {
+        "enabled": true
+    },
+    "Command_RemovePerms": {
+        "enabled": true
+    },
+    "Command_Resize": {
+        "enabled": true
+    },
+    "Command_SayMaxFunk": {
+        "enabled": true
+    },
+    "Command_SetCurrency": {
+        "enabled": true
+    },
+    "Command_SetPrefix": {
+        "enabled": true
+    },
+    "Command_SetStatus": {
+        "enabled": true
+    },
+    "Command_StatComm": {
+        "enabled": true
+    },
+    "Command_TTS": {
+        "enabled": true
+    },
+    "Command_WantedFunk": {
+        "enabled": true
+    },
+    "Command_Where": {
+        "enabled": true
+    },
+    "Command_Who": {
+        "enabled": true
+    },
+    "Command_Whois": {
+        "enabled": true
+    },
+    "Command_Whom": {
+        "enabled": true
+    },
+    "Command_WritePerms": {
+        "enabled": true
+    },
+    "Command_You": {
+        "enabled": true
+    },
+    "Command_Zashkvar": {
+        "enabled": true
+    },
+    "Command_banCommand": {
+        "enabled": true
+    },
+    "Command_e621": {
+        "enabled": true
+    },
+    "Command_e926": {
+        "enabled": true
+    },
+    "Command_everyPixel": {
+        "enabled": true
+    },
+    "Command_ithappens": {
+        "enabled": true
+    },
+    "Command_kick": {
+        "enabled": true
+    },
+    "Command_merge": {
+        "enabled": true
+    },
+    "Command_quit": {
+        "enabled": true
+    },
+    "Command_resend": {
+        "enabled": true
+    },
+    "Command_restart": {
+        "enabled": true
+    },
+    "Command_rollRows": {
+        "enabled": true
+    },
+    "Command_rollRowssmart": {
+        "enabled": true
+    },
+    "Command_screen": {
+        "enabled": true
+    },
+    "Command_triggers": {
+        "enabled": true
+    }
+}
