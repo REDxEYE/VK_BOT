@@ -410,4 +410,18 @@ class Command_Threads(C_template):
         args.message = '\n'.join(threads)+'\nВсего живых - {}'.format(threading.active_count())
         bot.Replyqueue.put(args)
 
+class Command_Garbage(C_template):
+    name = ['мусор']
+    access = ['admin']
+    desc = 'Ram cleaner'
+    perm = 'core.GC'
+
+    @staticmethod
+    def execute(bot:Vk_bot2.Bot, data:LongPoolMessage,Updates:Updates, forward=True):
+        bot.GC.collect()
+        args = ArgBuilder.Args_message
+        args.peer_id = data.chat_id
+        args.forward_messages = data.id
+        args.message = 'Мусор очищен'
+        bot.Replyqueue.put(args)
 

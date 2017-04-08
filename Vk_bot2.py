@@ -21,6 +21,7 @@ from Module_Manager import *
 from User_Manager import *
 from libs.tempfile_ import *
 import aiml_.Core
+import gc
 try:
     from chatterbot import ChatBot
     ChatBotAvalible = True
@@ -85,6 +86,8 @@ class SessionCapchaFix(Session):
 
 class Bot:
     def __init__(self, threads=4, LP_Threads=1, DEBUG=False):
+        self.GC = gc
+        self.GC.enable()
         if ChatBotAvalible:
             self.chatbot = ChatBot('RED EYE',
                                    trainer='chatterbot.trainers.ChatterBotCorpusTrainer',
