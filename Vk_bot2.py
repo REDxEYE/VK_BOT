@@ -20,7 +20,7 @@ from DataTypes.group import group
 from Module_Manager import *
 from User_Manager import *
 from libs.tempfile_ import *
-from aiml_ import Core
+import aiml_.Core
 try:
     from chatterbot import ChatBot
     ChatBotAvalible = True
@@ -149,7 +149,7 @@ class Bot:
 
 
         self.MyName = self.GetUserNameById(self.MyUId, update=True)
-        Core.InitCore(self)
+        aiml_.Core.InitCore(self)
         print('LOADED')
 
     def GetImg(self, name) -> str:
