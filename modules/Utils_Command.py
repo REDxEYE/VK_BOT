@@ -273,12 +273,15 @@ class Command_triggers(C_template):
                            'Таймаут : {}\n' \
                            'Одноразовый : {}\n' \
                            'Бесконечный : {}\n'
-        for n, trigger in enumerate(triggers.triggers):  # type: (int,Trigger)
-            lamb = inspect.getsource(trigger.cond)
-            lamb = lamb[lamb.find('lambda'):lamb.find(',', lamb.find('lambda'))]
-            t.append(trigger_template.format(n, lamb, trigger.timeout, trigger.onetime, trigger.infinite))
-        args.message = '\n'.join(t)+'\n.'
-        print(args.message)
+        if triggers.HasActive:
+            for n, trigger in enumerate(triggers.triggers):  # type: (int,Trigger)
+                lamb = inspect.getsource(trigger.cond)
+                lamb = lamb[lamb.find('lambda'):lamb.find(',', lamb.find('lambda'))]
+                t.append(trigger_template.format(n, lamb, trigger.timeout, trigger.onetime, trigger.infinite))
+            args.message = '\n'.join(t)+'\n.'
+        else:
+            args.message = 'Нету активных тригеров'
+
         bot.Replyqueue.put(args.AsDict_())
 
 

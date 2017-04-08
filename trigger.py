@@ -67,7 +67,12 @@ class TriggerHandler:
                     th.isAlive = False
                     if trigger.onetime and not trigger.infinite:
                         self.triggers.remove(trigger)
-
+    @property
+    def count(self):
+        return len(self.triggers)
+    @property
+    def HasActive(self):
+        return any(self.triggers)
 
 
 
