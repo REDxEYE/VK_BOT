@@ -104,6 +104,9 @@
     "Command_TTS": {
         "enabled": true
     },
+    "Command_Threads": {
+        "enabled": true
+    },
     "Command_WantedFunk": {
         "enabled": true
     },

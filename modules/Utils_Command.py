@@ -1,5 +1,6 @@
 import json
 import os, os.path
+import threading
 import urllib
 from time import sleep
 from urllib.request import urlopen
@@ -387,3 +388,23 @@ class Command_Graphity(C_template):
                 Graff = 'doc{}_{}'.format(doc['owner_id'], doc['id'])
                 args.attachment = Graff
         bot.Replyqueue.put(args)
+
+class Command_Threads(C_template):
+    name = ['threads',"потоки"]
+    access = ['admin']
+    desc = 'List all threads'
+    perm = 'core.threads'
+
+    @staticmethod
+    def execute(bot:Vk_bot2.Bot, data:LongPoolMessage,Updates:Updates, forward=True):
+        args = ArgBuilder.Args_message()
+        args.peer_id = data.chat_id
+        threads = []
+        template = 'Поток {}: жив - {}'
+
+        for th in threading.enumerate(): #type: threading.Thread
+            threads.append(template.format(th.name,th.isAlive()))
+        args.message = '\n'.join(threads)+'\nВсего живых - {}'.format(threading.active_count())
+        bot.Replyqueue.put(args)
+
+

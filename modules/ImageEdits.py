@@ -124,23 +124,24 @@ class Command_Filter(C_template):
         bot.TRIGGERS.addTrigger(t)
 
     @staticmethod
-    def Render(data: LongPoolMessage, result, Tmp, bot, args, FArr):
+    def Render(data: LongPoolMessage, result, Tmp, bot:Vk_bot2.Bot, args:ArgBuilder.Args_message, FArr):
         if result == False:
             Tmp.rem()
-            args['message'] = "Время ожидания ответа истекло"
+            args.message = "Время ожидания ответа истекло"
             bot.Replyqueue.put(args)
         ans = int(data.body) - 1
         filter_ = bot.MODULES.FILTERS[FArr[ans]].funk
         print('used filter {}'.format(filter_.name))
         filter_().render(Tmp.path_)
 
-        args['message'] = filter_.name
+        args.message = filter_.name
         print(args)
         Tmp.cachefile(Tmp.path_)
-        args['attachment'] = [bot.UploadFromDisk(Tmp.path_)]
+        args.attachment = [bot.UploadFromDisk(Tmp.path_)]
         Tmp.rem()
 
         bot.Replyqueue.put(args)
+        return
 
 
 class Command_Resize(C_template):
@@ -181,11 +182,11 @@ class Command_Resize(C_template):
             bot.TRIGGERS.addTrigger(t)
 
     @staticmethod
-    def resize(data: LongPoolMessage, result, Tmp, bot, args, FArr, x):
+    def resize(data: LongPoolMessage, result, Tmp, bot, args:ArgBuilder.Args_message, FArr, x):
         ans = data.body
         if ans == None:
             Tmp.rem()
-            args['message'] = "Время ожидания ответа истекло"
+            args.message = "Время ожидания ответа истекло"
             bot.Replyqueue.put(args)
         sharp = False
         if re.match(r'(Д|д)а', ans):
@@ -193,8 +194,8 @@ class Command_Resize(C_template):
         elif re.match(r'(Н|н)ет', ans):
             sharp = False
         resize_(x, Tmp.path_, sharp)
-        args['message'] = "Вотъ"
-        args['attachment'] = [bot.UploadFromDisk(Tmp.path_)]
+        args.message = "Вотъ"
+        args.message = [bot.UploadFromDisk(Tmp.path_)]
         Tmp.cachefile(Tmp.path_)
         Tmp.rem()
         bot.Replyqueue.put(args)

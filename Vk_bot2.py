@@ -37,11 +37,28 @@ HDR = {
     'Connection': 'keep-alive'}
 
 
-def getpath():
+def getpath() -> str:
+    """
+
+    Returns:
+        str: path to current file
+    """
     return os.path.dirname(os.path.abspath(__file__))
 
 
-def prettier_size(n, pow=0, b=1024, u='B', pre=[''] + [p + 'i' for p in 'KMGTPEZY']):
+def prettier_size(n, pow=0, b=1024, u='B', pre=[''] + [p + 'i' for p in 'KMGTPEZY']) ->float:
+    """
+
+    Args:
+        n:
+        pow:
+        b:
+        u:
+        pre:
+
+    Returns:
+        float: converts size in bytes to size in kb,mb and etc
+    """
     r, f = min(int(log(max(n * b ** pow, 1), b)), len(pre) - 1), '{:,.%if} %s%s'
     return (f % (abs(r % (-r - 1)), pre[r], u)).format(n * b ** pow / b ** float(r))
 
@@ -55,7 +72,7 @@ class SessionCapchaFix(Session):
         'Accept-Language': 'en-US,en;q=0.8',
         'Connection': 'keep-alive'}
 
-    def get_captcha_key(self, captcha_image_url):
+    def get_captcha_key(self, captcha_image_url) -> str:
         """
         Default behavior on CAPTCHA is to raise exception
         Reload this in child
@@ -90,9 +107,11 @@ class Bot:
         self.LP_threads = []
         self.EX_threadList = []
         for i in range(threads):
-            self.EX_threadList.append(threading.Thread(target=self.ExecCommands))
-            self.EX_threadList[i].setDaemon(True)
-            self.EX_threadList[i].start()
+            thread = threading.Thread(target=self.ExecCommands)
+            thread.setName('Exec thread №{}'.format(i))
+            thread.setDaemon(True)
+            thread.start()
+            self.EX_threadList.append(thread)
             print('Exec thread №{} started'.format(i))
         self.USERS = UserManager()
         self.MODULES = ModuleManager()
@@ -123,6 +142,7 @@ class Bot:
 
         self.ReplyThread = threading.Thread(target=self.Reply)
         self.ReplyThread.setDaemon(True)
+        self.ReplyThread.setName('Reply Thread')
         self.ReplyThread.start()
 
         self.MyUId = self.UserApi.users.get(v='5.60')[0]['id']

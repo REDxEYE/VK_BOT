@@ -1,6 +1,6 @@
 import time
 from DataTypes.LongPoolUpdate import LongPoolMessage
-
+import threading
 class Trigger:
     def __init__(self,cond,callback,onetime = True,timeout = 20,infinite = False,*callbackArgs,**callbackKwArgs):
 
@@ -48,18 +48,27 @@ class TriggerHandler:
         Args:
             data (LongPoolMessage):
         """
-        for trigger in self.triggers:
-            try:
+        for n, trigger in enumerate(self.triggers):
+
                 if time.time()-trigger.timestart > trigger.timeout:
                     self.triggers.remove(trigger)
                     trigger.callback(data,result = False)
                 if trigger.cond(data):
                     print('Triggered, calling callback')
-                    trigger.callback(data,result = True,*trigger.callbackArgs,**trigger.callbackKwArgs)
+                    print(trigger.callbackArgs,trigger.callbackKwArgs)
+                    trigger.callbackArgs = list(trigger.callbackArgs)
+                    trigger.callbackArgs.append(data)
+                    trigger.callbackKwArgs.update({'result': True})
+                    print(trigger.callbackArgs,trigger.callbackKwArgs)
+                    th = threading.Thread(target=trigger.callback, args=trigger.callbackArgs, kwargs=trigger.callbackKwArgs)
+                    th.setName('Trigger Callback thread {}'.format(n))
+                    th.start()
+                    th.join()
+                    th.isAlive = False
                     if trigger.onetime and not trigger.infinite:
                         self.triggers.remove(trigger)
-            except:
-                continue
+
+
 
 
 
