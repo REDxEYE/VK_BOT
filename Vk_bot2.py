@@ -280,7 +280,7 @@ class Bot:
             try:
                 self.prefix = settings['prefix']
             except:
-                self.prefix = '//'
+                self.prefix = '\\\\'
             self.Settings = settings["settings"]
 
     def SaveConfig(self):
