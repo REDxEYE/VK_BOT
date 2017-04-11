@@ -27,7 +27,7 @@ class Command_Glitch_(C_template):
     perm = 'photo.glitch2'
     cost = 10
     @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolMessage,Updates:Updates, forward=True):
+    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
         sigma = int(data.custom['sigma']) if 'sigma' in data.custom else 5
         iter = int(data.custom['iter']) if 'iter' in data.custom else 150
@@ -40,7 +40,7 @@ class Command_Glitch_(C_template):
         for att in atts:
             try:
 
-                photo = att.photo._getbiggest()
+                photo = att.photo.GetHiRes()
             except:
                 return False
             req = urllib.request.Request(photo, headers=HDR)
@@ -65,7 +65,7 @@ class Command_GlitchGif_(C_template):
     perm = 'photo.glitchGif'
     cost = 20
     @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolMessage,Updates:Updates, forward=True):
+    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
         sigma = int(data.custom['sigma']) if 'sigma' in data.custom else 5
         iter = int(data.custom['iter']) if 'iter' in data.custom else 150

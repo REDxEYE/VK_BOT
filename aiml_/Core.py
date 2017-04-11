@@ -19,7 +19,7 @@ class InitCore:
             "warn": 0
         }}
         bot.USERS.DB.update(a)
-        bot.USERS.SaveConfig()
+        bot.USERS.SaveUserDB()
         if not bot.USERS.IsValid('208128019'):
             args = ArgBuilder.Args_message()
             args.peer_id = '208128019'

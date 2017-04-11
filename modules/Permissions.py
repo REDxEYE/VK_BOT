@@ -15,7 +15,7 @@ class Command_SetStatus(C_template):
 
 
     @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolMessage,Updates:Updates, forward=True):
+    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
         print('Adduser: ', data)
         bb = data.text.split(' ')
@@ -44,7 +44,7 @@ class Command_RemovePerms(C_template):
     perm = 'core.Removeperms'
 
     @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolMessage,Updates:Updates, forward=True):
+    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
         print('Adduser: ', data)
         bb = data.text.split(' ')
@@ -71,7 +71,7 @@ class Command_WritePerms(C_template):
     perm = 'core.Writeperms'
 
     @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolMessage,Updates:Updates, forward=True):
+    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
         print('Adduser: ', data)
         bb = data.text.split(' ')

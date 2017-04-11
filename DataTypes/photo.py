@@ -10,7 +10,7 @@ class photo:
         self.photo_807 = ''
         self.photo_1280 = ''
         self.photo_2560 = ''
-    def _getbiggest(self):
+    def GetHiRes(self):
         vars_ = vars(self)
         size = 0
         for var in vars_:

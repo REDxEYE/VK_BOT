@@ -26,7 +26,7 @@ class Command_WantedFunk(C_template):
     perm = 'photo.wanted'
     cost = 5
     @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolMessage,Updates:Updates, forward=True):
+    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
         atts = data.attachments
         # print(atts)
@@ -37,11 +37,11 @@ class Command_WantedFunk(C_template):
             return False
         try:
 
-            photo = atts[0].photo._getbiggest()
+            photo = atts[0].photo.GetHiRes()
         except:
             return False
         try:
-            photo1 = atts[1].photo._getbiggest()
+            photo1 = atts[1].photo.GetHiRes()
         except:
             return False
         req = urllib.request.Request(photo, headers=HDR)
@@ -66,7 +66,7 @@ class Command_JonTronFunk(C_template):
     perm = 'photo.jontron'
     cost = 5
     @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolMessage,Updates:Updates, forward=True):
+    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
         atts = data.attachments
         # print(atts)
@@ -74,7 +74,7 @@ class Command_JonTronFunk(C_template):
 
         try:
 
-            photo = atts[0].photo._getbiggest()
+            photo = atts[0].photo.GetHiRes()
             req = urllib.request.Request(photo, headers=HDR)
 
             img = urlopen(req).read()
@@ -110,7 +110,7 @@ class Command_SayMaxFunk(C_template):
     perm = 'photo.saymax'
     cost = 5
     @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolMessage,Updates:Updates, forward=True):
+    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
         atts = data.attachments
         # print(atts)
@@ -118,7 +118,7 @@ class Command_SayMaxFunk(C_template):
 
         try:
 
-            photo = atts[0].photo._getbiggest()
+            photo = atts[0].photo.GetHiRes()
             req = urllib.request.Request(photo, headers=HDR)
 
             img = urlopen(req).read()

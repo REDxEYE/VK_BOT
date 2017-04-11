@@ -27,7 +27,7 @@ class Status:
             print(id)
             return vars(Status)[id]
         except:
-            raise Exception('Unknows status: {}'.format(id))
+            raise Exception('Unknown status: {}'.format(id))
 
     @staticmethod
     def getName(id):
@@ -36,7 +36,7 @@ class Status:
             if vars_[var] == id:
                 return var
         else:
-            raise ('Unknowd ID')
+            raise Exception('Unknown ID')
 
 
 class UserManager:
@@ -49,10 +49,16 @@ class UserManager:
     def __init__(self):
         self.Stats = Status
         self.Actions = Actions
-        self.DB = self.LoadConfig()
+        self.DB = self.LoadUserDB()
         self.UserTemplate = {'status': 99, 'perms': ['text.*', 'photo.*'], 'warn': 0, 'exclude': [], 'currency': 100}
 
-    def LoadConfig(self):
+    @staticmethod
+    def LoadUserDB() -> dict:
+        """
+
+        Returns:
+            dict: UserCache 
+        """
         path = getpath()
         if not os.path.exists(os.path.join(path, 'Users.json')):
             USERS = {}
@@ -61,7 +67,7 @@ class UserManager:
             USERS = json.load(config)
         return USERS
 
-    def SaveConfig(self):
+    def SaveUserDB(self):
         path = getpath()
         with open(os.path.join(path, 'Users.json'), 'w') as config:
             json.dump(self.DB, config, indent=4, sort_keys=True)
@@ -71,7 +77,7 @@ class UserManager:
         self.DB[user] = copy.deepcopy(self.UserTemplate)
         self.DB[user]['status'] = Status.getId(status) if status is str else status
         self.WritePerms(user, action, *perms)
-        self.SaveConfig()
+        self.SaveUserDB()
 
     def WritePerms(self, user, action, *perms):
         user = str(user)
@@ -109,9 +115,9 @@ class UserManager:
                     self.DB[user][UserManager.perms].remove(perm)
                 else:
                     continue
-        self.SaveConfig()
+        self.SaveUserDB()
 
-    def GetUser(self,user):
+    def GetUser(self, user):
         user = str(user)
         if self.isValid(user):
             return self.DB[user]
@@ -147,7 +153,7 @@ class UserManager:
             self.WriteUser(user, status)
         else:
             self.DB[user][UserManager.status] = Status.getId(status)
-            self.SaveConfig()
+            self.SaveUserDB()
         return
 
     def GetStatusId(self, user):
@@ -163,21 +169,21 @@ class UserManager:
     def UpdateCuttency(self, user, amount):
         amount = int(amount)
         self.DB[user][UserManager.currency] += amount
-        self.SaveConfig()
+        self.SaveUserDB()
 
     def pay(self, user: str, amount: int):
         amount = int(amount)
         user = str(user)
         self.DB[user][UserManager.currency] -= amount
-        self.SaveConfig()
+        self.SaveUserDB()
 
-    def isValid(self,user:str):
+    def isValid(self, user: str):
         return user in self.DB
 
     def SetCurrency(self, user, ammount):
         ammount = int(ammount)
         self.DB[user][UserManager.currency] = ammount
-        self.SaveConfig()
+        self.SaveUserDB()
 
     def _update(self):
         for user, data in self.DB.items():
@@ -185,25 +191,30 @@ class UserManager:
                 data.update({'currency': 100})
             print(data)
             self.DB[user] = data
-        self.SaveConfig()
+        self.SaveUserDB()
 
-    def cacheUser(self,user,data):
+    def cacheUser(self, user, data):
         user = str(user)
         self.DB[user][UserManager.cache] = data
-        self.SaveConfig()
-    def isCached(self,user):
+        self.SaveUserDB()
+
+    def isCached(self, user):
         user = str(user)
         if self.isValid(user):
             return UserManager.cache in self.DB[user]
         else:
             self.WriteUser(user, Status.user)
             return self.isCached(user)
-    def getCache(self,user:str):
+
+    def getCache(self, user: str):
         user = str(user)
         return self.DB[user][UserManager.cache]
-    def IsValid(self,user):
+
+    def IsValid(self, user):
         user = str(user)
         return user in self.DB
+
+
 if __name__ == "__main__":
     a = UserManager()
     a._update()

@@ -2,19 +2,17 @@ import io
 import queue
 import re
 import threading
-import tkinter as tk
 import urllib
 from math import *
-from random import choice
 from time import sleep
-from tkinter import ttk
 from urllib.request import urlopen
 import requests
 import vk.exceptions as VKEX
-from PIL import Image, ImageTk
+from PIL import Image
 from vk import *
 import trigger
-from DataTypes.LongPoolUpdate import *
+from DataTypes.LongPoolHistoryUpdate import Updates, LongPoolHistoryMessage, FillUpdates
+from DataTypes.attachments import attachment
 from DataTypes.user import user
 from DataTypes.group import group
 from Module_Manager import *
@@ -22,13 +20,16 @@ from User_Manager import *
 from libs.tempfile_ import *
 import aiml_.Core
 import gc
+
 try:
     from chatterbot import ChatBot
+
     ChatBotAvalible = True
 except ImportError:
     ChatBotAvalible = False
     ChatBot = None
 from utils import ArgBuilder
+
 HDR = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -47,21 +48,21 @@ def getpath() -> str:
     return os.path.dirname(os.path.abspath(__file__))
 
 
-def prettier_size(n, pow=0, b=1024, u='B', pre=[''] + [p + 'i' for p in 'KMGTPEZY']) ->float:
+def prettier_size(n, pow_=0, b=1024, u='B', pre=[''] + [p + 'i' for p in 'KMGTPEZY']) -> str:
     """
 
     Args:
         n:
-        pow:
+        pow_:
         b:
         u:
         pre:
 
     Returns:
-        float: converts size in bytes to size in kb,mb and etc
+        str: converts size in bytes to size in kb,mb and etc
     """
-    r, f = min(int(log(max(n * b ** pow, 1), b)), len(pre) - 1), '{:,.%if} %s%s'
-    return (f % (abs(r % (-r - 1)), pre[r], u)).format(n * b ** pow / b ** float(r))
+    r, f = min(int(log(max(n * b ** pow_, 1), b)), len(pre) - 1), '{:,.%if} %s%s'
+    return (f % (abs(r % (-r - 1)), pre[r], u)).format(n * b ** pow_ / b ** float(r))
 
 
 class SessionCapchaFix(Session):
@@ -83,9 +84,11 @@ class SessionCapchaFix(Session):
         return cap
 
 
-
 class Bot:
-    def __init__(self, threads=4, LP_Threads=1, DEBUG=False):
+    def __init__(self, threads=4, DEBUG=False):
+        self.Stat = {}
+        self.prefix = '\\\\'
+        self.Settings = {}
         self.GC = gc
         self.GC.enable()
         if ChatBotAvalible:
@@ -149,7 +152,6 @@ class Bot:
         self.ReplyThread.start()
 
         self.MyUId = self.UserApi.users.get(v='5.60')[0]['id']
-
 
         self.MyName = self.GetUserNameById(self.MyUId, update=True)
         aiml_.Core.InitCore(self)
@@ -249,7 +251,7 @@ class Bot:
     def Reply(self):
         while True:
             args = self.Replyqueue.get()
-            if isinstance(args,ArgBuilder.Args_message):
+            if isinstance(args, ArgBuilder.Args_message):
                 args = args.AsDict_()
             sleep(1)
             try:
@@ -276,13 +278,11 @@ class Bot:
             settings = json.load(config)
             try:
                 self.Stat = settings["stat"]
-            except:
-                self.Stat = {}
-                self.Stat['messages'] = 0
-                self.Stat['commands'] = 0
+            except KeyError:
+                self.Stat = {'messages': 0, 'commands': 0}
             try:
                 self.prefix = settings['prefix']
-            except:
+            except KeyError:
                 self.prefix = '\\\\'
             self.Settings = settings["settings"]
 
@@ -298,7 +298,7 @@ class Bot:
     def GetUploadServer(self):
         return self.UserApi.photos.getMessagesUploadServer()
 
-    def UploadPhoto(self, urls) -> list:
+    def UploadPhoto(self, urls: list) -> list:
         """
 
         Args:
@@ -310,7 +310,7 @@ class Bot:
         """
         atts = []
 
-        if type(urls) != type(['1', '2']):
+        if isinstance(urls, str):
             urls = [urls]
         i = 0
         for url in urls:
@@ -320,9 +320,6 @@ class Bot:
             req = urllib.request.Request(url, headers=HDR)
             img = urlopen(req).read()
             Tmp = TempFile(img, 'jpg')
-
-            args = {}
-            args['server'] = server
             print('uploading photo №{}'.format(i))
             req = requests.post(server, files={'photo': open(Tmp.file_(), 'rb')})
             print('Done')
@@ -332,9 +329,9 @@ class Bot:
                 try:
                     params = {'server': req.json()['server'], 'photo': req.json()['photo'], 'hash': req.json()['hash']}
                     photos = self.UserApi.photos.saveMessagesPhoto(**params)
-                    for photo in photos:
-                        atts.append(photo['id'])
-                except:
+                    for photo_ in photos:
+                        atts.append(photo_['id'])
+                except Exception:
                     continue
         return atts
 
@@ -349,12 +346,9 @@ class Bot:
         """
         try:
             self.Stat['cache'] = str(prettier_size((os.path.getsize(os.path.join(getpath(), 'tmp', 'cache.zip')))))
-        except:
+        except FileNotFoundError:
             self.Stat['cache'] = 'NO CACHE'
-        atts = []
         server = self.GetUploadServer()['upload_url']
-        args = {}
-        args['server'] = server
 
         print('uploading photo №')
         req = requests.post(server, files={'photo': open(file, 'rb')})
@@ -365,7 +359,8 @@ class Bot:
             # print('req',req.json())
             try:
                 params = {'server': req.json()['server'], 'photo': req.json()['photo'], 'hash': req.json()['hash']}
-                photo = self.UserApi.photos.saveMessagesPhoto(**params)[0]
+                photo_ = self.UserApi.photos.saveMessagesPhoto(**params)[0]
+                return photo_['id']
             except Exception as ex:
                 print(ex.__traceback__)
                 print(ex.__cause__)
@@ -373,11 +368,11 @@ class Bot:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 TB = traceback.format_tb(exc_traceback)
                 print(exc_type, exc_value, ''.join(TB))
-                return None
+                return 'Error'
 
-        return photo['id']
 
-    def UploadDocFromDisk(self, file) -> str:
+
+    def UploadDocFromDisk(self, file):
         """
 
         Args:
@@ -385,11 +380,9 @@ class Bot:
 
         Returns:
             str: doc id
+            any: doc
         """
-        atts = []
         server = self.UserApi.docs.getUploadServer()['upload_url']
-        args = {}
-        args['server'] = server
         name = file.split('/')[-1]
         print('uploading file')
         req = requests.post(server, files={'file': open(file, 'rb')})
@@ -398,33 +391,32 @@ class Bot:
         if req.status_code == requests.codes.ok:
             # print('req',req.json())
             params = {'file': req.json()['file'], 'title': name, 'v': 5.53}
-            doc = self.UserApi.docs.save(**params)[0]
+            doc_ = self.UserApi.docs.save(**params)[0]
 
-            return 'doc{}_{}'.format(doc['owner_id'], doc['id']), doc
-        return None, None
+            return f'doc{doc_["owner_id"]}_{doc_["id"]}', doc_
 
     def ExecCommands(self):
 
-        def process_fwd_msg(message: LongPoolMessage) -> LongPoolMessage:
-            if message.hasFwd:
-                fwd = message.fwd_messages[0]
+        def process_fwd_msg(message_: LongPoolHistoryMessage) -> LongPoolHistoryMessage:
+            if message_.hasFwd:
+                fwd = message_.fwd_messages[0]
 
                 if fwd.hasAttachment:
-                    message.attachments.extend(fwd.attachments)
-            return message
+                    message_.attachments.extend(fwd.attachments)
+            return message_
 
-        from DataTypes.LongPoolUpdate import Updates
+        from DataTypes.LongPoolHistoryUpdate import Updates
 
-        def print_message(self, data_: LongPoolMessage, LongPoolData: Updates):
+        def print_message(data_: LongPoolHistoryMessage, LongPoolData: Updates):
             # print_(data)
             data_ = copy.deepcopy(data_)
             p = '[\U0001F600-\U0001F64F]|[\U0001F300-\U0001F5FF]|[\U0001F680-\U0001F6FF]|[\U0001F1E0-\U0001F1FF]'
             emoji_pattern = re.compile(p, re.VERBOSE)
             data_.body = emoji_pattern.sub('', data_.body)
 
-            def process_attachments(_data: LongPoolMessage, _LongPoolData: Updates):
+            def process_attachments(_data: LongPoolHistoryMessage, _LongPoolData: Updates):
                 fwdMessages = []
-                attachments = []
+                attachments_ = []
 
                 def process_FWD(fwds: list, depth=1):
 
@@ -441,15 +433,13 @@ class Bot:
                                 Tmsg = fwd.body.replace('<br>', '\n| ')
                                 fwdMessages.append(
                                     templateFWD.format('    ' * fwd.depth, Tusr, ' ' + '    ' * fwd.depth, Tmsg))
-                            except:
-                                Tuser = self.USERS.getCache(fwd.user_id)
-                                Tuser.first_name = Tuser['first_name']
-                                Tuser.last_name = Tuser['last_name']
+                            except Exception:
+                                Tuser = user.Fill(self.USERS.getCache(fwd.user_id))
                                 Tusr = Tuser.first_name + ' ' + Tuser.last_name
                                 Tmsg = fwd.body.replace('<br>', '\n| ')
                                 fwdMessages.append(
                                     templateFWD.format('    ' * fwd.depth, Tusr, ' ' + '    ' * fwd.depth, Tmsg))
-                        except:
+                        except Exception:
                             fwdMessages.append(templateFWD.format(' ', 'ERROR', '', 'ERROR'))
                             continue
 
@@ -458,13 +448,13 @@ class Bot:
                     for t in _data.attachments:
                         if t.type == attachment.types.photo:
                             template_attach = "{} : {}"
-                            attachments.append(template_attach.format(t.type, t.photo._getbiggest()))
+                            attachments_.append(template_attach.format(t.type, t.photo.GetHiRes()))
 
                 out = ''
                 out += ''.join(fwdMessages) if len(fwdMessages) > 0 else ''
-                out += '\n' if (len(fwdMessages) > 0) and (len(attachments) > 0) else ''
-                out += ('Attachments :\n ' + '\n'.join(attachments[::-1])) if len(attachments) > 0 else ""
-                out += '\n' if len(attachments) > 0 else ''
+                out += '\n' if (len(fwdMessages) > 0) and (len(attachments_) > 0) else ''
+                out += ('Attachments :\n ' + '\n'.join(attachments_[::-1])) if len(attachments_) > 0 else ""
+                out += '\n' if len(attachments_) > 0 else ''
                 return out
 
             try:
@@ -483,7 +473,7 @@ class Bot:
 
                 toPrint = template.format(subj, usr, msg) + attachments + template2.format(message.id,
                                                                                            message.chat_id) if self.DEBUG else '\n'
-                print(toPrint, type_='message')
+                print(toPrint, type_="message")
                 self.log.write(toPrint)
                 self.log.flush()
                 os.fsync(self.log.fileno())
@@ -511,7 +501,7 @@ class Bot:
                         continue
                 defargs = {"peer_id": message.chat_id, "v": "5.60", "forward_messages": message.id}
 
-                print_message(self, message, PvUpdates)
+                print_message(message, PvUpdates)
                 comm = message.body.split("\n")
                 temp = {}
                 for C in comm[1:]:
@@ -519,8 +509,6 @@ class Bot:
                     C = C.split(":")
                     temp[C[0].replace(" ", "").lower()] = ':'.join(C[1:])
                 message.custom = temp
-
-
 
                 pattern = "{}, ?|{}, ?|{}, ?|{}, ?".format(self.MyName.first_name.lower(), self.MyName.first_name,
                                                            'ред', "Ред")
@@ -536,9 +524,9 @@ class Bot:
                     message.text = ' '.join(text.split(' ')[1:])
                     message.args = Command.split(' ')[1:]
                     Command = Command.split(' ')[0]
-                if (re.search(pattern,message.body) or message.body.startswith(self.prefix)) and int(message.user_id) != int(self.MyUId):
+                if (re.search(pattern, message.body) or message.body.startswith(self.prefix)) and int(
+                        message.user_id) != int(self.MyUId):
                     message = process_fwd_msg(message)
-
 
                     if Command in self.Settings['bannedCommands']:
                         if message.chat_id in self.Settings['bannedCommands'][Command]:
@@ -607,7 +595,7 @@ class Bot:
                         self.Checkqueue.task_done()
                         self.Replyqueue.put(defargs)
 
-    def SourceAct(self, data: LongPoolMessage, LongPoolUpdate: Updates):
+    def SourceAct(self, data: LongPoolHistoryMessage, LongPoolUpdate: Updates):
         """
 
         Args:
@@ -659,8 +647,7 @@ class Bot:
                 Targs['message'] = 'Вы не имеете права приглашать людей в данную беседу'
                 self.Replyqueue.put(Targs)
                 name = self.GetUserNameById(int(target))
-                Targs['message'] = "The kickHammer has spoken.\n {} has been kicked in the ass".format(
-                    ' '.join([name['first_name'], name['last_name']]))
+                Targs['message'] = f"The kickHammer has spoken.\n {name.Name} has been kicked in the ass"
                 self.UserApi.messages.removeChatUser(v=5.45, chat_id=data.chat_id - 2000000000, user_id=target)
 
             else:
@@ -673,7 +660,7 @@ class Bot:
                 user = self.GetUserNameById(data.action.action_mid)
                 print(user)
                 try:
-                    sex = user['sex']
+                    sex = user.sex
                     if sex == 2:
                         end = ''
                     if sex == 1:
@@ -682,11 +669,10 @@ class Bot:
                         end = 'о'
                 except:
                     end = 'о'
-                Targs['message'] = 'Оп, {} {} ливнул{} с подливой &#9786;'.format(user['first_name'], user['last_name'],
-                                                                                  end)
+                Targs['message'] = 'Оп, {} ливнул{} с подливой &#9786;'.format(user.Name,end)
             else:
                 user = self.GetUserNameById(data.action.action_mid, case='acc')
-                Targs['message'] = 'Оп, {} {} кикнули &#127770;'.format(user['first_name'], user['last_name'])
+                Targs['message'] = 'Оп, {} кикнули &#127770;'.format(user.Name)
             self.Replyqueue.put(Targs)
 
     def ContiniousMessageCheck(self, server=""):
@@ -717,9 +703,11 @@ class Bot:
                     for upd in req['updates']:
                         if 4 == upd[0]:
                             hasMsg = True
+                            print(upd)
                     if hasMsg:
                         self.parseLongPoolHistory(ts)
                         ts = req['ts']
+
             except:
                 print('TIMEOUT ERROR, reconnecting in 5 seconds')
                 sleep(5)
@@ -765,16 +753,8 @@ class Bot:
         # print('\n', '\n'.join([str(m) for m in updates.messages]))
         self.Checkqueue.put(updates)
 
-    def LeaveMeAlone(self, message: LongPoolMessage, result):
-        defargs = {"peer_id": message.chat_id, "v": "5.60", "forward_messages": message.id}
-        defargs['message'] = 'Оставьте меня. Мне нужно успокоится'
-        print(message)
-        # self.Replyqueue.put(defargs)
 
 
 if __name__ == "__main__":
     bot = Bot(DEBUG=True)
-    # t = trigger.Trigger(lambda message: (message.chat_id == 2000000025) and (message.user_id == 208128019),
-    #                    callback=bot.LeaveMeAlone, onetime=False, infinite=True)
-    # bot.TRIGGERS.addTrigger(t)
     bot.ContiniousMessageCheck()

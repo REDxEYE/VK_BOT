@@ -35,6 +35,9 @@
     "Command_GITPULL": {
         "enabled": true
     },
+    "Command_Garbage": {
+        "enabled": true
+    },
     "Command_GetGroup": {
         "enabled": true
     },

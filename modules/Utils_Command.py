@@ -20,7 +20,7 @@ except:
     execjs = None
 
 import Vk_bot2
-from DataTypes.LongPoolUpdate import LongPoolMessage, Updates
+from DataTypes.LongPoolHistoryUpdate import LongPoolHistoryMessage, Updates
 from DataTypes.group import group, contacts_group
 from DataTypes.doc import doc
 
@@ -42,7 +42,7 @@ class Command_GetGroup(C_template):
     template = '{botname}, группа'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, Updates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         g = group.Fill(bot.UserApi.groups.getById(v='5.60', group_id=data.args[0],
@@ -78,7 +78,7 @@ class Command_Whois(C_template):
     template = '{botnmae}, whois'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -116,7 +116,7 @@ class Command_AboutUser(C_template):
     template = '{botname}, whoami'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -139,7 +139,7 @@ class Command_EvalJS(C_template):
     perm = 'core.EvJs'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -160,7 +160,7 @@ class Command_ExecJS(C_template):
     perm = 'core.ExJs'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -182,7 +182,7 @@ class Command_quit(C_template):
     template = '{botname}, shutdown'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id,
                 "message": "Увидимся позже"}
         bot.Replyqueue.put(args)
@@ -198,7 +198,7 @@ class Command_restart(C_template):
     template = '{botname}, рестарт'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         import sys
         os.execl(sys.executable, sys.executable, os.path.join(bot.ROOT, 'Vk_bot2.py'))
 
@@ -211,7 +211,7 @@ class Command_ExecCode(C_template):
     template = '{botname}, py\nВаш код здесь'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -263,7 +263,7 @@ class Command_triggers(C_template):
     perm = 'core.triggers'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, Updates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         triggers = bot.TRIGGERS
@@ -292,7 +292,7 @@ class Command_SetPrefix(C_template):
     perm = 'core.prefix'
 
     @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolMessage,Updates:Updates, forward=True):
+    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         if len(data.args)==1:
@@ -310,7 +310,7 @@ class Command_CurChat(C_template):
     perm = 'core.prefix'
 
     @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolMessage,Updates:Updates, forward=True):
+    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         if data.isChat:
@@ -341,7 +341,7 @@ class Command_Graphity(C_template):
     perm = 'core.graphity'
 
     @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolMessage,Updates:Updates, forward=True):
+    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
 
@@ -351,9 +351,7 @@ class Command_Graphity(C_template):
 
         if att.type == attachment.types.doc:
             if att.doc.type == DataTypes.doc.doc.DocTypes.gif or att.doc.type == DataTypes.doc.doc.DocTypes.img:
-                print(att.doc)
                 gif = att.doc.url
-                print(gif)
                 req = urllib.request.Request(gif, headers=HDR)
                 img = urlopen(req).read()
                 Tmp = TempFile(img, 'png')
@@ -377,7 +375,7 @@ class Command_Graphity(C_template):
             else:
                 args.message = 'Это нельзя'
         if att.type == attachment.types.photo:
-            photo_url = att.photo._getbiggest()
+            photo_url = att.photo.GetHiRes()
             req = urllib.request.Request(photo_url, headers=HDR)
             img = Image.open(BytesIO(urlopen(req).read()))
             Tmp = TempFile.generatePath('png')
@@ -399,7 +397,7 @@ class Command_Threads(C_template):
     perm = 'core.threads'
 
     @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolMessage,Updates:Updates, forward=True):
+    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         threads = []
@@ -417,11 +415,11 @@ class Command_Garbage(C_template):
     perm = 'core.GC'
 
     @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolMessage,Updates:Updates, forward=True):
+    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
         bot.GC.collect()
-        args = ArgBuilder.Args_message
+        args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
         args.message = 'Мусор очищен'
-        bot.Replyqueue.put(args)
+        bot.Replyqueue.put(args.AsDict_())
 

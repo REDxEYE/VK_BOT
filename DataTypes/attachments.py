@@ -33,7 +33,6 @@ class attachment:
 
     def __str__(self):
         return str(dict({var: str(vars(self)[var]) for var in vars(self)}))
-
     def AsDict(self):
         return {var: vars(self)[var] for var in vars(self)}
 

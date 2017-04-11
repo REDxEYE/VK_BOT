@@ -1,9 +1,10 @@
 import time
-from DataTypes.LongPoolUpdate import LongPoolMessage
+from DataTypes.LongPoolHistoryUpdate import LongPoolHistoryMessage
 import threading
-class Trigger:
-    def __init__(self,cond,callback,onetime = True,timeout = 20,infinite = False,*callbackArgs,**callbackKwArgs):
 
+
+class Trigger:
+    def __init__(self, cond, callback, onetime=True, timeout=20, infinite=False, *callbackArgs, **callbackKwArgs):
         """
 
         Args:
@@ -23,16 +24,19 @@ class Trigger:
         self.timestart = time.time()
         self.callbackArgs = callbackArgs
         self.callbackKwArgs = callbackKwArgs
+
     def __str__(self):
         return str(dict({var: str(vars(self)[var]) for var in vars(self) if vars(self)[var] != None}))
 
     def AsDict(self):
         return {var: vars(self)[var] for var in vars(self) if vars(self)[var] != None}
+
+
 class TriggerHandler:
     def __init__(self):
         self.triggers = []
 
-    def addTrigger(self,*trigger:Trigger):
+    def addTrigger(self, *trigger: Trigger):
 
         """
 
@@ -42,40 +46,36 @@ class TriggerHandler:
         print('Trigger registered!')
         self.triggers.extend(trigger)
 
-    def processTriggers(self,data):
+    def processTriggers(self, data):
         """
 
         Args:
-            data (LongPoolMessage):
+            data (LongPoolHistoryMessage):
         """
         for n, trigger in enumerate(self.triggers):
 
-                if time.time()-trigger.timestart > trigger.timeout:
+            if time.time() - trigger.timestart > trigger.timeout:
+                self.triggers.remove(trigger)
+                trigger.callback(data, result=False)
+            if trigger.cond(data):
+                print('Triggered, calling callback')
+                print(trigger.callbackArgs, trigger.callbackKwArgs)
+                trigger.callbackArgs = list(trigger.callbackArgs)
+                trigger.callbackArgs.append(data)
+                trigger.callbackKwArgs.update({'result': True})
+                print(trigger.callbackArgs, trigger.callbackKwArgs)
+                th = threading.Thread(target=trigger.callback, args=trigger.callbackArgs, kwargs=trigger.callbackKwArgs)
+                th.setName('Trigger Callback thread {}'.format(n))
+                th.start()
+                th.join()
+                th.isAlive = False
+                if trigger.onetime and not trigger.infinite:
                     self.triggers.remove(trigger)
-                    trigger.callback(data,result = False)
-                if trigger.cond(data):
-                    print('Triggered, calling callback')
-                    print(trigger.callbackArgs,trigger.callbackKwArgs)
-                    trigger.callbackArgs = list(trigger.callbackArgs)
-                    trigger.callbackArgs.append(data)
-                    trigger.callbackKwArgs.update({'result': True})
-                    print(trigger.callbackArgs,trigger.callbackKwArgs)
-                    th = threading.Thread(target=trigger.callback, args=trigger.callbackArgs, kwargs=trigger.callbackKwArgs)
-                    th.setName('Trigger Callback thread {}'.format(n))
-                    th.start()
-                    th.join()
-                    th.isAlive = False
-                    if trigger.onetime and not trigger.infinite:
-                        self.triggers.remove(trigger)
+
     @property
     def count(self):
         return len(self.triggers)
+
     @property
     def HasActive(self):
         return any(self.triggers)
-
-
-
-
-
-

@@ -1,5 +1,5 @@
 import Vk_bot2
-from DataTypes.LongPoolUpdate import LongPoolMessage,Updates
+from DataTypes.LongPoolHistoryUpdate import LongPoolHistoryMessage,Updates
 
 
 class C_template:
@@ -11,7 +11,7 @@ class C_template:
     cost = 0
     enabled = True
     @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolMessage,Updates:Updates, forward=True):
+    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
         args['message'] = 'Change me'
         bot.Replyqueue.put(args)

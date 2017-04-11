@@ -14,7 +14,7 @@ class Command_AddCurrency(C_template):
     template = '{botname}, id пользователя кол-во денег'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -42,7 +42,7 @@ class Command_SetCurrency(C_template):
     template = '{botname}, id пользователя кол-во денег'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -70,7 +70,7 @@ class Command_GiveCurr(C_template):
     template = '{botname}, id пользователя кол-во денег'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id

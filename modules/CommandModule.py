@@ -69,7 +69,7 @@ class Command_Whom(C_template):
     cost = 2
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -126,13 +126,13 @@ class Command_Who(C_template):
     cost = 2
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True) -> bool:
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True) -> bool:
         """
 
         Args:
             forward (bool):
             LongPoolUpdates (Updates):
-            data (LongPoolMessage):
+            data (LongPoolHistoryMessage):
             bot (Vk_bot2.bot):
         """
 
@@ -207,7 +207,7 @@ class Command_Prob(C_template):
     perm = 'text.prob'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -230,7 +230,7 @@ class Command_Where(C_template):
     cost = 2
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -249,7 +249,7 @@ class Command_You(C_template):
     perm = 'text.you'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -282,7 +282,7 @@ class Command_Help(C_template):
     perm = 'text.help'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -300,7 +300,7 @@ class Command_Help(C_template):
         return True
 
     @staticmethod
-    def GetHelp(bot: Vk_bot2.Bot, data:LongPoolMessage, command, forward=True):
+    def GetHelp(bot: Vk_bot2.Bot, data:LongPoolHistoryMessage, command, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -326,7 +326,7 @@ class Command_resend(C_template):
     perm = 'text.resend'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -361,7 +361,7 @@ class Command_kick(C_template):
     perm = 'chat.kick'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -391,7 +391,7 @@ class Command_JoinFiveNigths(C_template):
     template = '{botname}, 5nights'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -430,7 +430,7 @@ class Command_StatComm(C_template):
     template = '{botname}, инфо'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -449,7 +449,7 @@ class Command_AdminOnly(C_template):
     template = '{botname}, дебаг'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -473,7 +473,7 @@ class _Command_BanAllGroupUsers(C_template):
                'время:срок в часах'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         exclude = 75615891
         ToBan = bot.GroupApi.groups.getMembers(group_id=data.custom["id"], count=1000)['items']
         if data.custom["id"] == exclude:
@@ -509,7 +509,7 @@ class Command_About(C_template):
     template = '{botname}, about'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -529,7 +529,7 @@ class Command_LockName(C_template):
     template = '{botname}, namelock'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -575,7 +575,7 @@ class Command_ithappens(C_template):
         return s.get_data()
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -603,7 +603,7 @@ class Command_banCommand(C_template):
                'команда:название команды\n'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         comm = data.custom['команда']
         if comm in ['bannedCommands']:
             bot.Settings['bannedCommands'][comm].append(str(data.id))
@@ -619,7 +619,7 @@ class Command_Choice(C_template):
     template = '{botname}, вариант1 вариант2 вариант3 вариантN '
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -656,7 +656,7 @@ class Command_TTS(C_template):
     template = '{botname}, нужный язык(2буквы) ВАШ ТЕКСТ)'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
@@ -761,7 +761,7 @@ class Command_Zashkvar(C_template):
     template = '{botname}, зашквар'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})

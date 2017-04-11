@@ -62,6 +62,9 @@ class user(object):
     def AsDict(self):
             return {var: vars(self)[var] for var in vars(self)}
 
+    @property
+    def Name(self):
+        return f'{self.first_name} {self.last_name}'
     @staticmethod
     def Fill(data):
         u = user()

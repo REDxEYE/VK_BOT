@@ -10,7 +10,7 @@ try:
     from PIL import ImageGrab
 
     windows = True
-except:
+except ImportError:
     windows = False
     ImageGrab = None
 
@@ -29,7 +29,7 @@ HDR = {
 
 try:
     from .__Command_template import *
-except:
+except ImportError:
     from __Command_template import *
 from utils import ArgBuilder
 
@@ -41,25 +41,26 @@ class Command_Kok(C_template):
     perm = 'photo.kok'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, Updates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates_: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
         try:
             att = data.attachments[0]
             if att.type == attachment.types.photo:
-                photo = att.photo._getbiggest()
+                photo = att.photo.GetHiRes()
+                req = urllib.request.Request(photo, headers=HDR)
+                img = urlopen(req).read()
+                Tmp = TempFile(img, 'jpg', NoCache=True)
+                kok(Tmp.path_)
+                att = bot.UploadFromDisk(Tmp.path_)
+                Tmp.cachefile(Tmp.path_)
+                Tmp.rem()
+                args.attachment = att
+                bot.Replyqueue.put(args)
+            return True
         except:
             return False
-        req = urllib.request.Request(photo, headers=HDR)
-        img = urlopen(req).read()
-        Tmp = TempFile(img, 'jpg', NoCache=True)
-        kok(Tmp.path_)
-        att = bot.UploadFromDisk(Tmp.path_)
-        Tmp.cachefile(Tmp.path_)
-        Tmp.rem()
-        args.attachment = att
-        bot.Replyqueue.put(args)
 
 
 class Command_Kek(C_template):
@@ -69,62 +70,64 @@ class Command_Kek(C_template):
     perm = 'photo.kek'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, Updates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
         try:
             att = data.attachments[0]
             if att.type == attachment.types.photo:
-                photo = att.photo._getbiggest()
+                photo = att.photo.GetHiRes()
+                req = urllib.request.Request(photo, headers=HDR)
+                img = urlopen(req).read()
+                Tmp = TempFile(img, 'jpg', NoCache=True)
+                kek(Tmp.path_)
+                att = bot.UploadFromDisk(Tmp.path_)
+                Tmp.cachefile(Tmp.path_)
+                Tmp.rem()
+                args.attachment = att
+                bot.Replyqueue.put(args)
+                return True
         except:
             return False
-        req = urllib.request.Request(photo, headers=HDR)
-        img = urlopen(req).read()
-        Tmp = TempFile(img, 'jpg', NoCache=True)
-        kek(Tmp.path_)
-        att = bot.UploadFromDisk(Tmp.path_)
-        Tmp.cachefile(Tmp.path_)
-        Tmp.rem()
-        args.attachment = att
-        bot.Replyqueue.put(args)
 
 
 class Command_Filter(C_template):
-    name = ["обработай"]
+    name = ["обработай", 'фильтр']
     access = ["all"]
     desc = "Позволяет применять фильтры к фото"
     perm = 'photo.filter'
     cost = 15
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, Updates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
         try:
             att = data.attachments[0]
             if att.type == attachment.types.photo:
-                photo = att.photo._getbiggest()
+                photo = att.photo.GetHiRes()
+                req = urllib.request.Request(photo, headers=HDR)
+                img = urlopen(req).read()
+                Tmp = TempFile(img, 'jpg', NoCache=True)
+                args.message = 'Список фильтров:\n'
+                FArr = dict(enumerate(bot.MODULES.FILTERS))
+                for filter_ in FArr:
+                    Fname = bot.MODULES.FILTERS[FArr[filter_]].desc
+                    args.message += "{}. {}\n".format(filter_ + 1, Fname)
+                bot.Replyqueue.put(args)
+                print(data.user_id, data.chat_id)
+                t = Trigger(cond=lambda
+                    Tdata: Tdata.user_id == data.user_id and Tdata.chat_id == data.chat_id and Tdata.body.isnumeric(),
+                            callback=Command_Filter.Render, Tmp=Tmp, bot=bot, args=args, FArr=FArr)
+                bot.TRIGGERS.addTrigger(t)
+                return True
         except:
             return False
-        req = urllib.request.Request(photo, headers=HDR)
-        img = urlopen(req).read()
-        Tmp = TempFile(img, 'jpg', NoCache=True)
-        args.message = 'Список фильтров:\n'
-        FArr = dict(enumerate(bot.MODULES.FILTERS))
-        for filter_ in FArr:
-            Fname = bot.MODULES.FILTERS[FArr[filter_]].desc
-            args.message += "{}. {}\n".format(filter_ + 1, Fname)
-        bot.Replyqueue.put(args)
-        print(data.user_id, data.chat_id)
-        t = Trigger(cond=lambda
-            Tdata: Tdata.user_id == data.user_id and Tdata.chat_id == data.chat_id and Tdata.body.isnumeric(),
-                    callback=Command_Filter.Render, Tmp=Tmp, bot=bot, args=args, FArr=FArr)
-        bot.TRIGGERS.addTrigger(t)
 
     @staticmethod
-    def Render(data: LongPoolMessage, result, Tmp, bot:Vk_bot2.Bot, args:ArgBuilder.Args_message, FArr):
+    def Render(data: LongPoolHistoryMessage, result, Tmp, bot: Vk_bot2.Bot, args: ArgBuilder.Args_message, FArr):
         if result == False:
             Tmp.rem()
             args.message = "Время ожидания ответа истекло"
@@ -151,7 +154,7 @@ class Command_Resize(C_template):
     perm = 'photo.resize'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, Updates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -168,7 +171,7 @@ class Command_Resize(C_template):
         Topost = []
         for att in data.attachments:
             try:
-                photo = att.photo._getbiggest()
+                photo = att.photo.GetHiRes()
             except:
                 return False
             req = urllib.request.Request(photo, headers=HDR)
@@ -177,21 +180,21 @@ class Command_Resize(C_template):
             args.message = 'Поднимать резкость?\n Да\Нет'
             bot.Replyqueue.put(args)
             t = Trigger(cond=lambda Tdata: Tdata.user_id == data.user_id and Tdata.chat_id == data.chat_id and (
-            re.match(r'(Д|д)а', Tdata.body) or re.match(r'(Н|н)ет', Tdata.body)), callback=Command_Resize.resize,
+                re.match(r"([Дд])а", Tdata.body) or re.match(r"([Нн])ет", Tdata.body)), callback=Command_Resize.resize,
                         Tmp=Tmp, bot=bot, args=args, x=x)
             bot.TRIGGERS.addTrigger(t)
 
     @staticmethod
-    def resize(data: LongPoolMessage, result, Tmp, bot, args:ArgBuilder.Args_message, FArr, x):
+    def resize(data: LongPoolHistoryMessage, result, Tmp, bot, args: ArgBuilder.Args_message, FArr, x):
         ans = data.body
         if ans == None:
             Tmp.rem()
             args.message = "Время ожидания ответа истекло"
             bot.Replyqueue.put(args)
         sharp = False
-        if re.match(r'(Д|д)а', ans):
+        if re.match(r'([Дд])а', ans):
             sharp = True
-        elif re.match(r'(Н|н)ет', ans):
+        elif re.match(r'([Нн])ет', ans):
             sharp = False
         resize_(x, Tmp.path_, sharp)
         args.message = "Вотъ"
@@ -217,7 +220,7 @@ class Command_e621(C_template):
     perm = 'core.e621'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, Updates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -260,7 +263,7 @@ class Command_e926(C_template):
     cost = 15
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, Updates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -297,7 +300,7 @@ class Command_rollRows(C_template):
     perm = 'photo.rollRows'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, Updates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -306,7 +309,7 @@ class Command_rollRows(C_template):
         Topost = []
         for att in data.attachments:
             try:
-                photo = att.photo._getbiggest()
+                photo = att.photo.GetHiRes()
             except:
                 return False
 
@@ -330,7 +333,7 @@ class Command_rollRowssmart(C_template):
     perm = 'photo.rollRowssmart'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, Updates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -339,7 +342,7 @@ class Command_rollRowssmart(C_template):
         Topost = []
         for att in data.attachments:
             try:
-                photo = att.photo._getbiggest()
+                photo = att.photo.GetHiRes()
             except:
                 return False
 
@@ -363,7 +366,7 @@ class Command_AddImages(C_template):
     perm = 'photo.add'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, Updates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -375,11 +378,11 @@ class Command_AddImages(C_template):
 
         try:
 
-            photo = atts[0].photo._getbiggest()
+            photo = atts[0].photo.GetHiRes()
         except:
             return False
         try:
-            photo1 = atts[1].photo._getbiggest()
+            photo1 = atts[1].photo.GetHiRes()
         except:
             return False
         req = urllib.request.Request(photo, headers=HDR)
@@ -407,7 +410,7 @@ class Command_merge(C_template):
     perm = 'photo.merge'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, Updates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -421,11 +424,11 @@ class Command_merge(C_template):
 
         try:
 
-            photo = atts[0].photo._getbiggest()
+            photo = atts[0].photo.GetHiRes()
         except:
             return False
         try:
-            photo1 = atts[1].photo._getbiggest()
+            photo1 = atts[1].photo.GetHiRes()
         except:
             return False
         req = urllib.request.Request(photo, headers=HDR)
@@ -454,7 +457,7 @@ class Command_screen(C_template):
     perm = 'core.screen'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, Updates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -476,7 +479,7 @@ class Command_GlitchImg(C_template):
     cost = 0
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, Updates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -484,7 +487,7 @@ class Command_GlitchImg(C_template):
 
         for att in data.attachments:
             try:
-                photo = att.photo._getbiggest()
+                photo = att.photo.GetHiRes()
             except:
                 return False
             req = urllib.request.Request(photo, headers=HDR)
@@ -507,12 +510,12 @@ class Command_everyPixel(C_template):
     perm = 'photo.everypixel'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, Updates: Updates, forward=True):
+    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
         att = data.attachments[0]
-        photo = att.photo._getbiggest()
+        photo = att.photo.GetHiRes()
         tags, quality = EveryPixel.GetTags(photo)
         tags_template = 'Я вижу тут:\n{}\n'
         tags_msg = tags_template.format('\n'.join(tags))
