@@ -48,7 +48,7 @@ class Command_Kok(C_template):
         try:
             att = data.attachments[0]
             if att.type == attachment.types.photo:
-                photo = att.photo.GetHiRes()
+                photo = att.photo.GetHiRes
                 req = urllib.request.Request(photo, headers=HDR)
                 img = urlopen(req).read()
                 Tmp = TempFile(img, 'jpg', NoCache=True)
@@ -77,7 +77,7 @@ class Command_Kek(C_template):
         try:
             att = data.attachments[0]
             if att.type == attachment.types.photo:
-                photo = att.photo.GetHiRes()
+                photo = att.photo.GetHiRes
                 req = urllib.request.Request(photo, headers=HDR)
                 img = urlopen(req).read()
                 Tmp = TempFile(img, 'jpg', NoCache=True)
@@ -107,7 +107,7 @@ class Command_Filter(C_template):
         try:
             att = data.attachments[0]
             if att.type == attachment.types.photo:
-                photo = att.photo.GetHiRes()
+                photo = att.photo.GetHiRes
                 req = urllib.request.Request(photo, headers=HDR)
                 img = urlopen(req).read()
                 Tmp = TempFile(img, 'jpg', NoCache=True)
@@ -171,7 +171,7 @@ class Command_Resize(C_template):
         Topost = []
         for att in data.attachments:
             try:
-                photo = att.photo.GetHiRes()
+                photo = att.photo.GetHiRes
             except:
                 return False
             req = urllib.request.Request(photo, headers=HDR)
@@ -309,7 +309,7 @@ class Command_rollRows(C_template):
         Topost = []
         for att in data.attachments:
             try:
-                photo = att.photo.GetHiRes()
+                photo = att.photo.GetHiRes
             except:
                 return False
 
@@ -342,7 +342,7 @@ class Command_rollRowssmart(C_template):
         Topost = []
         for att in data.attachments:
             try:
-                photo = att.photo.GetHiRes()
+                photo = att.photo.GetHiRes
             except:
                 return False
 
@@ -378,11 +378,11 @@ class Command_AddImages(C_template):
 
         try:
 
-            photo = atts[0].photo.GetHiRes()
+            photo = atts[0].photo.GetHiRes
         except:
             return False
         try:
-            photo1 = atts[1].photo.GetHiRes()
+            photo1 = atts[1].photo.GetHiRes
         except:
             return False
         req = urllib.request.Request(photo, headers=HDR)
@@ -424,11 +424,11 @@ class Command_merge(C_template):
 
         try:
 
-            photo = atts[0].photo.GetHiRes()
+            photo = atts[0].photo.GetHiRes
         except:
             return False
         try:
-            photo1 = atts[1].photo.GetHiRes()
+            photo1 = atts[1].photo.GetHiRes
         except:
             return False
         req = urllib.request.Request(photo, headers=HDR)
@@ -487,7 +487,7 @@ class Command_GlitchImg(C_template):
 
         for att in data.attachments:
             try:
-                photo = att.photo.GetHiRes()
+                photo = att.photo.GetHiRes
             except:
                 return False
             req = urllib.request.Request(photo, headers=HDR)
@@ -515,7 +515,7 @@ class Command_everyPixel(C_template):
         args.peer_id = data.chat_id
         args.forward_messages = data.id
         att = data.attachments[0]
-        photo = att.photo.GetHiRes()
+        photo = att.photo.GetHiRes
         tags, quality = EveryPixel.GetTags(photo)
         tags_template = 'Я вижу тут:\n{}\n'
         tags_msg = tags_template.format('\n'.join(tags))

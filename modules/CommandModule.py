@@ -335,7 +335,7 @@ class Command_resend(C_template):
         for att in data.attachments:
             try:
 
-                photo = att.photo
+                photo = att.photo.GetHiRes
             except:
                 return 'Error'
 

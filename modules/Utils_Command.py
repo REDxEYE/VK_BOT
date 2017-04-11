@@ -307,7 +307,7 @@ class Command_CurChat(C_template):
     name = ['чат','chat']
     access = ['admin']
     desc = 'Устанавливает префикс'
-    perm = 'core.prefix'
+    perm = 'core.currchat'
 
     @staticmethod
     def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
@@ -375,7 +375,7 @@ class Command_Graphity(C_template):
             else:
                 args.message = 'Это нельзя'
         if att.type == attachment.types.photo:
-            photo_url = att.photo.GetHiRes()
+            photo_url = att.photo.GetHiRes
             req = urllib.request.Request(photo_url, headers=HDR)
             img = Image.open(BytesIO(urlopen(req).read()))
             Tmp = TempFile.generatePath('png')
@@ -416,6 +416,7 @@ class Command_Garbage(C_template):
 
     @staticmethod
     def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
+        bot.GC.collect()
         bot.GC.collect()
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id

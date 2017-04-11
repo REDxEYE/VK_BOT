@@ -37,11 +37,11 @@ class Command_WantedFunk(C_template):
             return False
         try:
 
-            photo = atts[0].photo.GetHiRes()
+            photo = atts[0].photo.GetHiRes
         except:
             return False
         try:
-            photo1 = atts[1].photo.GetHiRes()
+            photo1 = atts[1].photo.GetHiRes
         except:
             return False
         req = urllib.request.Request(photo, headers=HDR)
@@ -74,7 +74,7 @@ class Command_JonTronFunk(C_template):
 
         try:
 
-            photo = atts[0].photo.GetHiRes()
+            photo = atts[0].photo.GetHiRes
             req = urllib.request.Request(photo, headers=HDR)
 
             img = urlopen(req).read()
@@ -118,7 +118,7 @@ class Command_SayMaxFunk(C_template):
 
         try:
 
-            photo = atts[0].photo.GetHiRes()
+            photo = atts[0].photo.GetHiRes
             req = urllib.request.Request(photo, headers=HDR)
 
             img = urlopen(req).read()

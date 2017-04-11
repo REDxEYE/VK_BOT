@@ -1,6 +1,9 @@
 import os
+import traceback
 import urllib
 from urllib.request import urlopen
+
+import sys
 
 from DataTypes.attachments import attachment
 from libs.PIL_module import Glitch, GlitchGif, MakeGlitchGifVSH, MakeGlitchGif
@@ -40,7 +43,7 @@ class Command_Glitch_(C_template):
         for att in atts:
             try:
 
-                photo = att.photo.GetHiRes()
+                photo = att.photo.GetHiRes
             except:
                 return False
             req = urllib.request.Request(photo, headers=HDR)
@@ -78,26 +81,24 @@ class Command_GlitchGif_(C_template):
         Topost = []
         for att in atts:
             print(att)
-            try:
-                if att.type == attachment.types.doc:
-                    try:
-                        gif = att.doc.url
-                    except:
-                        return False
-                    req = urllib.request.Request(gif, headers=HDR)
-                    img = urlopen(req).read()
-                    Tmp = TempFile(img, 'gif')
-                    file = GlitchGif(Tmp.path_, sigma=sigma, blockSize=size, iterations=iter, random_=random_,
-                                     Glitch_=Glitch_)
-                    doc, t = bot.UploadDocFromDisk(file)
-                    Tmp.rem()
-                    os.remove(file)
-                    Topost.append(doc)
-            except:
-                pass
-            try:
+            if att.type == attachment.types.doc:
+                try:
+                    gif = att.doc.url
+                except:
+                    return False
+                req = urllib.request.Request(gif, headers=HDR)
+                img = urlopen(req).read()
+                Tmp = TempFile(img, 'gif')
+                file = GlitchGif(Tmp.path_, sigma=sigma, blockSize=size, iterations=iter, random_=random_,
+                                 Glitch_=Glitch_)
+                doc, t = bot.UploadDocFromDisk(file)
+                Tmp.rem()
+                os.remove(file)
+                Topost.append(doc)
 
-                photo = bot.GetBiggesPic(atts[0], data['message_id'])
+            if att.type == attachment.types.photo:
+
+                photo = atts[0].photo.GetHiRes
                 req = urllib.request.Request(photo, headers=HDR)
                 img = urlopen(req).read()
                 Tmp = TempFile(img, 'jpg')
@@ -113,8 +114,7 @@ class Command_GlitchGif_(C_template):
                 os.remove(file)
                 Topost.append(doc)
                 Tmp.rem()
-            except:
-                return False
+
         args['message'] = ':D'
         args['attachment'] = Topost
 

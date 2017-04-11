@@ -448,7 +448,7 @@ class Bot:
                     for t in _data.attachments:
                         if t.type == attachment.types.photo:
                             template_attach = "{} : {}"
-                            attachments_.append(template_attach.format(t.type, t.photo.GetHiRes()))
+                            attachments_.append(template_attach.format(t.type, t.photo.GetHiRes))
 
                 out = ''
                 out += ''.join(fwdMessages) if len(fwdMessages) > 0 else ''
@@ -513,7 +513,7 @@ class Bot:
                 pattern = "{}, ?|{}, ?|{}, ?|{}, ?".format(self.MyName.first_name.lower(), self.MyName.first_name,
                                                            'ред', "Ред")
                 if message.body.startswith(self.prefix):
-                    Command = message.body[len(self.prefix):].split(' ')[0]
+                    Command = message.body[len(self.prefix):].split(' ')[0].lower()
                     message.args = message.body[1:].split(' ')[1:]
                     message.message = ' '.join(message.args)
                     message.text = message.message
@@ -523,7 +523,7 @@ class Bot:
                     message.message = text
                     message.text = ' '.join(text.split(' ')[1:])
                     message.args = Command.split(' ')[1:]
-                    Command = Command.split(' ')[0]
+                    Command = Command.split(' ')[0].lower()
                 if (re.search(pattern, message.body) or message.body.startswith(self.prefix)) and int(
                         message.user_id) != int(self.MyUId):
                     message = process_fwd_msg(message)
