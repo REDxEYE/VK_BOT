@@ -31,15 +31,12 @@ class ModuleManager:
         self.MODULES = []
         self.modules = os.listdir(os.path.join(getpath(), "modules"))
         sys.path.append(os.path.join(getpath(), "modules"))
-        for module in self.modules:
-            if not module.startswith("__"):
+        for module in self.modules: #type: str
+            if not module.startswith("__") and module.endswith('.py'):
                 try:
                     module = importlib.import_module(str(module.split(".")[0]))
-                except Exception as ex:
+                except ImportError:
                     print("can't import module " + str(module.split(".")[0]), type_='err')
-
-                    print(ex.__traceback__)
-                    print(ex.__cause__)
 
                     exc_type, exc_value, exc_traceback = sys.exc_info()
                     TB = traceback.format_tb(exc_traceback)
@@ -67,6 +64,8 @@ class ModuleManager:
                     if class_.startswith("Command"):
                         if class_ not in self.Config:
                             self.Config[class_] = {'enabled':True}
+                        if 'cost' not in self.Config[class_]:
+                            self.Config[class_]['cost'] = getattr(module, class_).cost
                         if self.Config[class_]['enabled']:
                             funk = getattr(module, class_)
                             if funk.enabled == False:
@@ -77,7 +76,7 @@ class ModuleManager:
                             impModuleStr = ("   ║ Importing {}".format(class_))
                             toPrint.append(impModuleStr)
                             longest = len(impModuleStr) if len(impModuleStr) > longest else longest
-
+                            funk.cost = self.Config[class_]['cost']
                             self.MODULES.append(
                                 Module(funk, funk.name, funk.perm, funk.access, funk.template, funk.desc, funk.cost))
                         else:
