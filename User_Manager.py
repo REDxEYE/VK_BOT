@@ -2,6 +2,8 @@ import copy
 import json
 import os.path
 
+import math
+
 
 def getpath():
     return os.path.dirname(os.path.abspath(__file__))
@@ -166,16 +168,36 @@ class UserManager:
         user = str(user)
         return self.DB[user][UserManager.currency]
 
-    def UpdateCuttency(self, user, amount):
+    def UpdateCurrency(self, user, amount):
         amount = int(amount)
         self.DB[user][UserManager.currency] += amount
         self.SaveUserDB()
 
     def pay(self, user: str, amount: int):
-        amount = int(amount)
+        amount = math.fabs(int(amount))
         user = str(user)
-        self.DB[user][UserManager.currency] -= amount
-        self.SaveUserDB()
+        if self.isValid(user):
+            if self.hasEnough(user, amount):
+                self.DB[user][UserManager.currency] -= amount
+            else:
+                return False
+            self.SaveUserDB()
+            return True
+        else:
+            return False
+
+    def addCurrency(self, user: str, amount: int):
+        amount = math.fabs(int(amount))
+        user = str(user)
+        if self.isValid(user):
+            self.DB[user][UserManager.currency] += amount
+            self.SaveUserDB()
+            return True
+        else:
+            return False
+    def hasEnough(self,user,curr):
+        return int(self.DB[str(user)][UserManager.currency])>=int(curr)
+
 
     def isValid(self, user: str):
         return user in self.DB

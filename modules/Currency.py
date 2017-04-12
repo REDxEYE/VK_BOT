@@ -21,7 +21,7 @@ class Command_AddCurrency(C_template):
         text = data.text.split(' ')
         user = text[0]
         curr = text[-1]
-        bot.USERS.UpdateCuttency(user, curr)
+        bot.USERS.UpdateCurrency(user, curr)
 
         userName = bot.GetUserNameById(int(user))
         try:
