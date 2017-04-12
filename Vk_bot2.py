@@ -20,7 +20,7 @@ from User_Manager import *
 from libs.tempfile_ import *
 import aiml_.Core
 import gc
-
+import argparse
 try:
     from chatterbot import ChatBot
 
@@ -756,5 +756,10 @@ class Bot:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='VkBot')
+    parser.add_argument('-r', dest = 'resend',help = 'Switch - resend messages or not',action="store_true")
+    args = parser.parse_args()
+    if args.resend:
+        ArgBuilder.Args_message.DoNotResend()
     bot = Bot(DEBUG=True)
     bot.ContiniousMessageCheck()

@@ -7,6 +7,8 @@ class Args_def:
 
 
 class Args_message(Args_def):
+    resend = True
+
     def __init__(self):
         super(Args_message, self).__init__()
         self.peer_id = None
@@ -26,8 +28,16 @@ class Args_message(Args_def):
             self.attachment.append(temp)
 
     def AsDict_(self) -> dict:
+        if not Args_message.resend:
+            self.forward_messages = []
         return {var: vars(self)[var] for var in vars(self) if vars(self)[var] != None}
 
+    @classmethod
+    def DoNotResend(cls):
+        cls.resend = False
+    @classmethod
+    def DoResend(cls):
+        cls.resend = True
 
 if __name__ == "__main__":
     a = Args_message()
