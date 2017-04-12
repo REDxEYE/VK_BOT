@@ -26,12 +26,10 @@ class Command_SetStatus(C_template):
 
         userName = bot.GetUserNameById(user)
         try:
-            args['message'] = 'Пользователю {} {} был установлен статус {}'.format(userName['first_name'],
-                                                                                   userName['last_name'],
-                                                                                   stat)
+            args['message'] = f'Пользователю {userName.Name} был установлен статус {stat}'
 
         except:
-            args['message'] = 'Пользователю были даны следующие права [ {} ]'.format(stat)
+            args['message'] = f'Пользователю были даны следующие права [ {stat} ]'
         # self.Reply(self.UserApi, MArgs)
         bot.Replyqueue.put(args)
         bot.SaveConfig()
@@ -54,11 +52,9 @@ class Command_RemovePerms(C_template):
 
         userName = bot.GetUserNameById(int(user))
         try:
-            args['message'] = 'Пользователю {} {} были сняты следующие права [ {} ]'.format(userName['first_name'],
-                                                                                            userName['last_name'],
-                                                                                            ', '.join(perms))
+            args['message'] = f'Пользователю {userName.Name} были сняты следующие права [ {", ".join(perms)} ]'
         except:
-            args['message'] = 'Пользователю были сняты следующие права [ {} ]'.format(', '.join(perms))
+            args['message'] = f'Пользователю были сняты следующие права [ {", ".join(perms)} ]'
         # self.Reply(self.UserApi, MArgs)
         bot.Replyqueue.put(args)
         bot.SaveConfig()
@@ -81,12 +77,10 @@ class Command_WritePerms(C_template):
 
         userName = bot.GetUserNameById(user)
         try:
-            args['message'] = 'Пользователю {} {} были даны следующие права [ {} ]'.format(userName['first_name'],
-                                                                                           userName['last_name'],
-                                                                                           ', '.join(perms))
+            args['message'] = f'Пользователю {userName.Name} были даны следующие права [ {", ".join(perms)} ]'
 
         except:
-            args['message'] = 'Пользователю были даны следующие права [ {} ]'.format(', '.join(perms))
+            args['message'] = f'Пользователю были даны следующие права [ {", ".join(perms)} ]'
         # self.Reply(self.UserApi, MArgs)
         bot.Replyqueue.put(args)
         bot.SaveConfig()

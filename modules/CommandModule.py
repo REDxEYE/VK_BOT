@@ -73,8 +73,7 @@ class Command_Whom(C_template):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
-        text = " ".join(data.body.split(',')[1].split(' ')[2:]) if "?" not in data.body else " ".join(
-            data.body.split(',')[1].split(' ')[2:])[:-1]
+        text = data.message[:-1] if '?' in data.message else data.message
         if int(data.chat_id) <= 2000000000:
             args.message = "Тебя"
             return args
@@ -140,12 +139,10 @@ class Command_Who(C_template):
 
         if forward:
             args.update({"forward_messages": data.id})
-        text = " ".join(
-            data.body.split(',')[1].split(' ')[2:])[:-1] if data.body.endswith("?") else " ".join(
-            data.body.split(',')[1].split(' ')[2:])
-        if "мне" in text: text = text.replace('мне', 'тебе')
-        if "мной" in text: text = text.replace('мной', 'тобой')
-        if "моей" in text: text = text.replace('моей', 'твоей')
+        text = data.message[:-1] if '?' in data.message else data.message
+        text = text.replace('мне', 'тебе')
+        text = text.replace('мной', 'тобой')
+        text = text.replace('моей', 'твоей')
         if not data.isChat:
             args['message'] = "Ты"
             bot.Replyqueue.put(args)
