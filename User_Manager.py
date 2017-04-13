@@ -4,6 +4,8 @@ import os.path
 
 import math
 
+import time
+
 
 def getpath():
     return os.path.dirname(os.path.abspath(__file__))
@@ -40,6 +42,32 @@ class Status:
         else:
             raise Exception('Unknown ID')
 
+class CoolDown:
+    def __init__(self,cooldown:int,limit:int):
+        self.limit = limit
+        self.cooldown = cooldown
+        self.endtime = time.time()+cooldown
+        self.num = 0
+        self.warned = False
+
+    def __call__(self):
+
+        if self.num<self.limit:
+            self.num += 1
+            self.endtime = time.time() + self.cooldown
+            return True
+        else:
+            print('limit')
+            self.endtime = time.time() + self.cooldown*2
+            return False
+
+
+    def check(self):
+        print(time.time(),self.endtime)
+        if time.time()>=self.endtime:
+            return True
+        else:
+            return False
 
 class UserManager:
     perms = 'perms'
@@ -105,6 +133,10 @@ class UserManager:
             for perm in perms:
 
                 coreperm = '{}.*'.format(perm.split('.')[0])
+                if perm in self.DB[user][UserManager.perms]:
+
+                    self.DB[user][UserManager.perms].remove(perm)
+                    continue
 
                 if coreperm in self.DB[user][UserManager.perms]:
                     if perm in self.DB[user][UserManager.exclude]:
@@ -112,9 +144,7 @@ class UserManager:
                     self.DB[user][UserManager.exclude].append(perm)
                     continue
 
-                if perm in self.DB[user][UserManager.perms]:
 
-                    self.DB[user][UserManager.perms].remove(perm)
                 else:
                     continue
         self.SaveUserDB()

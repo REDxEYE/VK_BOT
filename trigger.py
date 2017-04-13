@@ -46,7 +46,7 @@ class TriggerHandler:
         print('Trigger registered!')
         self.triggers.extend(trigger)
 
-    def processTriggers(self, data):
+    def processTriggers(self, data:LongPoolHistoryMessage):
         """
 
         Args:
@@ -54,17 +54,17 @@ class TriggerHandler:
         """
         for n, trigger in enumerate(self.triggers):
 
-            if time.time() - trigger.timestart > trigger.timeout:
+            if time.time() - trigger.timestart > trigger.timeout and not trigger.infinite:
                 self.triggers.remove(trigger)
                 trigger.callback(data, result=False)
             if trigger.cond(data):
                 print('Triggered, calling callback')
                 print(trigger.callbackArgs, trigger.callbackKwArgs)
-                trigger.callbackArgs = list(trigger.callbackArgs)
-                trigger.callbackArgs.append(data)
-                trigger.callbackKwArgs.update({'result': True})
-                print(trigger.callbackArgs, trigger.callbackKwArgs)
-                th = threading.Thread(target=trigger.callback, args=trigger.callbackArgs, kwargs=trigger.callbackKwArgs)
+                LocalcallbackArgs = list(trigger.callbackArgs)
+                LocalcallbackArgs.append(data)
+                trigger.callbackKwArgs['result'] = True
+                print(LocalcallbackArgs, trigger.callbackKwArgs)
+                th = threading.Thread(target=trigger.callback, args=LocalcallbackArgs, kwargs=trigger.callbackKwArgs)
                 th.setName('Trigger Callback thread {}'.format(n))
                 th.start()
                 th.join()

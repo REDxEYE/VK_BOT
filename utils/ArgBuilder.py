@@ -6,6 +6,7 @@ class Args_def:
         self.v = '5.60'
 
 
+
 class Args_message(Args_def):
     resend = True
 
@@ -26,7 +27,19 @@ class Args_message(Args_def):
             else:
                 temp = template.format(att.type, Owner, Id)
             self.attachment.append(temp)
-
+        return self
+    def setpeer_id(self,peer_id:int):
+        self.peer_id = peer_id
+        return self
+    def setmessage(self,message:str):
+        self.message = message
+        return self
+    def setattachment(self,attachment:list):
+        self.attachment = attachment
+        return self
+    def setforward_messages(self,forward_messages):
+        self.forward_messages = forward_messages
+        return self
     def AsDict_(self) -> dict:
         if not Args_message.resend:
             self.forward_messages = []

@@ -13,8 +13,8 @@ HDR = {
 
 
 def GetTags(image):
-    urlKeyWords = 'https://services1.microstock.pro/keywording/keywords'
-    urlquality = 'https://services2.microstock.pro/aesthetics/quality'
+    urlKeyWords = 'https://keywording.api.everypixel.com/v1/keywords'
+    urlquality = 'https://quality.api.everypixel.com/v1/quality'
     # req = Request(url,data ="json=^%^7B^%^22url^%^22^%^3A^%^22https^%^3A^%^2F^%^2Fpp.userapi.com^%^2Fc628230^%^2Fv628230019^%^2F3ba42^%^2FWT21Z4VvOnk.jpg^%^22^%^7D",headers=HDR,method='POST' )
     print('Trying to get tags for ', image)
     KeyWords = requests.request('POST', urlKeyWords, data={'json': json.dumps({'url': image})}, headers=HDR).json()

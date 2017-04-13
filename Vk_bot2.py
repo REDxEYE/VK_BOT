@@ -5,6 +5,7 @@ import threading
 import urllib
 from math import *
 from time import sleep
+from typing import overload
 from urllib.request import urlopen
 import requests
 import vk.exceptions as VKEX
@@ -21,6 +22,7 @@ from libs.tempfile_ import *
 import aiml_.Core
 import gc
 import argparse
+
 try:
     from chatterbot import ChatBot
 
@@ -123,6 +125,7 @@ class Bot:
         self.MODULES = ModuleManager()
         self.DEBUG = DEBUG
         self.TRIGGERS = trigger.TriggerHandler()
+        self.COOLDOWN = {}  # type: dict[str:CoolDown]
         self.AdminModeOnly = False
 
         self.defargs = {"v": "5.60"}
@@ -370,8 +373,6 @@ class Bot:
                 print(exc_type, exc_value, ''.join(TB))
                 return 'Error'
 
-
-
     def UploadDocFromDisk(self, file):
         """
 
@@ -536,6 +537,22 @@ class Bot:
                     if self.MODULES.isValid(Command):
                         funk = self.MODULES.GetModule(Command)
                         user = message.user_id
+                        if (str(user) not in self.COOLDOWN) and (not self.USERS.HasPerm(user, 'core.nolimit')):
+                            self.COOLDOWN[str(user)] = CoolDown(5, 3)
+                        if str(user) in self.COOLDOWN:
+                            if self.COOLDOWN[str(user)].check():
+                                del self.COOLDOWN[str(user)]
+                        # Bad code, i know
+                        if str(user) in self.COOLDOWN:
+                            if (not self.COOLDOWN[str(user)]()) or (not self.USERS.HasPerm(user, 'core.nolimit')):
+                                Targs = ArgBuilder.Args_message()
+                                Targs.peer_id = message.chat_id
+                                Targs.message = 'Превышен лимит команд, пожалуйста подождите 5 секунд. Весь последующий спам команд только увеличит время ожидания'
+                                if not self.COOLDOWN[str(user)].warned:
+                                    self.Replyqueue.put(Targs)
+                                self.COOLDOWN[str(user)].warned = True
+                                continue
+
                         if self.USERS.HasPerm(user, funk.perms) and self.MODULES.CanAfford(self.USERS.GetCurrency(user),
                                                                                            Command):
                             try:
@@ -581,7 +598,6 @@ class Bot:
                             defargs["message"] = "Нехватает валюты. Попробуйте обратиться к администрации"
                             self.Checkqueue.task_done()
                             self.Replyqueue.put(defargs)
-
 
                         else:
                             print('"Недостаточно прав"')
@@ -669,7 +685,7 @@ class Bot:
                         end = 'о'
                 except:
                     end = 'о'
-                Targs['message'] = 'Оп, {} ливнул{} с подливой &#9786;'.format(user.Name,end)
+                Targs['message'] = 'Оп, {} ливнул{} с подливой &#9786;'.format(user.Name, end)
             else:
                 user = self.GetUserNameById(data.action.action_mid, case='acc')
                 Targs['message'] = 'Оп, {} кикнули &#127770;'.format(user.Name)
@@ -703,7 +719,7 @@ class Bot:
                     for upd in req['updates']:
                         if 4 == upd[0]:
                             hasMsg = True
-                            print(upd)
+                            # print(upd)
                     if hasMsg:
                         self.parseLongPoolHistory(ts)
                         ts = req['ts']
@@ -754,12 +770,42 @@ class Bot:
         self.Checkqueue.put(updates)
 
 
+@overload
+def MultipleStrCheck(string: str, *list: str) -> bool:
+    for item in list:
+        print(item,string,item in string)
+        if item in string:
+            return True
+    return False
+
+def MultipleStrCheck(string: str, list: list) -> bool:
+    for item in list:
+        print(item, string, item in string)
+        if item in string:
+            return True
+    return False
+
+
+def CustomTriggers(api: Bot):
+    t1 = trigger.Trigger(cond=lambda data: MultipleStrCheck(data.body.lower(), ['python', 'питон']) and
+                                              int(data.user_id) != int(api.MyUId), onetime=False, infinite=True,
+                         callback=lambda message, result: api.Replyqueue.put(ArgBuilder.Args_message()
+                                                                     .setpeer_id(message.chat_id)
+                                                                     .setmessage('Кто-то сказал питон?')
+                                                                     .setattachment([api.UploadFromDisk(api.GetImg('Python.jpg'))])))
+
+    api.TRIGGERS.addTrigger(t1)
+
 
 if __name__ == "__main__":
+    s = time.time()
     parser = argparse.ArgumentParser(description='VkBot')
-    parser.add_argument('-r', dest = 'resend',help = 'Switch - resend messages or not',action="store_true")
+    parser.add_argument('-r', dest='resend', help='Switch - resend messages or not', action="store_true")
+    parser.add_argument('-thr', dest='threads', help='Number of threads for commands', default=4)
     args = parser.parse_args()
     if args.resend:
         ArgBuilder.Args_message.DoNotResend()
-    bot = Bot(DEBUG=True)
+    bot = Bot(DEBUG=True, threads=int(args.threads))
+    CustomTriggers(bot)
+    print(f'Loaded in {time.time()-s} seconds')
     bot.ContiniousMessageCheck()
