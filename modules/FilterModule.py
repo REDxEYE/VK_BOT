@@ -24,6 +24,9 @@ try:
 except:
     from __Command_template import *
 
+from Module_manager_v2 import ModuleManager
+
+@ModuleManager.Filter(name= 'PencilSketch',desc="Карандашный набросок")
 class Filter_PencilSketch(F_template):
     enabled = cv2Avalible
     name = 'PencilSketch'
@@ -70,100 +73,7 @@ class Filter_PencilSketch(F_template):
         cv2.imwrite(path, img_blend)
         # return
 
-
-class Filter_WarmingFilter(F_template):
-    enabled = cv2Avalible and scipyAvalible
-    name = 'WarmingFilter'
-    desc = "Тёплый фильтр"
-    """Warming filter
-
-        A class that applies a warming filter to an image.
-        The class uses curve filters to manipulate the perceived color
-        temparature of an image. The warming filter will shift the image's
-        color spectrum towards red, away from blue.
-    """
-
-    def __init__(self):
-        """Initialize look-up table for curve filter"""
-        # create look-up tables for increasing and decreasing a channel
-        self.incr_ch_lut = self._create_LUT_8UC1([0, 64, 128, 192, 256],
-                                                 [0, 70, 140, 210, 256])
-        self.decr_ch_lut = self._create_LUT_8UC1([0, 64, 128, 192, 256],
-                                                 [0, 30, 80, 120, 192])
-
-    def render(self, img_rgb):
-        """Applies warming filter to an RGB image
-
-            :param img_rgb: RGB image to be processed
-            :returns: Processed RGB image
-        """
-        path = img_rgb
-        img_rgb = cv2.imread(img_rgb)
-        # warming filter: increase red, decrease blue
-        c_r, c_g, c_b = cv2.split(img_rgb)
-        c_r = cv2.LUT(c_r, self.incr_ch_lut).astype(np.uint8)
-        c_b = cv2.LUT(c_b, self.decr_ch_lut).astype(np.uint8)
-        img_rgb = cv2.merge((c_r, c_g, c_b))
-
-        # increase color saturation
-        c_h, c_s, c_v = cv2.split(cv2.cvtColor(img_rgb, cv2.COLOR_RGB2HSV))
-        c_s = cv2.LUT(c_s, self.incr_ch_lut).astype(np.uint8)
-        cv2.imwrite(path, cv2.cvtColor(cv2.merge((c_h, c_s, c_v)), cv2.COLOR_HSV2RGB))
-        # return cv2.cvtColor(cv2.merge((c_h, c_s, c_v)), cv2.COLOR_HSV2RGB)
-
-    def _create_LUT_8UC1(self, x, y):
-        """Creates a look-up table using scipy's spline interpolation"""
-        spl = UnivariateSpline(x, y)
-        return spl(xrange(256))
-
-
-class Filter_CoolingFilter(F_template):
-    enabled = cv2Avalible and scipyAvalible
-    name = 'CoolingFilter'
-    desc = "Холодный фильтр"
-    # охлаждает ваше трахатье
-    """Cooling filter
-
-        A class that applies a cooling filter to an image.
-        The class uses curve filters to manipulate the perceived color
-        temparature of an image. The warming filter will shift the image's
-        color spectrum towards blue, away from red.
-    """
-
-    def __init__(self):
-        """Initialize look-up table for curve filter"""
-        # create look-up tables for increasing and decreasing a channel
-        self.incr_ch_lut = self._create_LUT_8UC1([0, 64, 128, 192, 256],
-                                                 [0, 70, 140, 210, 256])
-        self.decr_ch_lut = self._create_LUT_8UC1([0, 64, 128, 192, 256],
-                                                 [0, 30, 80, 120, 192])
-
-    def render(self, img_rgb):
-        """Applies pencil sketch effect to an RGB image
-
-            :param img_rgb: RGB image to be processed
-            :returns: Processed RGB image
-        """
-        path = img_rgb
-        img_rgb = cv2.imread(img_rgb)
-        # cooling filter: increase blue, decrease red
-        c_r, c_g, c_b = cv2.split(img_rgb)
-        c_r = cv2.LUT(c_r, self.decr_ch_lut).astype(np.uint8)
-        c_b = cv2.LUT(c_b, self.incr_ch_lut).astype(np.uint8)
-        img_rgb = cv2.merge((c_r, c_g, c_b))
-
-        # decrease color saturation
-        c_h, c_s, c_v = cv2.split(cv2.cvtColor(img_rgb, cv2.COLOR_RGB2HSV))
-        c_s = cv2.LUT(c_s, self.decr_ch_lut).astype(np.uint8)
-        cv2.imwrite(path, cv2.cvtColor(cv2.merge((c_h, c_s, c_v)), cv2.COLOR_HSV2RGB))
-        # return cv2.cvtColor(cv2.merge((c_h, c_s, c_v)), cv2.COLOR_HSV2RGB)
-
-    def _create_LUT_8UC1(self, x, y):
-        """Creates a look-up table using scipy's spline interpolation"""
-        spl = UnivariateSpline(x, y)
-        return spl(xrange(256))
-
-
+@ModuleManager.Filter(name= 'Cartoonizer',desc="Мультфильм фильтр")
 class Filter_Cartoonizer(F_template):
     enabled = cv2Avalible
     name = 'Cartoonizer'
@@ -218,7 +128,7 @@ class Filter_Cartoonizer(F_template):
         cv2.imwrite(path, cv2.bitwise_and(img_color, img_edge))
         # return cv2.bitwise_and(img_color, img_edge)
 
-
+@ModuleManager.Filter(name= 'Equal',desc="Уравнивающий фильтр")
 class Filter_Equal(F_template):
     name = 'Equal'
     desc = "Уравнивающий фильтр"
@@ -231,7 +141,7 @@ class Filter_Equal(F_template):
         im = ImageOps.equalize(im)
         im.save(img, 'PNG')
 
-
+@ModuleManager.Filter(name= 'AutoContrast',desc='Автоконтраст')
 class Filter_AutoContrast(F_template):
     name = 'AutoContrast'
     desc = "Автоконтраст"
@@ -244,7 +154,7 @@ class Filter_AutoContrast(F_template):
         im = ImageOps.autocontrast(im, 5)
         im.save(img, 'PNG')
 
-
+@ModuleManager.Filter(name= 'Tlen',desc="Тлен")
 class Filter_Tlen(F_template):
     name = 'Tlen'
     desc = "Тлен"
@@ -258,7 +168,7 @@ class Filter_Tlen(F_template):
         im = ImageChops.multiply(im, im2)
         im.save(img, 'JPEG')
 
-
+@ModuleManager.Filter(name= 'Neural',desc="Нейронный фильтр")
 class Filter_Neural(F_template):
     enabled = cv2Avalible
     name = 'Neural'
@@ -308,7 +218,7 @@ class Filter_Neural(F_template):
             np.maximum(accum, fimg, accum)
         return accum
 
-
+@ModuleManager.Filter(name= 'Neural2',desc="Нейронный фильтр Sigma 6")
 class Filter_Neural2(F_template):
     enabled = cv2Avalible
     name = 'Neural2'
@@ -357,7 +267,7 @@ class Filter_Neural2(F_template):
             np.maximum(accum, fimg, accum)
         return accum
 
-
+@ModuleManager.Filter(name= 'Neural3',desc="Нейронный фильтр Sigma 5")
 class Filter_Neural3(F_template):
     enabled = cv2Avalible
     name = 'Neural3'
@@ -406,7 +316,7 @@ class Filter_Neural3(F_template):
             np.maximum(accum, fimg, accum)
         return accum
 
-
+@ModuleManager.Filter(name= 'Neural_Edges',desc="Нейронный фильтр глубокий")
 class Filter_Neural_Edges(F_template):
     enabled = cv2Avalible
     name = 'Neural_Edges'
@@ -456,7 +366,7 @@ class Filter_Neural_Edges(F_template):
             np.maximum(accum, fimg, accum)
         return accum
 
-
+@ModuleManager.Filter(name= 'Neural_Edges2',desc="Нейронный фильтр глубокий 2")
 class Filter_Neural_Edges2(F_template):
     enabled = cv2Avalible
     name = 'Neural_Edges2'

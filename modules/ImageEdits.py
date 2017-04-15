@@ -1,8 +1,13 @@
 import os
 import re
+import traceback
 import urllib
 from urllib.request import urlopen
+
+import sys
+
 from DataTypes.attachments import attachment
+from Module_manager_v2 import ModuleManager
 from trigger import Trigger
 
 try:
@@ -34,14 +39,14 @@ except ImportError:
 from utils import ArgBuilder
 
 
+@ModuleManager.command(names=["кок"], perm='photo.kok', desc="Зеркалит картинку", cost=2)
 class Command_Kok(C_template):
     name = ["кок"]
     access = ["all"]
     desc = "Зеркалит картинку"
     perm = 'photo.kok'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates_: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -53,24 +58,24 @@ class Command_Kok(C_template):
                 img = urlopen(req).read()
                 Tmp = TempFile(img, 'jpg', NoCache=True)
                 kok(Tmp.path_)
-                att = bot.UploadFromDisk(Tmp.path_)
+                att = self.api.UploadFromDisk(Tmp.path_)
                 Tmp.cachefile(Tmp.path_)
                 Tmp.rem()
                 args.attachment = att
-                bot.Replyqueue.put(args)
+                self.api.Replyqueue.put(args)
             return True
         except:
             return False
 
 
+@ModuleManager.command(names=["кек"], perm='photo.kek', desc="Зеркалит картинку", cost=2)
 class Command_Kek(C_template):
     name = ["кек"]
     access = ["all"]
     desc = "Зеркалит картинку"
     perm = 'photo.kek'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -82,16 +87,18 @@ class Command_Kek(C_template):
                 img = urlopen(req).read()
                 Tmp = TempFile(img, 'jpg', NoCache=True)
                 kek(Tmp.path_)
-                att = bot.UploadFromDisk(Tmp.path_)
+                att = self.api.UploadFromDisk(Tmp.path_)
                 Tmp.cachefile(Tmp.path_)
                 Tmp.rem()
                 args.attachment = att
-                bot.Replyqueue.put(args)
+                self.api.Replyqueue.put(args)
                 return True
         except:
             return False
 
 
+@ModuleManager.command(names=["обработай", 'фильтр'], perm='photo.filter', desc="Позволяет применять фильтры к фото",
+                       cost=2)
 class Command_Filter(C_template):
     name = ["обработай", 'фильтр']
     access = ["all"]
@@ -99,8 +106,7 @@ class Command_Filter(C_template):
     perm = 'photo.filter'
     cost = 15
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -112,49 +118,52 @@ class Command_Filter(C_template):
                 img = urlopen(req).read()
                 Tmp = TempFile(img, 'jpg', NoCache=True)
                 args.message = 'Список фильтров:\n'
-                FArr = dict(enumerate(bot.MODULES.FILTERS))
+                FArr = dict(enumerate(self.api.MODULES.FILTERS))
                 for filter_ in FArr:
-                    Fname = bot.MODULES.FILTERS[FArr[filter_]].desc
+                    Fname = self.api.MODULES.FILTERS[FArr[filter_]].desc
                     args.message += "{}. {}\n".format(filter_ + 1, Fname)
-                bot.Replyqueue.put(args)
-                print(data.user_id, data.chat_id)
+                self.api.Replyqueue.put(args)
+
                 t = Trigger(cond=lambda
                     Tdata: Tdata.user_id == data.user_id and Tdata.chat_id == data.chat_id and Tdata.body.isnumeric(),
-                            callback=Command_Filter.Render, Tmp=Tmp, bot=bot, args=args, FArr=FArr)
-                bot.TRIGGERS.addTrigger(t)
+                            callback=self.Render, Tmp=Tmp, bot=self.api, args=args, FArr=FArr)
+                self.api.TRIGGERS.addTrigger(t)
                 return True
-        except:
+        except Exception as Ex:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            TB = traceback.format_tb(exc_traceback)
+            print_(exc_type, exc_value, traceback.print_tb(exc_traceback))
             return False
 
-    @staticmethod
-    def Render(data: LongPoolHistoryMessage, result, Tmp, bot: Vk_bot2.Bot, args: ArgBuilder.Args_message, FArr):
+    def Render(self, data: LongPoolHistoryMessage, result, Tmp, bot: Vk_bot2.Bot, args: ArgBuilder.Args_message, FArr):
         if result == False:
             Tmp.rem()
             args.message = "Время ожидания ответа истекло"
-            bot.Replyqueue.put(args)
+            self.api.Replyqueue.put(args)
+            return
         ans = int(data.body) - 1
-        filter_ = bot.MODULES.FILTERS[FArr[ans]].funk
+        filter_ = self.api.MODULES.FILTERS[FArr[ans]].funk
         print('used filter {}'.format(filter_.name))
         filter_().render(Tmp.path_)
 
         args.message = filter_.name
         print(args)
         Tmp.cachefile(Tmp.path_)
-        args.attachment = [bot.UploadFromDisk(Tmp.path_)]
+        args.attachment = [self.api.UploadFromDisk(Tmp.path_)]
         Tmp.rem()
 
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
         return
 
 
+@ModuleManager.command(names=["увеличь"], perm='photo.resize', desc="Позволяет увеличивать\уменьшать фото")
 class Command_Resize(C_template):
     name = ["увеличь"]
     access = ["all"]
     desc = "Позволяет увеличивать\уменьшать фото"
     perm = 'photo.resize'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -162,11 +171,11 @@ class Command_Resize(C_template):
             x = int(data.custom['size'])
             if x > 3000:
                 args.message = "Неее, слишком жирно"
-                bot.Replyqueue.put(args)
+                self.api.Replyqueue.put(args)
                 return False
         else:
             args.message = "Размер не указан"
-            bot.Replyqueue.put(args)
+            self.api.Replyqueue.put(args)
             return False
         Topost = []
         for att in data.attachments:
@@ -178,19 +187,18 @@ class Command_Resize(C_template):
             img = urlopen(req).read()
             Tmp = TempFile(img, 'jpg', NoCache=True)
             args.message = 'Поднимать резкость?\n Да\Нет'
-            bot.Replyqueue.put(args)
+            self.api.Replyqueue.put(args)
             t = Trigger(cond=lambda Tdata: Tdata.user_id == data.user_id and Tdata.chat_id == data.chat_id and (
                 re.match(r"([Дд])а", Tdata.body) or re.match(r"([Нн])ет", Tdata.body)), callback=Command_Resize.resize,
-                        Tmp=Tmp, bot=bot, args=args, x=x)
-            bot.TRIGGERS.addTrigger(t)
+                        Tmp=Tmp, args=args, x=x)
+            self.api.TRIGGERS.addTrigger(t)
 
-    @staticmethod
-    def resize(data: LongPoolHistoryMessage, result, Tmp, bot, args: ArgBuilder.Args_message, FArr, x):
+    def resize(self, data: LongPoolHistoryMessage, result, Tmp, args: ArgBuilder.Args_message, x):
         ans = data.body
-        if ans == None:
+        if result == False:
             Tmp.rem()
             args.message = "Время ожидания ответа истекло"
-            bot.Replyqueue.put(args)
+            self.api.Replyqueue.put(args)
         sharp = False
         if re.match(r'([Дд])а', ans):
             sharp = True
@@ -198,29 +206,29 @@ class Command_Resize(C_template):
             sharp = False
         resize_(x, Tmp.path_, sharp)
         args.message = "Вотъ"
-        args.message = [bot.UploadFromDisk(Tmp.path_)]
+        args.message = [self.api.UploadFromDisk(Tmp.path_)]
         Tmp.cachefile(Tmp.path_)
         Tmp.rem()
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
 
 from bs4 import *
 
 
+@ModuleManager.command(names=["e621"], perm='core.e621', desc="Ищет пикчи на e612",
+                       template="Ищет пикчи на e612, форма запроса:\n"\
+                                "{botname}, e621\n"\
+                                "tags:тэги через ;\n"\
+                                "sort:fav_count либо score либо вообще не пишите это, если хотите случайных\n"\
+                                "n:кол-во артов(максимум 10)\n"\
+                                "page:страница на которой искать")
 class Command_e621(C_template):
     name = ["e621"]
     access = ["admin", "editor", "moderator"]
-    info = """Ищет пикчи на e612, форма запроса:\n
-           Ред, e621\n
-           tags:тэги через ;\n
-           sort:fav_count либо score либо вообще не пишите это, если хотите случайных\n
-           n:кол-во артов(максимум 10)\n
-           page:страница на которой искать"""
     desc = "Ищет пикчи на e612"
     perm = 'core.e621'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -228,7 +236,7 @@ class Command_e621(C_template):
         tags = data.custom['tags'].replace(' ', '').split(';') if 'tags' in data.custom else None
         if tags == None:
             args.message = Command_e926.info
-            bot.Replyqueue.put(args)
+            self.api.Replyqueue.put(args)
             return True
         n = int(data.custom['n']) if 'n' in data.custom else 5
         page = int(data.custom['page']) if 'page' in data.custom else 1
@@ -243,12 +251,18 @@ class Command_e621(C_template):
         for post in posts:
             if post['ext'] not in ['jpg', 'png', 'jpeg']:
                 continue
-            atts.append(bot.UploadPhoto(post['url']))
+            atts.append(self.api.UploadPhoto(post['url']))
         args.attachment = atts
         args.message = 'Вот порнушка по твоему запросу, шалунишка...\n' + msg
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
-
+@ModuleManager.command(names=["e926"], perm='photo.e926', desc="Ищет пикчи на e612",
+                       template="Ищет пикчи на e926, форма запроса:\n"\
+                                "{botname}, e926\n"\
+                                "tags:тэги через ;\n"\
+                                "sort:fav_count либо score либо вообще не пишите это, если хотите случайных\n"\
+                                "n:кол-во артов(максимум 10)\n"\
+                                "page:страница на которой искать",cost=15)
 class Command_e926(C_template):
     name = ["e926"]
     access = ["all"]
@@ -262,8 +276,7 @@ class Command_e926(C_template):
     perm = 'photo.e926'
     cost = 15
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -271,7 +284,7 @@ class Command_e926(C_template):
         tags = data.custom['tags'].replace(' ', '').split(';') if 'tags' in data.custom else None
         if tags == None:
             args.message = Command_e926.info
-            bot.Replyqueue.put(args)
+            self.api.Replyqueue.put(args)
             return True
         n = int(data.custom['n']) if 'n' in data.custom else 5
         page = int(data.custom['page']) if 'page' in data.custom else 1
@@ -287,20 +300,19 @@ class Command_e926(C_template):
         for post in posts:
             if post['ext'] not in ['jpg', 'png', 'jpeg']:
                 continue
-            atts.append(bot.UploadPhoto(post['url']))
+            atts.append(self.api.UploadPhoto(post['url']))
         args.attachment = atts
         args.message = 'Вот пикчи по твоему запросу\n' + msg
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
-
+@ModuleManager.command(names=["rollrows"], perm='photo.rollRows', desc="Сдвигает строки в фото")
 class Command_rollRows(C_template):
     name = ["rollrows"]
     access = ["all"]
     desc = "Сдвигает строки в фото"
     perm = 'photo.rollRows'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -318,14 +330,14 @@ class Command_rollRows(C_template):
             Tmp = TempFile(img, 'jpg')
             roll(Tmp.path_, delta)
             Tmp.cachefile(Tmp.path_)
-            att = bot.UploadFromDisk(Tmp.path_)
+            att = self.api.UploadFromDisk(Tmp.path_)
             Topost.append(att)
             Tmp.rem()
         args.attachment = Topost
         args.message = ':D'
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
-
+@ModuleManager.command(names=["rollsmart"], perm='photo.rollRowssmart', desc="Сдвигает строки в фото")
 class Command_rollRowssmart(C_template):
     name = ["rollsmart"]
     access = ["all"]
@@ -333,7 +345,7 @@ class Command_rollRowssmart(C_template):
     perm = 'photo.rollRowssmart'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -351,29 +363,28 @@ class Command_rollRowssmart(C_template):
             Tmp = TempFile(img, 'jpg')
             rollsmast(Tmp.path_)
             Tmp.cachefile(Tmp.path_)
-            att = bot.UploadFromDisk(Tmp.path_)
+            att = self.api.UploadFromDisk(Tmp.path_)
             Topost.append(att)
             Tmp.rem()
         args.attachment = Topost
         args.message = ':D'
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
-
+@ModuleManager.command(names=["сложи"], perm='photo.add', desc="Соединяет 2 фото")
 class Command_AddImages(C_template):
     name = ["сложи"]
     access = ['all']
     desc = "Соединяет 2 фото"
     perm = 'photo.add'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
         atts = data.attachments
         if len(atts) < 2:
             args.message = 'Нужны 2 файла'
-            bot.Replyqueue.put(args)
+            self.api.Replyqueue.put(args)
         Topost = []
 
         try:
@@ -392,7 +403,7 @@ class Command_AddImages(C_template):
         Tmp = TempFile(img, 'jpg')
         Tmp1 = TempFile(img1, 'jpg')
         add(Tmp.path_, Tmp1.path_)
-        att = bot.UploadFromDisk(Tmp.path_)
+        att = self.api.UploadFromDisk(Tmp.path_)
         Topost.append(att)
         Tmp.cachefile(Tmp.path_)
         Tmp1.cachefile(Tmp1.path_)
@@ -400,17 +411,16 @@ class Command_AddImages(C_template):
         Tmp1.rem()
         args.message = ':D'
         args.attachment = Topost
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
-
+@ModuleManager.command(names=["совмести"], perm='photo.merge', desc="Соединяет 2 фото")
 class Command_merge(C_template):
     name = ["совмести"]
     access = ['all']
     desc = "Соединяет 2 фото"
     perm = 'photo.merge'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -418,7 +428,7 @@ class Command_merge(C_template):
         # print(atts)
         if len(atts) < 2:
             args.message = 'Нужны 2 файла'
-            bot.Replyqueue.put(args)
+            self.api.Replyqueue.put(args)
             return
         Topost = []
 
@@ -438,7 +448,7 @@ class Command_merge(C_template):
         Tmp = TempFile(img, 'jpg')
         Tmp1 = TempFile(img1, 'jpg')
         Merge(Tmp.path_, Tmp1.path_)
-        att = bot.UploadFromDisk(Tmp.path_)
+        att = self.api.UploadFromDisk(Tmp.path_)
         Topost.append(att)
         Tmp.cachefile(Tmp.path_)
         Tmp1.cachefile(Tmp1.path_)
@@ -446,9 +456,9 @@ class Command_merge(C_template):
         Tmp1.rem()
         args.message = ':D'
         args.attachment = Topost
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
-
+@ModuleManager.command(names=["скрин"], perm='photo.screen', desc="Скрин экрана")
 class Command_screen(C_template):
     enabled = windows
     name = ["скрин"]
@@ -456,21 +466,21 @@ class Command_screen(C_template):
     desc = "Скрин экрана"
     perm = 'core.screen'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
+
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
         im = ImageGrab.grab()
         pt = TempFile.generatePath('jpg')
         im.save(pt)
-        att = bot.UploadFromDisk(pt)
+        att = self.api.UploadFromDisk(pt)
         os.remove(pt)
         args.message = 'Ееее, скрины'
         args.attachment = att
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
-
+@ModuleManager.command(names=["глитч"], perm='photo.glitch', desc="Глючит фото")
 class Command_GlitchImg(C_template):
     name = ["глитч"]
     access = ["all"]
@@ -479,7 +489,7 @@ class Command_GlitchImg(C_template):
     cost = 0
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -494,15 +504,15 @@ class Command_GlitchImg(C_template):
             img = urlopen(req).read()
             Tmp = TempFile(img, 'jpg')
             Glitch2.glitch_an_image(Tmp.path_)
-            att = bot.UploadFromDisk(Tmp.path_)
+            att = self.api.UploadFromDisk(Tmp.path_)
             Topost.append(att)
             Tmp.cachefile(Tmp.path_)
             Tmp.rem()
         args.message = 'Меня одного глючит?'
         args.attachment = Topost
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
-
+@ModuleManager.command(names=["everypixel"], perm='photo.everypixel', desc='Описывает ваше фото')
 class Command_everyPixel(C_template):
     name = ['everypixel']
     access = ['all']
@@ -510,7 +520,7 @@ class Command_everyPixel(C_template):
     perm = 'photo.everypixel'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -521,4 +531,4 @@ class Command_everyPixel(C_template):
         tags_msg = tags_template.format('\n'.join(tags))
 
         args.message = tags_msg + 'Годнота этой пикчи - {}\n'.format(int(quality))
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)

@@ -2,6 +2,7 @@ import os
 import urllib
 from urllib.request import urlopen
 
+from Module_manager_v2 import ModuleManager
 from libs.PIL_module import Wanted, JonTron, SayMax, textPlain
 from libs.tempfile_ import TempFile
 
@@ -18,22 +19,22 @@ try:
 except:
     from __Command_template import *
 
-
+@ModuleManager.command(names=["wanted"], perm='photo.wanted', desc="Вставляет 2 фото внутрь фото с написью Разыскивается")
 class Command_WantedFunk(C_template):
     name = ["wanted"]
     access = ["all"]
     desc = "Вставляет 2 фото внутрь фото с написью Разыскивается"
     perm = 'photo.wanted'
     cost = 5
-    @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
+
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
         atts = data.attachments
         # print(atts)
         Topost = []
         if len(atts) != 2:
             args['message'] = 'Нужно 2 фотографии'
-            bot.Replyqueue.put(args)
+            self.api.Replyqueue.put(args)
             return False
         try:
 
@@ -51,22 +52,22 @@ class Command_WantedFunk(C_template):
         Tmp = TempFile(img, 'jpg')
         Tmp1 = TempFile(img1, 'jpg')
         Wanted(Tmp.path_, Tmp1.path_)
-        att = bot.UploadFromDisk(Tmp.path_)
+        att = self.api.UploadFromDisk(Tmp.path_)
         Topost.append(att)
         Tmp.rem()
         Tmp1.rem()
         args['attachment'] = Topost
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
-
+@ModuleManager.command(names=["jontron"], perm='photo.jontron', desc="Вставляет фото в фото с ДжонТроном")
 class Command_JonTronFunk(C_template):
     name = ["jontron"]
     access = ['all']
     desc = "Вставляет фото в фото с ДжонТроном"
     perm = 'photo.jontron'
     cost = 5
-    @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
+
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
         atts = data.attachments
         # print(atts)
@@ -81,7 +82,7 @@ class Command_JonTronFunk(C_template):
             Tmp = TempFile(img, 'jpg')
             Tmp.cachefile(Tmp.path_)
             JonTron(Tmp.path_)
-            att = bot.UploadFromDisk(Tmp.path_)
+            att = self.api.UploadFromDisk(Tmp.path_)
 
             Tmp.rem()
         except:
@@ -95,14 +96,14 @@ class Command_JonTronFunk(C_template):
             _path = textPlain(text, size, font, x, y, 512, 512)
             JonTron(_path)
 
-            att = bot.UploadFromDisk(_path)
+            att = self.api.UploadFromDisk(_path)
             os.remove(_path)
             del _path
         Topost.append(att)
         args['attachment'] = Topost
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
-
+@ModuleManager.command(names=["saymax"], perm='photo.saymax', desc="Даёте подержать ваше фото Сойке")
 class Command_SayMaxFunk(C_template):
     name = ["saymax"]
     access = ['all']
@@ -110,7 +111,7 @@ class Command_SayMaxFunk(C_template):
     perm = 'photo.saymax'
     cost = 5
     @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
         atts = data.attachments
         # print(atts)
@@ -126,7 +127,7 @@ class Command_SayMaxFunk(C_template):
 
             SayMax(Tmp.path_)
             Tmp.cachefile(Tmp.path_)
-            att = bot.UploadFromDisk(Tmp.path_)
+            att = self.api.UploadFromDisk(Tmp.path_)
             Tmp.rem()
         except:
             text = data.custom['text'] if 'text' in data.custom else 'кок'
@@ -138,10 +139,10 @@ class Command_SayMaxFunk(C_template):
                 return False
             _path = textPlain(text, size, font, x, y, 1280, 720)
             SayMax(_path)
-            att = bot.UploadFromDisk(_path)
+            att = self.api.UploadFromDisk(_path)
             os.remove(_path)
             del _path
         Topost.append(att)
 
         args['attachment'] = Topost
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)

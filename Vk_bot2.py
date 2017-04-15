@@ -16,10 +16,14 @@ from DataTypes.LongPoolHistoryUpdate import Updates, LongPoolHistoryMessage, Fil
 from DataTypes.attachments import attachment
 from DataTypes.user import user
 from DataTypes.group import group
-from Module_Manager import *
+from Module_manager_v2 import *
 from User_Manager import *
+from utils.cooldown import cooldown_manager
 from libs.tempfile_ import *
-import aiml_.Core
+try:
+    import aiml_.Core
+except ImportError:
+    pass
 import gc
 import argparse
 
@@ -122,10 +126,10 @@ class Bot:
             self.EX_threadList.append(thread)
             print('Exec thread №{} started'.format(i))
         self.USERS = UserManager()
-        self.MODULES = ModuleManager()
+        self.MODULES = ModuleManager(self)
         self.DEBUG = DEBUG
         self.TRIGGERS = trigger.TriggerHandler()
-        self.COOLDOWN = {}  # type: dict[str:CoolDown]
+        self.COOLDOWN = cooldown_manager(timeout=5,limit=3)
         self.AdminModeOnly = False
 
         self.defargs = {"v": "5.60"}
@@ -147,6 +151,8 @@ class Bot:
         self.UserApi = API(self.UserSession)
         self.DefApi = API(self.DefSession)
 
+
+
         self.log = io.open("Message_Log.Log", mode="ta", newline="\n", encoding="utf-8")
 
         self.ReplyThread = threading.Thread(target=self.Reply)
@@ -157,7 +163,10 @@ class Bot:
         self.MyUId = self.UserApi.users.get(v='5.60')[0]['id']
 
         self.MyName = self.GetUserNameById(self.MyUId, update=True)
-        aiml_.Core.InitCore(self)
+        try:
+            aiml_.Core.InitCore(self)
+        except:
+            pass
         print('LOADED')
 
     def GetImg(self, name) -> str:
@@ -535,30 +544,17 @@ class Bot:
                             return
 
                     if self.MODULES.isValid(Command):
-                        funk = self.MODULES.GetModule(Command)
+                        funk = self.MODULES.GetModule(Command,message.args)
                         user = message.user_id
-                        if (str(user) not in self.COOLDOWN) and (not self.USERS.HasPerm(user, 'core.nolimit')):
-                            self.COOLDOWN[str(user)] = CoolDown(5, 3)
-                        if str(user) in self.COOLDOWN:
-                            if self.COOLDOWN[str(user)].check():
-                                del self.COOLDOWN[str(user)]
-                        # Bad code, i know
-                        if str(user) in self.COOLDOWN:
-                            if (not self.COOLDOWN[str(user)]()) or (not self.USERS.HasPerm(user, 'core.nolimit')):
-                                Targs = ArgBuilder.Args_message()
-                                Targs.peer_id = message.chat_id
-                                Targs.message = 'Превышен лимит команд, пожалуйста подождите 5 секунд. Весь последующий спам команд только увеличит время ожидания'
-                                if not self.COOLDOWN[str(user)].warned:
-                                    self.Replyqueue.put(Targs)
-                                self.COOLDOWN[str(user)].warned = True
-                                continue
-
-                        if self.USERS.HasPerm(user, funk.perms) and self.MODULES.CanAfford(self.USERS.GetCurrency(user),
-                                                                                           Command):
+                        self.COOLDOWN.adduser(user).chechUsers()
+                        print('can user', self.COOLDOWN.canUse(user))
+                        if self.USERS.HasPerm(user, funk.perms) and self.MODULES.CanAfford(self.USERS.GetCurrency(user),Command) and (self.COOLDOWN.canUse(user) or self.USERS.HasPerm(user, 'core.nolimit')):
+                            self.COOLDOWN.useUser(user)
                             try:
                                 print("Executing command {},\n arguments:{}".format(Command, message.args))
                                 print(message)
-                                stat = funk.funk.execute(self, message, PvUpdates)
+
+                                stat = funk.funk(message, PvUpdates)
                                 self.USERS.pay(user, funk.cost)
                                 if stat == False:
                                     print(self.MyName)
@@ -593,12 +589,16 @@ class Bot:
                                 print(defargs['message'])
                                 # self.Reply(self.UserApi, args)
                                 self.Checkqueue.task_done()
-                                self.Replyqueue.put(defargs)
+                                #self.Replyqueue.put(defargs)
                         elif not self.MODULES.CanAfford(self.USERS.GetCurrency(user), Command):
                             defargs["message"] = "Нехватает валюты. Попробуйте обратиться к администрации"
                             self.Checkqueue.task_done()
                             self.Replyqueue.put(defargs)
-
+                        elif not self.COOLDOWN.canUse(user) and not self.COOLDOWN.iswarned(user):
+                            self.COOLDOWN.warned(user)
+                            defargs["message"] = "Вы превысили лимит команд. Последующий спам команд будет увеличивать время отката на 10 секунд"
+                            self.Checkqueue.task_done()
+                            self.Replyqueue.put(defargs)
                         else:
                             print('"Недостаточно прав"')
                             defargs["message"] = "Недостаточно прав"
@@ -773,22 +773,19 @@ class Bot:
 @overload
 def MultipleStrCheck(string: str, *list: str) -> bool:
     for item in list:
-        print(item,string,item in string)
         if item in string:
             return True
     return False
 
 def MultipleStrCheck(string: str, list: list) -> bool:
     for item in list:
-        print(item, string, item in string)
         if item in string:
             return True
     return False
 
 
 def CustomTriggers(api: Bot):
-    t1 = trigger.Trigger(cond=lambda data: MultipleStrCheck(data.body.lower(), ['python', 'питон']) and
-                                              int(data.user_id) != int(api.MyUId), onetime=False, infinite=True,
+    t1 = trigger.Trigger(cond=lambda data: MultipleStrCheck(data.body.lower(), ['python', 'питон']) and int(data.user_id) != int(api.MyUId), onetime=False, infinite=True,
                          callback=lambda message, result: api.Replyqueue.put(ArgBuilder.Args_message()
                                                                      .setpeer_id(message.chat_id)
                                                                      .setmessage('Кто-то сказал питон?')
@@ -806,6 +803,6 @@ if __name__ == "__main__":
     if args.resend:
         ArgBuilder.Args_message.DoNotResend()
     bot = Bot(DEBUG=True, threads=int(args.threads))
-    CustomTriggers(bot)
+    #CustomTriggers(bot)
     print(f'Loaded in {time.time()-s} seconds')
     bot.ContiniousMessageCheck()

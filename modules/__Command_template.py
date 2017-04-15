@@ -10,11 +10,9 @@ class C_template:
     perm = 'change.me'
     cost = 0
     enabled = True
-    @staticmethod
-    def execute(bot:Vk_bot2.Bot, data:LongPoolHistoryMessage, Updates:Updates, forward=True):
-        args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
-        args['message'] = 'Change me'
-        bot.Replyqueue.put(args)
+
+    def __init__(self,api):
+        self.api = api
 
 
 

@@ -56,7 +56,15 @@ class TriggerHandler:
 
             if time.time() - trigger.timestart > trigger.timeout and not trigger.infinite:
                 self.triggers.remove(trigger)
-                trigger.callback(data, result=False)
+                LocalcallbackArgs = list(trigger.callbackArgs)
+                LocalcallbackArgs.append(data)
+                trigger.callbackKwArgs['result'] = False
+                print(LocalcallbackArgs, trigger.callbackKwArgs)
+                th = threading.Thread(target=trigger.callback, args=LocalcallbackArgs, kwargs=trigger.callbackKwArgs)
+                th.setName('Trigger Callback thread {}'.format(n))
+                th.start()
+                th.join()
+                th.isAlive = False
             if trigger.cond(data):
                 print('Triggered, calling callback')
                 print(trigger.callbackArgs, trigger.callbackKwArgs)

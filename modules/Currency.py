@@ -1,3 +1,5 @@
+from Module_manager_v2 import ModuleManager
+
 try:
     from .__Command_template import *
 except:
@@ -5,7 +7,7 @@ except:
 
 from utils import ArgBuilder
 
-
+@ModuleManager.command(names=['addmoney', 'addcurr'], desc='Редактирование кошелька пользователя', perm='core.currency', template='{botname}, id пользователя кол-во денег')
 class Command_AddCurrency(C_template):
     name = ['addmoney', 'addcurr']
     access = ['admin']
@@ -13,17 +15,17 @@ class Command_AddCurrency(C_template):
     desc = 'Редактирование кошелька пользователя'
     template = '{botname}, id пользователя кол-во денег'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
+
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
         text = data.text.split(' ')
         user = text[0]
         curr = text[-1]
-        bot.USERS.UpdateCurrency(user, curr)
+        self.api.USERS.UpdateCurrency(user, curr)
 
-        userName = bot.GetUserNameById(int(user))
+        userName = self.api.GetUserNameById(int(user))
         try:
             args.message = 'Пользователю {} {} было добавлено {} валюты'.format(userName.first_name,
                                                                                 userName.last_name,
@@ -31,9 +33,9 @@ class Command_AddCurrency(C_template):
 
         except:
             args.message = 'Пользователю было добавлено {} валюты'.format(curr)
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
-
+@ModuleManager.command(names=['setmoney', 'setcurr'], desc='Редактирование кошелька пользователя', perm='core.currency', template='{botname}, id пользователя кол-во денег')
 class Command_SetCurrency(C_template):
     name = ['setmoney', 'setcurr']
     access = ['admin']
@@ -41,27 +43,27 @@ class Command_SetCurrency(C_template):
     desc = 'Редактирование кошелька пользователя'
     template = '{botname}, id пользователя кол-во денег'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
+
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
         text = data.text.split(' ')
         user = text[0]
         curr = text[-1]
-        bot.USERS.SetCurrency(user, curr)
+        self.api.USERS.SetCurrency(user, curr)
 
 
-        userName = bot.GetUserNameById(int(user))
+        userName = self.api.GetUserNameById(int(user))
         try:
             args.message = 'Пользователю {} {} было изменено кол-во валюты на {}'.format(userName.first_name,
                                                                                          userName.last_name, curr)
 
         except:
             args.message = 'Пользователю было изменено кол-во валюты на {}'.format(curr)
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
-
+@ModuleManager.command(names=['скинуть', 'отдолжить'], desc='Позволяет передать валюту', perm='text.giveCurr', template = '{botname}, id пользователя кол-во денег')
 class Command_GiveCurr(C_template):
     name = ['скинуть', 'отдолжить']
     access = ['all']
@@ -69,26 +71,25 @@ class Command_GiveCurr(C_template):
     desc = 'Позволяет передать валюту'
     template = '{botname}, id пользователя кол-во денег'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
         text = data.text.split(' ')
         user = text[0]
         curr = text[-1]
-        if not bot.USERS.isValid(user):
+        if not self.api.USERS.isValid(user):
             args.message = 'Неизвестный пользователь. Проверьте правильность указанного вами id'
-            bot.Replyqueue.put(args)
+            self.api.Replyqueue.put(args)
             return
         # from
-        bot.USERS.pay(str(user), -int(curr))
+        self.api.USERS.pay(str(user), -int(curr))
         # to
-        bot.USERS.pay(str(data.user_id), int(curr))
-        userName = bot.GetUserNameById(int(user))
+        self.api.USERS.pay(str(data.user_id), int(curr))
+        userName = self.api.GetUserNameById(int(user))
         try:
             args.message = 'Вы перевели {} {} {} валюты'.format(userName.first_name, userName.last_name, curr)
 
         except:
             args.message = 'Вы перевели пользователю {} валюты'.format(curr)
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)

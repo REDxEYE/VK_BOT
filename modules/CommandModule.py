@@ -9,40 +9,40 @@ from math import log
 from time import sleep
 from urllib.request import urlopen
 
-from DataTypes.group import group,contacts_group
-from utils import ArgBuilder
 try:
     import execjs
 
     execjsAvalible = True
-except:
+except ImportError:
     execjsAvalible = False
     execjs = None
 try:
     import feedparser
 
     feedparserAvalible = True
-except:
+except ImportError:
     feedparser = None
     feedparserAvalible = False
 try:
     import gtts
+
     gttsAvalable = True
-except:
+except ImportError:
     gtts = None
     gttsAvalable = False
 import pymorphy2
 import requests
-from libs import VK_foaf
 from libs.tempfile_ import TempFile
-from DataTypes.contacts import contacts
 from utils import ArgBuilder
+
 try:
     from .__Command_template import *
-except:
+except ImportError:
     from __Command_template import *
+from Module_manager_v2 import ModuleManager
 
 morph = pymorphy2.MorphAnalyzer()
+
 HDR = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -56,11 +56,12 @@ def getpath():
     return os.path.dirname(os.path.abspath(__file__))
 
 
-def prettier_size(n, pow=0, b=1024, u='B', pre=[''] + [p + 'i' for p in 'KMGTPEZY']):
-    r, f = min(int(log(max(n * b ** pow, 1), b)), len(pre) - 1), '{:,.%if} %s%s'
-    return (f % (abs(r % (-r - 1)), pre[r], u)).format(n * b ** pow / b ** float(r))
+def prettier_size(n, pow_=0, b=1024, u='B', pre=[''] + [p + 'i' for p in 'KMGTPEZY']):
+    r, f = min(int(log(max(n * b ** pow_, 1), b)), len(pre) - 1), '{:,.%if} %s%s'
+    return (f % (abs(r % (-r - 1)), pre[r], u)).format(n * b ** pow_ / b ** float(r))
 
 
+@ModuleManager.command(names=["кого"], perm='text.whom', desc="Выбирает случайного человека")
 class Command_Whom(C_template):
     name = ["кого"]
     access = ["all"]
@@ -68,8 +69,7 @@ class Command_Whom(C_template):
     perm = 'text.whom'
     cost = 2
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -90,7 +90,7 @@ class Command_Whom(C_template):
             for wrd in toinf:
                 print(wrd)
                 toinfwrd = morph.parse(wrd)[0]
-                if ('VERB' or "NPRO") in toinfwrd.tag.POS:
+                if ('VERB' in toinfwrd.tag.POS) or ("NPRO" in toinfwrd.tag.POS):
                     try:
 
                         if toinfwrd.normal_form == "я":
@@ -101,22 +101,23 @@ class Command_Whom(C_template):
                             infwrd = toinfwrd.inflect({userGender, toinfwrd.tag.POS})
                         print(infwrd)
                         toins += "{} ".format(str(infwrd.word))
-                    except:
+                    except Exception:
                         print("err", wrd)
                 else:
                     toins += "{} ".format(wrd)
 
-            if ud.id == bot.MyUId:
+            if ud.id == self.api.MyUId:
                 args.message = 'Определённо меня'
-                bot.Replyqueue.put(args)
+                self.api.Replyqueue.put(args)
             name = '*id{} ({} {})'.format(str(ud.id), ud.first_name_acc, ud.last_name_acc)
             replies = ["Определённо {}", "Точно {}", "Я уверен что его -  {}"]
             msg = random.choice(replies)
             args.message = msg.format(name)
             # self.Reply(self.UserApi, args)
-            bot.Replyqueue.put(args.AsDict_())
+            self.api.Replyqueue.put(args.AsDict_())
 
 
+@ModuleManager.command(names=["кто?"], perm='text.who', desc="Выбирает случайного человека", cost=2)
 class Command_Who(C_template):
     name = ["кто?"]
     access = ["all"]
@@ -124,34 +125,23 @@ class Command_Who(C_template):
     perm = 'text.who'
     cost = 2
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True) -> bool:
-        """
-
-        Args:
-            forward (bool):
-            LongPoolUpdates (Updates):
-            data (LongPoolHistoryMessage):
-            bot (Vk_bot2.bot):
-        """
-
-        args = {"peer_id": data.chat_id, "v": "5.60", }
-
-        if forward:
-            args.update({"forward_messages": data.id})
-        text = data.message[:-1] if '?' in data.message else data.message
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+        text = data.text[:-1] if data.text.endswith('?') else data.text
         text = text.replace('мне', 'тебе')
         text = text.replace('мной', 'тобой')
         text = text.replace('моей', 'твоей')
+        text = text.replace('меня', 'тебя')
         if not data.isChat:
             args['message'] = "Ты"
-            bot.Replyqueue.put(args)
+            self.api.Replyqueue.put(args)
             return True
         else:
-            ud = bot.GetUserNameById(random.choice(data.chat_active))
-            if ud == 2:
+            ud = self.api.GetUserNameById(random.choice(data.chat_active))
+
+            if ud.sex == 2:
                 userGender = "masc"
-            elif ud == 1:
+            elif ud.sex == 1:
                 userGender = "femn"
             else:
                 userGender = "neut"
@@ -165,14 +155,9 @@ class Command_Who(C_template):
                     if ('VERB' or "NPRO") in toinfwrd.tag.POS:
                         try:
 
-                            if toinfwrd.normal_form == "я":
-                                print("Ja", toinfwrd)
-                                toinfwrd = morph.parse("ты")[0]
-                                infwrd = toinfwrd.inflect({"accs", "2per"})
-                            else:
-                                infwrd = toinfwrd.inflect({userGender, toinfwrd.tag.POS, toinfwrd.tag.tense})
+                            infwrd = toinfwrd.inflect({userGender, toinfwrd.tag.POS, toinfwrd.tag.tense})
                             print(infwrd)
-                            toins += "{} ".format(str(infwrd.word))
+                            toins += f"{str(infwrd.word)} "
                         except:
                             print("err", wrd)
                             toins += "{} ".format(wrd)
@@ -182,32 +167,30 @@ class Command_Who(C_template):
                     toins += "{} ".format(wrd)
             replies = ["Определённо {} {}", "Точно {} {}", "Я уверен что {} {}"]
             if ud.id == data.user_id:
-                args['message'] = "Ты {}".format(toins.replace("тебе", "себе"))
-                bot.Replyqueue.put(args)
+                args.message = "Ты {}".format(toins.replace("тебе", "себе"))
+                self.api.Replyqueue.put(args)
                 return True
-            if ud.id == bot.MyUId:
-                args['message'] = 'Определённо Я'
-                bot.Replyqueue.put(args)
+            if ud.id == self.api.MyUId:
+                args.message = 'Определённо Я'
+                self.api.Replyqueue.put(args)
                 return True
             name = '*id{} ({} {})'.format(str(ud.id), ud.first_name_nom, ud.last_name_nom)
 
             msg = random.choice(replies)
-            args['message'] = msg.format(name, toins)
+            args.message = msg.format(name, toins)
             # self.Reply(self.UserApi, args)
-            bot.Replyqueue.put(args)
+            self.api.Replyqueue.put(args)
 
 
+@ModuleManager.command(names=["вероятность"], perm='text.prob', desc="Процент правдивости инфы")
 class Command_Prob(C_template):
     name = ["вероятность"]
     access = ["all"]
     desc = "Процент правдивости инфы"
     perm = 'text.prob'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
-        args = {"peer_id": data.chat_id, "v": "5.60", }
-        if forward:
-            args.update({"forward_messages": data.id})
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
         a = data.body.split(' ')
         if 'вероятность' in a[1]:
             a = a[2:]
@@ -216,9 +199,10 @@ class Command_Prob(C_template):
         msg = "Вероятность того, что {}, равна {}%".format(' '.join(a), random.randint(0, 100))
         args['message'] = msg
         # self.Reply(self.UserApi, args)
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
 
+@ModuleManager.command(names=["где"], desc='Говорит где что находится', perm='text.where')
 class Command_Where(C_template):
     name = ["где"]
     access = ["all"]
@@ -226,18 +210,17 @@ class Command_Where(C_template):
     perm = 'text.where'
     cost = 2
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
-        args = {"peer_id": data.chat_id, "v": "5.60", }
-        if forward:
-            args.update({"forward_messages": data.id})
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+
         replies = ["Под столом", "На кровати", "За спиной", "На столе"]
         msg = random.choice(replies)
         args['message'] = msg
         # self.Reply(self.UserApi, args)
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
 
+@ModuleManager.command(names=["ты!"], desc='Не обзывай бота', perm='text.you', template="{botname}, ты!")
 class Command_You(C_template):
     name = ["ты!"]
     access = ['all']
@@ -245,11 +228,9 @@ class Command_You(C_template):
     template = "{botname}, ты!"
     perm = 'text.you'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
-        args = {"peer_id": data.chat_id, "v": "5.60", }
-        if forward:
-            args.update({"forward_messages": data.id})
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
+        args = ArgBuilder.Args_message().setforward_messages(data.id).setpeer_id(data.chat_id)
+
         usr = LongPoolUpdates.GetUserProfile(data.user_id)
         try:
             if usr.sex == 2:
@@ -267,10 +248,12 @@ class Command_You(C_template):
         except:
             args['message'] = msg
         # self.Reply(self.UserApi, args)
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
         return True
 
 
+@ModuleManager.command(names=["команды", "помощь"], desc="Выводит это сообщение", perm='text.help',
+                       template='"{botname}, помощь" или "{botname}, команды" - выводится список команд,\nа "{botname}, помощь НАЗВАНИЕ КОМАНДЫ" или "{botname}, команды НАЗВАНИЕ_КОМАНДЫ" - Выведет шаблон запроса')
 class Command_Help(C_template):
     name = ["команды", "помощь"]
     access = ['all']
@@ -278,43 +261,37 @@ class Command_Help(C_template):
     template = '"{botname}, помощь" или "{botname}, команды" - выводится список команд,\nа "{botname}, помощь НАЗВАНИЕ КОМАНДЫ" или "{botname}, команды НАЗВАНИЕ_КОМАНДЫ" - Выведет шаблон запроса'
     perm = 'text.help'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
-        args = {"peer_id": data.chat_id, "v": "5.60", }
-        if forward:
-            args.update({"forward_messages": data.id})
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
         if len(data.args) >= 1 and data.args[0] != "":
             print(data.args)
-            Command_Help.GetHelp(bot, data, data.args[0], forward)
+            Command_Help.GetHelp(data, data.args[0])
             return
         args['message'] = 'Список команд'
         a = "Вам доступны:\n"
-        UserPerms = bot.USERS.GetPerms(data.user_id)
-        for command in bot.MODULES.GetAvailable(UserPerms):
+        UserPerms = self.api.USERS.GetPerms(data.user_id)
+        for command in self.api.MODULES.GetAvailable(UserPerms):
             a += 'Команда: "{}", {}. Стоимость: {}\n'.format('" или "'.join(command.names), command.desc, command.cost)
         args['message'] = str(a)
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
         return True
 
-    @staticmethod
-    def GetHelp(bot: Vk_bot2.Bot, data:LongPoolHistoryMessage, command, forward=True):
-        args = {"peer_id": data.chat_id, "v": "5.60", }
-        if forward:
-            args.update({"forward_messages": data.id})
-        if bot.MODULES.isValid(command):
-            mod = bot.MODULES.GetModule(command)
+    def GetHelp(self, data: LongPoolHistoryMessage, command):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+
+        if self.api.MODULES.isValid(command):
+            mod = self.api.MODULES.GetModule(command)
             try:
-                args['message'] = mod.template.format(botname=bot.MyName.first_name)
+                args['message'] = mod.template.format(botname=self.api.MyName.first_name)
             except:
                 args['message'] = mod.template.format(botname="Имя бота")
 
         else:
             args['message'] = 'Неизвестная команда'
-            bot.Replyqueue.put(args)
-            return
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
 
+@ModuleManager.command(names=["перешли"], desc="Пересылает фото", perm='text.resend', template="{botname}, перешли")
 class Command_resend(C_template):
     name = ["перешли"]
     access = ['all']
@@ -322,11 +299,8 @@ class Command_resend(C_template):
     template = "{botname}, перешли"
     perm = 'text.resend'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
-        args = {"peer_id": data.chat_id, "v": "5.60", }
-        if forward:
-            args.update({"forward_messages": data.id})
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
 
         Topost = []
         for att in data.attachments:
@@ -341,15 +315,17 @@ class Command_resend(C_template):
             img = urlopen(req).read()
 
             Tmp = TempFile(img, 'jpg')
-            att = bot.UploadFromDisk(Tmp.path_)
+            att = self.api.UploadFromDisk(Tmp.path_)
             Topost.append(att)
             Tmp.cachefile(Tmp.path_)
             Tmp.rem()
         args['attachment'] = Topost
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
         return True
 
 
+@ModuleManager.command(names=["изгнать", "kick", "votekick"], desc="Изгоняет пользователя", perm='chat.kick',
+                       template="{botname}, изгнать UID1 UID2 UID3")
 class Command_kick(C_template):
     name = ["изгнать", "kick", "votekick"]
     access = ['admin', 'moderator', 'editor']
@@ -357,29 +333,28 @@ class Command_kick(C_template):
     template = "{botname}, изгнать UID1 UID2 UID3"
     perm = 'chat.kick'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
-        args = {"peer_id": data.chat_id, "v": "5.60", }
-        if forward:
-            args.update({"forward_messages": data.id})
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
         ToKick = list(data.custom['id']) if 'id' in data.custom else data.text.split(' ')
         if len(ToKick) < 1:
             return False
 
         for user in ToKick:
-            if bot.USERS.GetStatus(data.user_id) in ['admin', 'moder']:
+            if self.api.USERS.GetStatus(data.user_id) in ['admin', 'moder']:
                 args['message'] = "Нельзя кикать администрацию"
-                bot.Replyqueue.put(args)
+                self.api.Replyqueue.put(args)
                 continue
             name = LongPoolUpdates.GetUserProfile(data.user_id)
             args['message'] = "The kickHammer has spoken\n {} has been kicked in the ass".format(
                 ' '.join([name.first_name, name.last_name]))
             print(data)
-            bot.UserApi.messages.removeChatUser(v=5.45, chat_id=data.chat_id - 2000000000, user_id=user)
-            bot.Replyqueue.put(args)
+            self.api.UserApi.messages.removeChatUser(v=5.45, chat_id=data.chat_id - 2000000000, user_id=user)
+            self.api.Replyqueue.put(args)
         return True
 
 
+#@ModuleManager.command(names=["5nights"], desc="Добавляет в беседу", perm='text.joinChat',
+#                       template="{botname}, 5nights")
 class Command_JoinFiveNigths(C_template):
     name = ["5nights"]
     access = ["all"]
@@ -387,38 +362,35 @@ class Command_JoinFiveNigths(C_template):
     perm = 'text.joinChat'
     template = '{botname}, 5nights'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
-        args = {"peer_id": data.chat_id, "v": "5.60", }
-        if forward:
-            args.update({"forward_messages": data.id})
-        are_friend = bot.UserApi.friends.areFriends(user_ids=[data.user_id])[0]['friend_status']
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+
+        are_friend = self.api.UserApi.friends.areFriends(user_ids=[data.user_id])[0]['friend_status']
         if int(are_friend) == 3:
-            ans = bot.UserApi.messages.addChatUser(chat_id=13, user_id=data.user_id)
-            # ans = bot.UserApi.messages.addChatUser(chat_id=22, user_id=data.user_id)
+            ans = self.api.UserApi.messages.addChatUser(chat_id=13, user_id=data.user_id)
+            # ans = self.api.UserApi.messages.addChatUser(chat_id=22, user_id=data.user_id)
 
             if int(ans) != 1:
                 args['message'] = 'Ошибка добавления'
             return True
 
         else:
-            f = int(bot.UserApi.friends.add(user_id=data.user_id, text='Что б добавить в беседу'))
+            f = int(self.api.UserApi.friends.add(user_id=data.user_id, text='Что б добавить в беседу'))
             if f == 1 or f == 2:
 
-                ans = bot.UserApi.messages.addChatUser(chat_id=13, user_id=data.user_id)
+                ans = self.api.UserApi.messages.addChatUser(chat_id=13, user_id=data.user_id)
                 args['message'] = 'Примите завяку и снова напишите !5nights'
                 if int(ans) != 1:
                     args['message'] = 'Ошибка добавления'
 
             else:
                 args['message'] = 'Не могу добавить вас в друзья, а значит и не могу добавить в беседу'
-            bot.Replyqueue.put(args)
+            self.api.Replyqueue.put(args)
             return True
 
 
-
-
-
+@ModuleManager.command(names=["инфо", "инфа", "info", 'stats', 'stat'], desc="Статистика", perm='text.info',
+                       template='{botname}, инфо')
 class Command_StatComm(C_template):
     name = ["инфо", "инфа", "info", 'stats', 'stat']
     access = ["all"]
@@ -426,18 +398,18 @@ class Command_StatComm(C_template):
     perm = 'text.info'
     template = '{botname}, инфо'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
-        args = {"peer_id": data.chat_id, "v": "5.60", }
-        if forward:
-            args.update({"forward_messages": data.id})
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+
         msg = 'Кол-во обработанных сообщений: {}\nКол-во выполеных команд: {}\nЗарегестрировано польхователей: {}\nРазмер кэша: {}\nКол-во живых потоков: {}\n'
-        args['message'] = msg.format(bot.Stat['messages'], bot.Stat['commands'], len(bot.USERS.DB), bot.Stat['cache'],
-                                     len([thread for thread in bot.EX_threadList if thread.is_alive()]))
-        bot.Replyqueue.put(args)
+        args['message'] = msg.format(self.api.Stat['messages'], self.api.Stat['commands'], len(self.api.USERS.DB),
+                                     self.api.Stat['cache'],
+                                     len([thread for thread in self.api.EX_threadList if thread.is_alive()]))
+        self.api.Replyqueue.put(args)
         return True
 
 
+@ModuleManager.command(names=["дебаг"], desc="Врубает режим АдминОнли", perm='core.debug', template='{botname}, дебаг')
 class Command_AdminOnly(C_template):
     name = ["дебаг"]
     access = ["admin"]
@@ -445,19 +417,22 @@ class Command_AdminOnly(C_template):
     perm = 'core.debug'
     template = '{botname}, дебаг'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
-        args = {"peer_id": data.chat_id, "v": "5.60", }
-        if forward:
-            args.update({"forward_messages": data.id})
-        bot.AdminModeOnly = not bot.AdminModeOnly
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+
+        self.api.AdminModeOnly = not self.api.AdminModeOnly
         msgOn = 'Включен режим дебага, принимаются сообщения только от админов'
         msgOff = 'Выключен режим дебага, принимаются все сообщения '
-        args['message'] = msgOn if bot.AdminModeOnly else msgOff
-        bot.Replyqueue.put(args)
+        args['message'] = msgOn if self.api.AdminModeOnly else msgOff
+        self.api.Replyqueue.put(args)
         return True
 
 
+# @ModuleManager.command(names=["забанитьнафигвсех"], desc="Банит всех участников группы к фигам", perm='core.banNahoi', template='{botname}, забанитьнафигвсех\n' \
+#               'причина:цифра\n' \
+#               'группа:ИД группы\n' \
+#               'комантарий:Ваш комент\n' \
+#               'время:срок в часах')
 class _Command_BanAllGroupUsers(C_template):
     name = ["забанитьнафигвсех"]
     access = ["admin"]
@@ -469,10 +444,9 @@ class _Command_BanAllGroupUsers(C_template):
                'комантарий:Ваш комент\n' \
                'время:срок в часах'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         exclude = 75615891
-        ToBan = bot.GroupApi.groups.getMembers(group_id=data.custom["id"], count=1000)['items']
+        ToBan = self.api.GroupApi.groups.getMembers(group_id=data.custom["id"], count=1000)['items']
         if data.custom["id"] == exclude:
             return
         args = {'v': "5.60", 'group_id': exclude}
@@ -483,7 +457,7 @@ class _Command_BanAllGroupUsers(C_template):
         if "группа" in data.custom:
             args['group_id'] = data.custom["группа"]
         else:
-            args['group_id'] = bot.Group.replace("-", "")
+            args['group_id'] = self.api.Group.replace("-", "")
         if data.custom["комментарий"]:
             comment = data.custom["комментарий"]
             args['comment'] = comment
@@ -494,10 +468,12 @@ class _Command_BanAllGroupUsers(C_template):
             args["end_date"] = end_date
         for user in ToBan:
             args['user_id'] = user
-            bot.GroupApi.groups.banUser(**args)
+            self.api.GroupApi.groups.banUser(**args)
             sleep(1)
 
 
+@ModuleManager.command(names=['about', 'ктоты'], desc='Выводит информацию о боте', perm='text.about',
+                       template='{botname}, about')
 class Command_About(C_template):
     name = ['about', 'ктоты']
     access = ['all']
@@ -505,19 +481,16 @@ class Command_About(C_template):
     perm = 'text.about'
     template = '{botname}, about'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
-        args = {"peer_id": data.chat_id, "v": "5.60", }
-        if forward:
-            args.update({"forward_messages": data.id})
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
 
         args['message'] = \
             'Создан *red_eye_rus (Red Dragon)\n' \
             'Множество идей взяты у *rukifox (Яна)\n' \
-            'GitHub: www.github.com/REDxEYE/VK_BOT\n'
-        bot.Replyqueue.put(args)
+            #'GitHub: www.github.com/REDxEYE/VK_BOT\n'
+        self.api.Replyqueue.put(args)
 
-
+#@ModuleManager.command(names=["namelock"], desc="Лочит имя беседы", perm='chat.LockName',template='{botname}, namelock')
 class Command_LockName(C_template):
     name = ["namelock"]
     access = ["admin"]
@@ -525,27 +498,26 @@ class Command_LockName(C_template):
     perm = 'chat.LockName'
     template = '{botname}, namelock'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
+
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
         if forward:
             args.update({"forward_messages": data.id})
         id = int(data.id)
-        if id not in bot.Settings['namelock']:
+        if id not in self.api.Settings['namelock']:
             args['message'] = 'Смена названия беседы запрещена'
-            bot.Replyqueue.put(args)
-            bot.Settings['namelock'].append(id)
+            self.api.Replyqueue.put(args)
+            self.api.Settings['namelock'].append(id)
 
         else:
 
-            bot.Settings['namelock'].remove(id)
+            self.api.Settings['namelock'].remove(id)
             args['message'] = 'Смена названия беседы разрешена'
-            bot.Replyqueue.put(args)
-        bot.SaveConfig()
+            self.api.Replyqueue.put(args)
+        self.api.SaveConfig()
         return True
 
-
-
+@ModuleManager.command(names=["этослучилось", 'ithappens'], desc="Рандомная история с ithappens.me", perm='text.Zadolbali',template= '{botname}, этослучилось')
 class Command_ithappens(C_template):
     name = ["этослучилось", 'ithappens']
     access = ["all"]
@@ -571,11 +543,9 @@ class Command_ithappens(C_template):
         s.feed(html)
         return s.get_data()
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
-        args = {"peer_id": data.chat_id, "v": "5.60", }
-        if forward:
-            args.update({"forward_messages": data.id})
+    
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
         feed = feedparser.parse('http://www.ithappens.me/rss')['entries']
         zz = random.choice(feed)
         template = """      {}
@@ -584,30 +554,30 @@ class Command_ithappens(C_template):
           {}"""
         msg = template.format(zz['title'], Command_ithappens.strip_tags(zz['summary']), zz['link'])
         args['message'] = msg
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
         return True
 
         # if __name__ == "__main__":
         #    Command_Zadolbali().execute(None,{})
 
-
+@ModuleManager.command(names=["блок"], desc="блокирует команду в чате", perm='chat.BlockCommand', template='{botname}, блок\n' \
+               'команда:название команды\n')
 class Command_banCommand(C_template):
     name = ["блок"]
     access = ["admin", "editor", "moderator"]
     desc = "блокирует команду в чате"
     perm = 'chat.BlockCommand'
-    template = '{}, блок\n' \
+    template = '{botname}, блок\n' \
                'команда:название команды\n'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         comm = data.custom['команда']
         if comm in ['bannedCommands']:
-            bot.Settings['bannedCommands'][comm].append(str(data.id))
+            self.api.Settings['bannedCommands'][comm].append(str(data.id))
         else:
-            bot.Settings['bannedCommands'][comm] = [str(data.id)]
+            self.api.Settings['bannedCommands'][comm] = [str(data.id)]
 
-
+@ModuleManager.command(names= ["выбери"], desc="Выбирает из представленных вариантов", perm='text.choice', template='{botname}, вариант1 вариант2 вариант3 вариантN ')
 class Command_Choice(C_template):
     name = ["выбери"]
     access = ["all"]
@@ -616,34 +586,14 @@ class Command_Choice(C_template):
     template = '{botname}, вариант1 вариант2 вариант3 вариантN '
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
-        args = {"peer_id": data.chat_id, "v": "5.60", }
-        if forward:
-            args.update({"forward_messages": data.id})
-        vars = data.text.split(' ')
-        var = random.choice(vars)
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+        var = random.choice(data.args)
         templates = ['Я выбираю: {}', "Вот это: {}", "Думаю это лучший вариант: {}"]
         args['message'] = random.choice(templates).format(var)
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
-
-
-
-
-# import lupa
-# from lupa import LuaRuntime
-# lua = LuaRuntime(unpack_returned_tuples=True)
-# class Command_Lua(Command_template):
-#    name = 'Lua'
-#    access = ['admin']
-#    desc = 'Выполняет JS скрипт'
-#    @staticmethod
-#    def execute(bot:Vk_bot2.bot,data):
-#        args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
-#        code = bot.html_decode(' '.join(data.body.split('<br>')[1:]))
-#        l = lua.eval(code)
-#        args['message'] = l
-#        bot.Replyqueue.put(args)
+@ModuleManager.command(names= ["скажи"], desc='Произносит ваш текст на выбранном языке ("Имя бота", "нужный язык (2буквы)" " ВАШ ТЕКСТ")', perm='text.tts', template='{botname}, нужный язык(2буквы) ВАШ ТЕКСТ)')
 class Command_TTS(C_template):
     enabled = gttsAvalable
     name = ["скажи"]
@@ -652,16 +602,11 @@ class Command_TTS(C_template):
     perm = 'text.tts'
     template = '{botname}, нужный язык(2буквы) ВАШ ТЕКСТ)'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
-        args = {"peer_id": data.chat_id, "v": "5.60", }
-        if forward:
-            args.update({"forward_messages": data.id})
-        apiurl = 'https://api.vk.com/method/docs.getUploadServer?access_token={}&type=audio_message&v=5.60'.format(
-            bot.UserAccess_token)
-        print(apiurl)
+
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+        apiurl = f"https://api.vk.com/method/docs.getUploadServer?access_token={self.api.UserAccess_token}&type=audio_message&v=5.60"
         server = json.loads(urlopen(apiurl).read().decode('utf-8'))['response']['upload_url']
-        print(server)
         for i in Command_TTS.name:
             if i in data.body:
                 text = data.body.replace('<br>', '').split(i)[-1].split(" ")[1:]
@@ -676,7 +621,7 @@ class Command_TTS(C_template):
             tts.write_to_fp(a)
         except:
             args['message'] = 'Технические сложности. Обратитесь через пару секунд'
-            bot.Replyqueue.put(args)
+            self.api.Replyqueue.put(args)
             return
         a.close()
         req = requests.post(server, files={'file': open(a.name, 'rb')})
@@ -684,72 +629,16 @@ class Command_TTS(C_template):
         if req.status_code == requests.codes.ok:
             print('req', req.json())
             params = {'file': req.json()['file'], 'v': '5.60'}
-            doc = bot.UserApi.docs.save(**params)[0]
+            doc = self.api.UserApi.docs.save(**params)[0]
 
             Voice = 'doc{}_{}'.format(doc['owner_id'], doc['id'])
             args['attachment'] = Voice
-            bot.Replyqueue.put(args)
-
-
-#class _Command_RemoteExec(C_template):
-#    name = ["безпалева"]
-#    access = ['admin']
-#    desc = "Выполняет команду в лс/беседе другого человека"
-#    perm = 'core.remoteExec'
-#
-#    @staticmethod
-#    def execute(bot: Vk_bot2.Bot, data: LongPoolMessage, LongPoolUpdates: Updates, forward=True):
-#        RemoteData = copy.deepcopy(data)
-#        args = {"peer_id": data.chat_id, "v": "5.60"}
-#        CustomArgs = data.custom
-#        if ('peer_id' not in CustomArgs) or ('command' not in CustomArgs):
-#            return False
-#        for t in data.custom:
-#            RemoteData.update({t: data.custom[t]})
-#        if int(CustomArgs['peer_id']) < 2000000000:
-#            try:
-#                print(CustomArgs['peer_id'])
-#                a = bot.UserApi.messages.getChat(chat_id=int(CustomArgs['peer_id']))
-#                RemoteData.update({'peer_id': int(CustomArgs['peer_id']) + 2000000000})
-#            except Exception as E:
-#                print(E)
-#                bot.Replyqueue.put(
-#                    {"peer_id": data.chat_id, "v": "5.60", 'message': 'Другим людям в личку нельзя писать'})
-#                return 'error'
-#        chat = bot.UserApi.messages.getChat(
-#            chat_id=int(CustomArgs['peer_id']) if int(CustomArgs['peer_id']) < 2000000000 else int(
-#                CustomArgs['peer_id']) - 2000000000)['title']
-#        args['message'] = "Нужная беседа - {}?".format(chat)
-#        bot.Replyqueue.put(args)
-#        ans = bot.WaitForMSG(3, data)
-#        print(ans)
-#        if re.match(r'(Д|д)а', ans):
-#            pass
-#        elif re.match(r'(Н|н)ет', ans):
-#            args['message'] = 'Ну тогда попробуй еще раз'
-#            bot.Replyqueue.put(args)
-#            return "error"
-#        try:
-#            execute(bot,
-#                    RemoteData,
-#                    False)
-#        except Exception as E:
-#
-#            exc_type, exc_value, exc_traceback = sys.exc_info()
-#            TB = traceback.format_tb(exc_traceback)
-#
-#            args['message'] = "Неудалось выполнить команду удалённо, ошибка:{}\n {}\n {} \n {}".format(exc_type,
-#                                                                                                       exc_value,
-#                                                                                                       ''.join(TB),
-#                                                                                                       "Перешлите это сообщение владельцу бота")
-#            bot.Replyqueue.put(args)
+            self.api.Replyqueue.put(args)
 
 
 
 
-
-
-
+@ModuleManager.command(names= ['зашквар', "жир"], desc='Замеряет зашкварность сообщения', perm='text.zashkvar', template='{botname}, зашквар')
 class Command_Zashkvar(C_template):
     name = ['зашквар', "жир"]
     access = ['user']
@@ -757,12 +646,9 @@ class Command_Zashkvar(C_template):
     perm = 'text.zashkvar'
     template = '{botname}, зашквар'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
-        args = {"peer_id": data.chat_id, "v": "5.60", }
-        if forward:
-            args.update({"forward_messages": data.id})
-        if len(data.fwd_messages)>0:
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+        if len(data.fwd_messages) > 0:
             try:
                 message = data.fwd_messages[0]
                 try:
@@ -771,7 +657,7 @@ class Command_Zashkvar(C_template):
                     temp = message.date
             except:
                 args['message'] = "Непонятная ошибочка."
-                bot.Replyqueue.put(args)
+                self.api.Replyqueue.put(args)
                 return
 
             print(temp)
@@ -779,9 +665,9 @@ class Command_Zashkvar(C_template):
             zh = random.randint(0, 100)
             template = "Зашкварность - {}%"
             args['message'] = template.format(zh)
-            bot.Replyqueue.put(args)
+            self.api.Replyqueue.put(args)
 
 
         else:
             args['message'] = "Нечего мерять. Прикрепи к команде сообшение, зашкварность которого хочешь померять"
-            bot.Replyqueue.put(args)
+            self.api.Replyqueue.put(args)

@@ -2,32 +2,33 @@ from time import sleep
 
 import sys
 
+from Module_manager_v2 import ModuleManager
+
 try:
     from .__Command_template import *
-except:
+except ImportError:
     from __Command_template import *
 
 from ExtLib.Raspberry_PI import *
 from utils import ArgBuilder
-
+@ModuleManager.command(names= ['pistat', 'PI', 'малина'], desc='Выводит информацию о RaspberryPi', perm='core.PI', template='{botname}, малина')
 class Command_PiStat(C_template):
     name = ['pistat', 'PI', 'малина']
     access = ['admin']
     perm = 'core.PI'
     desc = 'Выводит информацию о RaspberryPi'
     enabled = True
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
-        args = ArgBuilder.Args_message()
-        args.peer_id = data.chat_id
-        args.forward_messages = data.id
+    
+    
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
         template = 'Темпуратура CPU {} градусов\n' \
                    'Загруженность CPU {}%\n' \
                    'Оперативная память {}Мб\n' \
                    'Места на диске {}\n'
         msg = template.format(getCPUtemperature(), getCPUuse(), round(int(getRAMinfo()[2])/1024,3), getDiskSpace()[2])
         args.message = msg
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
 
 class Command_GITPULL(C_template):
@@ -36,8 +37,7 @@ class Command_GITPULL(C_template):
     perm = 'core.update'
     desc = 'git pull and git chechout'
 
-    @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
@@ -52,7 +52,7 @@ class Command_GITPULL(C_template):
             if t > 100:
                 break
         args.message = '\n'.join(text)
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
 
 class Command_LevelUP(C_template):
     name = ['levelup']
@@ -62,11 +62,11 @@ class Command_LevelUP(C_template):
     template = '{botname}, THERE NO FUCKING HELP FOR YOU'
 
     @staticmethod
-    def execute(bot: Vk_bot2.Bot, data: LongPoolHistoryMessage, Updates: Updates, forward=True):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         args = ArgBuilder.Args_message()
         args.peer_id = data.id
         args.message = 'Запущена процедура обновления!'
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
         p = os.popen('git pull -f')
         text = []
         text.append(p.readline())
@@ -77,12 +77,12 @@ class Command_LevelUP(C_template):
             if t > 100:
                 break
         args.message = '\n'.join(text)
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
         sleep(1)
         args.message = 'Загрузка обновления закончена'
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
         sleep(1)
         args.message = 'Перезагрузка!'
-        bot.Replyqueue.put(args)
+        self.api.Replyqueue.put(args)
         sleep(3)
-        os.execl(sys.executable,sys.executable, os.path.join(bot.ROOT, 'Vk_bot2.py'))
+        os.execl(sys.executable,sys.executable, os.path.join(self.api.ROOT, 'Vk_bot2.py'))

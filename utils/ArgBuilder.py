@@ -40,6 +40,14 @@ class Args_message(Args_def):
     def setforward_messages(self,forward_messages):
         self.forward_messages = forward_messages
         return self
+
+    def __getitem__(self, item):
+        return vars(self)[item]
+
+    def __setitem__(self, key, value):
+        if key in vars(self):
+            vars(self)[key] = value
+
     def AsDict_(self) -> dict:
         if not Args_message.resend:
             self.forward_messages = []
@@ -51,6 +59,8 @@ class Args_message(Args_def):
     @classmethod
     def DoResend(cls):
         cls.resend = True
+
+
 
 if __name__ == "__main__":
     a = Args_message()

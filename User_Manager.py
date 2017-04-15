@@ -42,32 +42,6 @@ class Status:
         else:
             raise Exception('Unknown ID')
 
-class CoolDown:
-    def __init__(self,cooldown:int,limit:int):
-        self.limit = limit
-        self.cooldown = cooldown
-        self.endtime = time.time()+cooldown
-        self.num = 0
-        self.warned = False
-
-    def __call__(self):
-
-        if self.num<self.limit:
-            self.num += 1
-            self.endtime = time.time() + self.cooldown
-            return True
-        else:
-            print('limit')
-            self.endtime = time.time() + self.cooldown*2
-            return False
-
-
-    def check(self):
-        print(time.time(),self.endtime)
-        if time.time()>=self.endtime:
-            return True
-        else:
-            return False
 
 class UserManager:
     perms = 'perms'
@@ -93,14 +67,15 @@ class UserManager:
         if not os.path.exists(os.path.join(path, 'Users.json')):
             USERS = {}
             return USERS
-        with open(os.path.join(path, 'Users.json'), 'r') as config:
-            USERS = json.load(config)
+        with open(os.path.join(path, 'Users.json'), 'r',encoding="utf8") as config:
+            a = config.read()
+            USERS = json.loads(a)
         return USERS
 
     def SaveUserDB(self):
         path = getpath()
-        with open(os.path.join(path, 'Users.json'), 'w') as config:
-            json.dump(self.DB, config, indent=4, sort_keys=True)
+        with open(os.path.join(path, 'Users.json'), 'w',encoding="UTF-8") as config:
+            config.write(json.dumps(self.DB, indent=4, sort_keys=True,ensure_ascii=False),)
 
     def WriteUser(self, user, status, action=99, *perms):
         user = str(user)
@@ -162,6 +137,7 @@ class UserManager:
 
     def HasPerm(self, user, perm):
         coreperm = '{}.*'.format(perm.split('.')[0])
+
         user = str(user)
         if user not in self.DB:
             self.WriteUser(user, Status.user)

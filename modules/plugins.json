@@ -1,238 +1,242 @@
 {
-    "Command_About": {
-        "cost": 0,
-        "enabled": true
+    "Command_About":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_AboutUser": {
-        "cost": 0,
-        "enabled": true
+    "Command_AboutUser":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_AddCurrency": {
-        "cost": 0,
-        "enabled": true
+    "Command_AddCurrency":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_AddImages": {
-        "cost": 0,
-        "enabled": true
+    "Command_AddImages":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_AdminOnly": {
-        "cost": 0,
-        "enabled": true
+    "Command_AdminOnly":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_Choice": {
-        "cost": 0,
-        "enabled": true
+    "Command_Choice":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_CurChat": {
-        "cost": 0,
-        "enabled": true
+    "Command_CurChat":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_EvalJS": {
-        "cost": 0,
-        "enabled": true
+    "Command_EvalJS":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_ExecCode": {
-        "cost": 0,
-        "enabled": true
+    "Command_ExecCode":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_ExecJS": {
-        "cost": 0,
-        "enabled": true
+    "Command_ExecJS":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_Filter": {
-        "cost": 15,
-        "enabled": true
+    "Command_Filter":{
+        "cost":15,
+        "enabled":true
     },
-    "Command_GITPULL": {
-        "cost": 0,
-        "enabled": true
+    "Command_GITPULL":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_Garbage": {
-        "cost": 0,
-        "enabled": true
+    "Command_Garbage":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_GetGroup": {
-        "cost": 0,
-        "enabled": true
+    "Command_GetGroup":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_GiveCurr": {
-        "cost": 0,
-        "enabled": true
+    "Command_GiveCurr":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_GlitchGif_": {
-        "cost": 20,
-        "enabled": true
+    "Command_GlitchGif_":{
+        "cost":20,
+        "enabled":true
     },
-    "Command_GlitchImg": {
-        "cost": 0,
-        "enabled": true
+    "Command_GlitchImg":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_Glitch_": {
-        "cost": 10,
-        "enabled": true
+    "Command_Glitch_":{
+        "cost":10,
+        "enabled":true
     },
-    "Command_Graphity": {
-        "cost": 0,
-        "enabled": true
+    "Command_Graphity":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_Help": {
-        "cost": 0,
-        "enabled": true
+    "Command_Help":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_JoinFiveNigths": {
-        "cost": 0,
-        "enabled": true
+    "Command_JoinFiveNigths":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_JonTronFunk": {
-        "cost": 5,
-        "enabled": true
+    "Command_JonTronFunk":{
+        "cost":5,
+        "enabled":true
     },
-    "Command_Kek": {
-        "cost": 0,
-        "enabled": true
+    "Command_Kek":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_Kok": {
-        "cost": 0,
-        "enabled": true
+    "Command_Kok":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_LevelUP": {
-        "cost": 0,
-        "enabled": true
+    "Command_LevelUP":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_LockName": {
-        "cost": 0,
-        "enabled": true
+    "Command_LockName":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_PiStat": {
-        "cost": 0,
-        "enabled": true
+    "Command_PiStat":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_Prob": {
-        "cost": 0,
-        "enabled": true
+    "Command_Prob":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_RemovePerms": {
-        "cost": 0,
-        "enabled": true
+    "Command_RemovePerms":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_Resize": {
-        "cost": 0,
-        "enabled": true
+    "Command_Resize":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_SayMaxFunk": {
-        "cost": 5,
-        "enabled": true
+    "Command_SayMaxFunk":{
+        "cost":5,
+        "enabled":true
     },
-    "Command_SetCurrency": {
-        "cost": 0,
-        "enabled": true
+    "Command_SetCurrency":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_SetPrefix": {
-        "cost": 0,
-        "enabled": true
+    "Command_SetPrefix":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_SetStatus": {
-        "cost": 0,
-        "enabled": true
+    "Command_SetStatus":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_StatComm": {
-        "cost": 0,
-        "enabled": true
+    "Command_StatComm":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_TTS": {
-        "cost": 0,
-        "enabled": true
+    "Command_TTS":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_Threads": {
-        "cost": 0,
-        "enabled": true
+    "Command_Threads":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_WantedFunk": {
-        "cost": 5,
-        "enabled": true
+    "Command_WantedFunk":{
+        "cost":5,
+        "enabled":true
     },
-    "Command_Where": {
-        "cost": 2,
-        "enabled": true
+    "Command_Where":{
+        "cost":2,
+        "enabled":true
     },
-    "Command_Who": {
-        "cost": 2,
-        "enabled": true
+    "Command_Who":{
+        "cost":2,
+        "enabled":true
     },
-    "Command_Whois": {
-        "cost": 0,
-        "enabled": true
+    "Command_Whois":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_Whom": {
-        "cost": 2,
-        "enabled": true
+    "Command_Whom":{
+        "cost":2,
+        "enabled":true
     },
-    "Command_WritePerms": {
-        "cost": 0,
-        "enabled": true
+    "Command_WritePerms":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_You": {
-        "cost": 0,
-        "enabled": true
+    "Command_You":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_Zashkvar": {
-        "cost": 0,
-        "enabled": true
+    "Command_Zashkvar":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_banCommand": {
-        "cost": 0,
-        "enabled": true
+    "Command_banCommand":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_e621": {
-        "cost": 0,
-        "enabled": true
+    "Command_e621":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_e926": {
-        "cost": 15,
-        "enabled": true
+    "Command_e926":{
+        "cost":15,
+        "enabled":true
     },
-    "Command_everyPixel": {
-        "cost": 0,
-        "enabled": true
+    "Command_everyPixel":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_ithappens": {
-        "cost": 0,
-        "enabled": true
+    "Command_ithappens":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_kick": {
-        "cost": 0,
-        "enabled": true
+    "Command_kick":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_merge": {
-        "cost": 0,
-        "enabled": true
+    "Command_merge":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_quit": {
-        "cost": 0,
-        "enabled": true
+    "Command_quit":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_resend": {
-        "cost": 0,
-        "enabled": true
+    "Command_resend":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_restart": {
-        "cost": 0,
-        "enabled": true
+    "Command_restart":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_rollRows": {
-        "cost": 0,
-        "enabled": true
+    "Command_rollRows":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_rollRowssmart": {
-        "cost": 0,
-        "enabled": true
+    "Command_rollRowssmart":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_screen": {
-        "cost": 0,
-        "enabled": true
+    "Command_screen":{
+        "cost":0,
+        "enabled":true
     },
-    "Command_triggers": {
-        "cost": 0,
-        "enabled": true
+    "Command_triggers":{
+        "cost":0,
+        "enabled":true
+    },
+    "Command_updateCache":{
+        "cost":0,
+        "enabled":true
     }
 }
