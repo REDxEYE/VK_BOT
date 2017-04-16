@@ -488,7 +488,7 @@ class Command_GlitchImg(C_template):
     perm = 'photo.glitch'
     cost = 0
 
-    @staticmethod
+
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
@@ -519,7 +519,7 @@ class Command_everyPixel(C_template):
     desc = 'Описывает ваше фото'
     perm = 'photo.everypixel'
 
-    @staticmethod
+
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id

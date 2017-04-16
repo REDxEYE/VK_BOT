@@ -19,7 +19,7 @@ class ModuleManager:
 
     def __init__(self, api:Bot):
         self.setApi(api)
-        self.CONGIFPATH = os.path.join('E:\\VK_BOT', 'modules', 'plugins.json')
+        self.CONGIFPATH = os.path.join(api.ROOT, 'modules', 'plugins.json')
         self.ReadConfig()
         self.mods = [] # type: list[Module_struct.Filter]
         self.loadModules()

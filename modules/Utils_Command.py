@@ -11,6 +11,7 @@ from DataTypes.attachments import attachment
 from Module_manager_v2 import ModuleManager
 from libs.tempfile_ import TempFile
 from trigger import Trigger
+from utils.StringBuilder import StringBuilder
 
 try:
     import execjs
@@ -127,9 +128,15 @@ class Command_AboutUser(C_template):
         userperms = self.api.USERS.GetPerms(data.user_id)
         userstatus = self.api.USERS.GetStatus(data.user_id)
         UD = VK_foaf.GetUser(data.user_id)
-        msg_template = "Ваш статус - {}\nВаш id - {}\nВаши права :\n{}\nЗарегистрирован {}\nДень рождения {}\n пол {}\nКол-во внутренней валюты: {}\n"
-        msg = msg_template.format(userstatus, data.user_id, ',\n'.join(userperms), UD['reg'], UD['Bday'],
-                                  UD['gender'], self.api.USERS.GetCurrency(data.user_id))
+        string = StringBuilder(sep='────────────')
+        string +=f"Ваш статус - {userstatus}\n"
+        msg = f"Ваш id - {data.user_id}\n" \
+             f"Ваши права :\n" \
+             f"{os.linesep.join(userperms)}\n" \
+             f"Зарегистрирован {UD['reg']}\n" \
+             f"День рождения {UD['Bday']}\n" \
+             f"пол {UD['gender']}\n" \
+             f"Кол-во внутренней валюты: {self.api.USERS.GetCurrency(data.user_id)}\n"
         args['message'] = msg
         self.api.Replyqueue.put(args)
 
