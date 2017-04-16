@@ -526,7 +526,10 @@ class Command_everyPixel(C_template):
         args.forward_messages = data.id
         att = data.attachments[0]
         photo = att.photo.GetHiRes
-        tags, quality = EveryPixel.GetTags(photo)
+        req = urllib.request.Request(photo, headers=HDR)
+        img = urlopen(req).read()
+        Tmp = TempFile(img, 'jpg')
+        tags, quality = EveryPixel.GetTags(Tmp.path_)
         tags_template = 'Я вижу тут:\n{}\n'
         tags_msg = tags_template.format('\n'.join(tags))
 

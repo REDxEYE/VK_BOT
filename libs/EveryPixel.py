@@ -17,10 +17,12 @@ def GetTags(image):
     urlquality = 'https://quality.api.everypixel.com/v1/quality'
     # req = Request(url,data ="json=^%^7B^%^22url^%^22^%^3A^%^22https^%^3A^%^2F^%^2Fpp.userapi.com^%^2Fc628230^%^2Fv628230019^%^2F3ba42^%^2FWT21Z4VvOnk.jpg^%^22^%^7D",headers=HDR,method='POST' )
     print('Trying to get tags for ', image)
-    KeyWords = requests.request('POST', urlKeyWords, data={'json': json.dumps({'url': image})}, headers=HDR).json()
-    quality = requests.request('POST', urlquality, data={'json': json.dumps({'url': image})}, headers=HDR).json()
 
-    return KeyWords['keywords']['keywords'], quality['quality']['score'] * 100
+    KeyWords = requests.request('POST', urlKeyWords, headers=HDR,files ={'img.jpg':open(image,'rb')})
+    quality = requests.request('POST', urlquality, headers=HDR,files ={'img.jpg':open(image,'rb')})
+    print(KeyWords.text)
+    print(quality.text)
+    return KeyWords.json()['keywords']['keywords'], quality.json()['quality']['score'] * 100
 
 
 if __name__ == '__main__':

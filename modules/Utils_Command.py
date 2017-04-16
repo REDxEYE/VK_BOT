@@ -128,16 +128,16 @@ class Command_AboutUser(C_template):
         userperms = self.api.USERS.GetPerms(data.user_id)
         userstatus = self.api.USERS.GetStatus(data.user_id)
         UD = VK_foaf.GetUser(data.user_id)
-        string = StringBuilder(sep='────────────')
-        string +=f"Ваш статус - {userstatus}\n"
-        msg = f"Ваш id - {data.user_id}\n" \
-             f"Ваши права :\n" \
-             f"{os.linesep.join(userperms)}\n" \
-             f"Зарегистрирован {UD['reg']}\n" \
-             f"День рождения {UD['Bday']}\n" \
-             f"пол {UD['gender']}\n" \
-             f"Кол-во внутренней валюты: {self.api.USERS.GetCurrency(data.user_id)}\n"
-        args['message'] = msg
+        string = StringBuilder(sep='╟────────────\n')
+        string += f"║Ваш статус - {userstatus}\n"
+        string += f"║Ваш id - {data.user_id}\n"
+        string += f"║Ваши права :\n╠══ {str(os.linesep+'╠══ ').join(userperms)}\n"
+        string += f"║Зарегистрирован {UD['reg']}\n"
+        string += f"║День рождения {UD['Bday']}\n"
+        string += f"║пол {UD['gender']}\n"
+        string += f"║Кол-во внутренней валюты: {self.api.USERS.GetCurrency(data.user_id)}\n"
+
+        args['message'] = string.toSting()
         self.api.Replyqueue.put(args)
 
 

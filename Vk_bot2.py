@@ -599,6 +599,10 @@ class Bot:
                             defargs["message"] = "Вы превысили лимит команд. Последующий спам команд будет увеличивать время отката на 10 секунд"
                             self.Checkqueue.task_done()
                             self.Replyqueue.put(defargs)
+
+                        elif not self.COOLDOWN.canUse(user) and self.COOLDOWN.iswarned(user):
+                            continue
+
                         else:
                             print('"Недостаточно прав"')
                             defargs["message"] = "Недостаточно прав"

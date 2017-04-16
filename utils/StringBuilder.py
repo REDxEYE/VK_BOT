@@ -11,6 +11,9 @@ class StringBuilder:
     def __str__(self):
         return self._sep.join(self._string)
 
+    def toSting(self):
+        return self.__str__()
+
     def append(self, data):
         self._string.append(data)
         return self
