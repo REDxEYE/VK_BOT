@@ -520,7 +520,7 @@ class Bot:
                     temp[C[0].replace(" ", "").lower()] = ':'.join(C[1:])
                 message.custom = temp
 
-                pattern = "{}, ?|{}, ?|{}, ?|{}, ?".format(self.MyName.first_name.lower(), self.MyName.first_name,
+                pattern = "^{}, ?|^{}, ?|^{}, ?|^{}, ?".format(self.MyName.first_name.lower(), self.MyName.first_name,
                                                            'ред', "Ред")
                 if message.body.startswith(self.prefix):
                     Command = message.body[len(self.prefix):].split(' ')[0].lower()
