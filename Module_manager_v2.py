@@ -32,8 +32,8 @@ class ModuleManager:
         self.WriteConfig()
 
     def loadModules(self):
-        modules = os.listdir(os.path.join('E:\\VK_BOT', "modules"))
-        sys.path.append(os.path.join('E:\\VK_BOT', "modules"))
+        modules = os.listdir(os.path.join(self.api.ROOT, "modules"))
+        sys.path.append(os.path.join(self.api.ROOT, "modules"))
         for module_ in modules:  # type: str
             if not module_.startswith("__") and module_.endswith('.py'):
                 try:

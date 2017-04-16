@@ -24,7 +24,7 @@ import Vk_bot2
 from DataTypes.LongPoolHistoryUpdate import LongPoolHistoryMessage, Updates
 from DataTypes.group import group, contacts_group
 from DataTypes.doc import doc
-
+import DataTypes
 from modules.__Command_template import C_template
 from utils import ArgBuilder
 from libs import VK_foaf
@@ -112,7 +112,7 @@ class Command_Whois(C_template):
         self.api.Replyqueue.put(args)
 
 
-@ModuleManager.command(names=['whoami', "uname"], perm='text.whoami',
+@ModuleManager.command(names=['whoami', "uname",'профиль'], perm='text.whoami',
                        desc="Выводит информацию о вашем статусе и правах у бота", template='{botnmae}, whoami')
 class Command_AboutUser(C_template):
     name = ['whoami', "uname"]
@@ -202,7 +202,7 @@ class Command_restart(C_template):
         os.execl(sys.executable, sys.executable, os.path.join(self.api.ROOT, 'Vk_bot2.py'))
 
 
-@ModuleManager.command(names=["py", "python"], perm='core.restart', desc="Выполняет код из сообщения",
+@ModuleManager.command(names=["py", "python"], perm='core.PY', desc="Выполняет код из сообщения",
                        template='{botname}, py\nВаш код здесь')
 class Command_ExecCode(C_template):
     name = ["py", "python"]
@@ -423,3 +423,20 @@ class Command_updateCache(C_template):
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         self.api.GetUserNameById(int(data.user_id), update=True)
+
+@ModuleManager.command(names=['очисти'],perm = 'core.clearDDB',desc='Удаляет пользователя их базы пользователей',template='{botname}, очисти ud1 ud2 .... ud999')
+class ClearBD(C_template):
+
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates,):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+
+        for target in data.args:
+            try:
+                user = DataTypes.user.user.Fill(self.api.USERS.DB[target]['cache'])
+                del self.api.USERS.DB[target]
+                args.message += f'Пользователь {user.Name} был удалён из базы данных\n'
+
+
+            except KeyError:
+                continue
+        self.api.Replyqueue.put(args)

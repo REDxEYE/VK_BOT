@@ -81,11 +81,16 @@ class Command_WritePerms(C_template):
         args = ArgBuilder.Args_message().setforward_messages(data.id).setpeer_id(data.chat_id)
         print('Adduser: ', data)
         bb = data.args
-        user = bb[0]
+        if data.hasFwd:
+            user = str(data.fwd_messages[0].user_id)
+            perms = bb[0:]
+        else:
+            user = bb[0]
+            perms = bb[1:]
         print('user ',user)
         if not user.isdigit():
             return False
-        perms = bb[1:]
+
         self.api.USERS.WritePerms(user, self.api.USERS.Actions.Add, *perms)
 
         userName = self.api.GetUserNameById(user)
@@ -101,11 +106,16 @@ class Command_WritePerms(C_template):
         args = ArgBuilder.Args_message().setforward_messages(data.id).setpeer_id(data.chat_id)
         print('Adduser: ', data)
         bb = data.args
-        user = bb[0]
+        if data.hasFwd:
+            user = str(data.fwd_messages[0].user_id)
+            perms = bb[0:]
+        else:
+            user = bb[0]
+            perms = bb[1:]
         print('user ',user)
         if not user.isdigit():
             return False
-        perms = bb[1:]
+
         self.api.USERS.WritePerms(user, self.api.USERS.Actions.Remove, *perms)
 
         userName = self.api.GetUserNameById(user)

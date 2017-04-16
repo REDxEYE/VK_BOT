@@ -11,9 +11,11 @@ class C_template:
     cost = 0
     enabled = True
 
-    def __init__(self,api):
+    def __init__(self,api:Vk_bot2.Bot):
         self.api = api
 
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
+        pass
 
 
 class F_template:
