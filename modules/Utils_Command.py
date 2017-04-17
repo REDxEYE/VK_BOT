@@ -2,6 +2,10 @@ import json
 import os, os.path
 import threading
 import urllib
+import platform
+import datetime
+import psutil
+from utils.Pretty_size import prettier_size
 from time import sleep
 from urllib.request import urlopen
 
@@ -448,4 +452,42 @@ class ClearBD(C_template):
 
             except KeyError:
                 continue
+        self.api.Replyqueue.put(args)
+
+@ModuleManager.command(names=['система'], perm='text.sys', desc='Выводит информацию о система')
+class OsInfo(C_template):
+
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+        string = StringBuilder(sep = '\n')
+        ram = psutil.virtual_memory()
+        cpu = psutil.cpu_freq()
+        string += f'Платформа: {platform.platform()}'
+        string += f'Процессор: {platform.processor()}'
+        string += f'Частота процессора: {cpu.current}МГц'
+        string += f'Загруженность процессора: {psutil.cpu_percent()}%'
+        string += f'Версия питона: {platform.python_version()}'
+        string += f'FREE RAM: {prettier_size(int(ram.free))}'
+        string += f'USED RAM: {prettier_size(int(ram.used))}'
+        string += f'TOTAL RAM: {prettier_size(int(ram.total))}'
+
+
+        string += f'Время системы: {datetime.datetime.now()}'
+
+
+        args.message = string.toSting()
+        self.api.Replyqueue.put(args)
+
+@ModuleManager.command(names=['reload'], perm='core.reload', desc='Перегрузка модулей')
+class Reloader(C_template):
+
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+        self.api.MODULES.loadModules(True)
+        string = StringBuilder(sep = '\n')
+        string += f'Перезагружено'
+
+
+
+        args.message = string.toSting()
         self.api.Replyqueue.put(args)

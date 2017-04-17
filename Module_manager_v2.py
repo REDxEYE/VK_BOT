@@ -5,7 +5,7 @@ import traceback
 import ujson
 
 import sys
-
+from copy import copy
 
 import Module_struct
 from Vk_bot2 import Bot
@@ -31,13 +31,21 @@ class ModuleManager:
 
         self.WriteConfig()
 
-    def loadModules(self):
+    def loadModules(self,reload = False):
         modules = os.listdir(os.path.join(self.api.ROOT, "modules"))
         sys.path.append(os.path.join(self.api.ROOT, "modules"))
         for module_ in modules:  # type: str
             if not module_.startswith("__") and module_.endswith('.py'):
                 try:
-                    importlib.import_module(str(module_.split(".")[0]))
+                    if reload:
+
+                        for n, mod in enumerate(self.MODULES):
+                            del self.MODULES[n]
+                        for f in copy(self.FILTERS):
+                            del self.FILTERS[f]
+                        importlib.reload(sys.modules[str(module_.split(".")[0])])
+                    else:
+                        importlib.import_module(str(module_.split(".")[0]))
                 except:
                     print("can't import module " + str(module_.split(".")[0]), type_='err')
                     exc_type, exc_value, exc_traceback = sys.exc_info()

@@ -9,6 +9,8 @@ from math import log
 from time import sleep
 from urllib.request import urlopen
 
+from utils.StringBuilder import StringBuilder
+
 try:
     import execjs
 
@@ -401,10 +403,14 @@ class Command_StatComm(C_template):
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
 
-        msg = 'Кол-во обработанных сообщений: {}\nКол-во выполеных команд: {}\nЗарегестрировано польхователей: {}\nРазмер кэша: {}\nКол-во живых потоков: {}\n'
-        args['message'] = msg.format(self.api.Stat['messages'], self.api.Stat['commands'], len(self.api.USERS.DB),
-                                     self.api.Stat['cache'],
-                                     len([thread for thread in self.api.EX_threadList if thread.is_alive()]))
+        string = StringBuilder(sep= '\n')
+        string += f'Кол-во обработанных сообщений: {self.api.Stat["messages"]}'
+        string += f'Кол-во обработанных сообщений: {self.api.Stat["messages"]}'
+        string += f'Зарегестрировано польхователей: {len(self.api.USERS.DB)}'
+        string += f'Зарегестрировано польхователей: {len(self.api.USERS.DB)}'
+        string += f'Размер кэша: {self.api.Stat["cache"]}'
+        string += f'Кол-во живых потоков: {len([thread for thread in self.api.EX_threadList if thread.is_alive()])}'
+        args['message'] = string.toSting()
         self.api.Replyqueue.put(args)
         return True
 
@@ -491,7 +497,7 @@ class Command_About(C_template):
         self.api.Replyqueue.put(args)
 
 #@ModuleManager.command(names=["namelock"], desc="Лочит имя беседы", perm='chat.LockName',template='{botname}, namelock')
-class Command_LockName(C_template):
+class _Command_LockName(C_template):
     name = ["namelock"]
     access = ["admin"]
     desc = "Лочит имя беседы"

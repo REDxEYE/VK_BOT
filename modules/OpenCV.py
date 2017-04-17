@@ -110,7 +110,8 @@ class Command_SayMaxFunk(C_template):
     desc = "Даёте подержать ваше фото Сойке"
     perm = 'photo.saymax'
     cost = 5
-    @staticmethod
+	
+	
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
         atts = data.attachments
