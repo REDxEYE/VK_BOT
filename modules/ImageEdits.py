@@ -6,6 +6,7 @@ from urllib.request import urlopen
 
 import sys
 
+from CustomPrint import print_
 from DataTypes.attachments import attachment
 from Module_manager_v2 import ModuleManager
 from libs.photo_replacer import replacePhoto
@@ -542,9 +543,14 @@ class Mask_photo(C_template):
 
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
+
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
+        if self.api.remixsed == 0:
+            args.message = 'Невозможно выполнить так-как нету печенек :C'
+            self.api.Replyqueue.put(args)
+            return
         atts = data.attachments #type: list[attachment]
         # print(atts)
         if len(atts) < 2:
