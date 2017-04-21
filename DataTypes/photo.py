@@ -12,6 +12,10 @@ class photo:
         self.photo_2560 = ''
 
     @property
+    def getOwnerid_Photoid(self):
+        return f'{self.owner_id}_{self.id}'
+
+    @property
     def GetHiRes(self):
         vars_ = vars(self)
         size = 0

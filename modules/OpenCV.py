@@ -86,11 +86,12 @@ class Command_JonTronFunk(C_template):
 
             Tmp.rem()
         except:
-            text = data.custom['text'] if 'text' in data.custom else 'Meh...'
-            size = data.custom['size'] if 'size' in data.custom else 120
-            font = data.custom['font'] if 'font' in data.custom else 'times.ttf'
-            x = int(data.custom['x']) if 'x' in data.custom else 100
-            y = int(data.custom['y']) if 'y' in data.custom else 150
+
+            text = data.custom.get('text','Meh...')
+            size = int(data.custom.get('size',120))
+            font = data.custom.get('font','times.ttf')
+            x = int(data.custom.get('x', 100))
+            y = int(data.custom.get('y', 150))
             if text == None:
                 return False
             _path = textPlain(text, size, font, x, y, 512, 512)
@@ -131,11 +132,11 @@ class Command_SayMaxFunk(C_template):
             att = self.api.UploadFromDisk(Tmp.path_)
             Tmp.rem()
         except:
-            text = data.custom['text'] if 'text' in data.custom else 'кок'
-            size = data.custom['size'] if 'size' in data.custom else 300
-            font = data.custom['font'] if 'font' in data.custom else 'times.ttf'
-            x = int(data.custom['x']) if 'x' in args else 250
-            y = int(data.custom['y']) if 'y' in args else 200
+            text = data.custom.get('text', 'кок')
+            size = int(data.custom.get('size', 300))
+            font = data.custom.get('font', 'times.ttf')
+            x = int(data.custom.get('x', 250))
+            y = int(data.custom.get('y', 200))
             if text == None:
                 return False
             _path = textPlain(text, size, font, x, y, 1280, 720)

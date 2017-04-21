@@ -613,15 +613,13 @@ class Command_TTS(C_template):
         args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
         apiurl = f"https://api.vk.com/method/docs.getUploadServer?access_token={self.api.UserAccess_token}&type=audio_message&v=5.60"
         server = json.loads(urlopen(apiurl).read().decode('utf-8'))['response']['upload_url']
-        for i in Command_TTS.name:
-            if i in data.body:
-                text = data.body.replace('<br>', '').split(i)[-1].split(" ")[1:]
-        # text = data.text.split(' ')
-        lang = text[0]
+		
+        lang = data.args[0]
+        tosay = data.args[1:]
         if lang not in gtts.gTTS.LANGUAGES:
             lang = 'ru'
-
-        tts = gtts.gTTS(' '.join(text[1:]), lang=lang, debug=True)
+            tosay =data.args
+        tts = gtts.gTTS(' '.join(tosay), lang=lang, debug=True)
         a = tempF.NamedTemporaryFile('w+b', suffix='.mp3', dir='tmp', delete=False)
         try:
             tts.write_to_fp(a)

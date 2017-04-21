@@ -23,7 +23,7 @@ try:
 except:
     from __Command_template import *
 
-@ModuleManager.command(names=["perms"], perm='photo.glitch2', desc="Глючная обработка",cost=10)
+@ModuleManager.command(names=["глюк"], perm='photo.glitch2', desc="Глючная обработка",cost=10)
 class Command_Glitch_(C_template):
     name = ["глюк"]
     access = ['all']
@@ -39,7 +39,6 @@ class Command_Glitch_(C_template):
         Glitch_ = bool(data.custom['color']) if 'color' in data.custom else True
         random_ = bool(data.custom['rand']) if 'rand' in data.custom else True
         atts = data.attachments
-        print(data.attachments[0])
         Topost = []
         for att in atts:
             try:

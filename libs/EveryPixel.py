@@ -18,12 +18,12 @@ def GetTags(image):
     # req = Request(url,data ="json=^%^7B^%^22url^%^22^%^3A^%^22https^%^3A^%^2F^%^2Fpp.userapi.com^%^2Fc628230^%^2Fv628230019^%^2F3ba42^%^2FWT21Z4VvOnk.jpg^%^22^%^7D",headers=HDR,method='POST' )
     print('Trying to get tags for ', image)
 
-    KeyWords = requests.request('POST', urlKeyWords, headers=HDR,files ={'img.jpg':open(image,'rb')})
-    quality = requests.request('POST', urlquality, headers=HDR,files ={'img.jpg':open(image,'rb')})
+    KeyWords = requests.request('POST', urlKeyWords, headers=HDR,files ={'file':open(image,'rb')})
+    quality = requests.request('POST', urlquality, headers=HDR,files ={'file':open(image,'rb')})
     print(KeyWords.text)
     print(quality.text)
     return KeyWords.json()['keywords']['keywords'], quality.json()['quality']['score'] * 100
 
 
 if __name__ == '__main__':
-    print(GetTags('https://pp.userapi.com/c837632/v837632349/4fd28/g2_95FBp5Tk.jpg'))
+    print(GetTags('tempfile_54f94863-73e5-46d1-8f2a-a29f33416927.jpg'))

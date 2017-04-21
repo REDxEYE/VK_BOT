@@ -1,11 +1,13 @@
-
 def signature(*types):
     def func(f):
         def inner_func(callingObj, *args, **kwargs):
             return f(callingObj, *args, **kwargs)
+
         inner_func.signature = types
         return inner_func
+
     return func
+
 
 class Overload(object):
     def __init__(self, func):
@@ -38,4 +40,3 @@ class Overload(object):
         self.methods.append(func)
         self.signatures.append(func.signature)
         return self
-

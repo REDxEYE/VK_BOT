@@ -18,8 +18,10 @@ from DataTypes.user import user
 from DataTypes.group import group
 from Module_manager_v2 import *
 from User_Manager import *
+from utils.cookies import get_cookies
 from utils.cooldown import cooldown_manager
 from libs.tempfile_ import *
+
 try:
     import aiml_.Core
 except ImportError:
@@ -91,7 +93,13 @@ class SessionCapchaFix(Session):
 
 
 class Bot:
-    def __init__(self, threads=4, DEBUG=False):
+    def __init__(self, threads=4, DEBUG=False, token_only=False):
+        self.token_only = token_only
+        self.login = 0
+        self.cookies_creation_time = 0
+        self.pass_ = 0
+        self.client_id = 0
+        self.remixsed = 0
         self.Stat = {}
         self.prefix = '\\\\'
         self.Settings = {}
@@ -129,12 +137,15 @@ class Bot:
         self.MODULES = ModuleManager(self)
         self.DEBUG = DEBUG
         self.TRIGGERS = trigger.TriggerHandler()
-        self.COOLDOWN = cooldown_manager(timeout=5,limit=3)
+        self.COOLDOWN = cooldown_manager(timeout=5, limit=3)
         self.AdminModeOnly = False
 
         self.defargs = {"v": "5.60"}
 
         self.LoadConfig()
+
+        self.check_remixsid()
+
         self.SaveConfig()
 
         self.UserAccess_token = self.Settings['UserAccess_token']
@@ -150,8 +161,6 @@ class Bot:
 
         self.UserApi = API(self.UserSession)
         self.DefApi = API(self.DefSession)
-
-
 
         self.log = io.open("Message_Log.Log", mode="ta", newline="\n", encoding="utf-8")
 
@@ -169,9 +178,16 @@ class Bot:
             pass
         print('LOADED')
 
+    def check_remixsid(self):
+        print(self.cookies_creation_time - time.time())
+        if self.cookies_creation_time - time.time() > 86400:
+            self.remixsed, self.UserAccess_token = get_cookies(self.login, self.pass_, self.client_id)
+            self.cookies_creation_time = time.time()
+        self.SaveConfig()
+
     def GetImg(self, name) -> str:
         """
-
+ 
         Args:
             name: Image name
 
@@ -288,6 +304,7 @@ class Bot:
             self.generateConfig(path)
         with open(path + '/settings.json', 'r') as config:
             settings = json.load(config)
+
             try:
                 self.Stat = settings["stat"]
             except KeyError:
@@ -298,6 +315,34 @@ class Bot:
                 self.prefix = '\\\\'
             self.Settings = settings["settings"]
 
+            if not self.token_only:
+                try:
+                    self.cookies_creation_time = settings['cookies']
+                except KeyError:
+                    print('No cookies')
+                    self.cookies_creation_time = 0.0
+                try:
+                    self.login = settings['login']
+                except KeyError:
+                    print('No login')
+                    self.login = input('Page login:')
+                try:
+                    self.pass_ = settings['pass']
+                except KeyError:
+                    print('No password')
+                    self.pass_ = input('Page password:')
+                try:
+                    self.client_id = settings['client_id']
+                except KeyError:
+                    print('No client_id')
+                    self.client_id = input('client_id:')
+                try:
+                    self.remixsed = settings['remixsed']
+                except KeyError:
+                    print('No remixsed')
+                    self.remixsed = 0
+
+
     def SaveConfig(self):
         path = getpath()
         data = {}
@@ -305,6 +350,12 @@ class Bot:
             data['stat'] = self.Stat
             data['prefix'] = self.prefix
             data['settings'] = self.Settings
+            if not self.token_only:
+                data['cookies'] = self.cookies_creation_time
+                data['remixsed'] = self.remixsed
+                data['login'] = self.login
+                data['pass'] = self.pass_
+                data['client_id'] = self.client_id
             json.dump(data, config, indent=4, sort_keys=True)
 
     def GetUploadServer(self):
@@ -521,7 +572,7 @@ class Bot:
                 message.custom = temp
 
                 pattern = "^{}, ?|^{}, ?|^{}, ?|^{}, ?".format(self.MyName.first_name.lower(), self.MyName.first_name,
-                                                           'ред', "Ред")
+                                                               'ред', "Ред")
                 if message.body.startswith(self.prefix):
                     Command = message.body[len(self.prefix):].split(' ')[0].lower()
                     message.args = message.body[1:].split(' ')[1:]
@@ -544,11 +595,13 @@ class Bot:
                             return
 
                     if self.MODULES.isValid(Command):
-                        funk = self.MODULES.GetModule(Command,message.args)
+                        funk = self.MODULES.GetModule(Command, message.args)
                         user = message.user_id
                         self.COOLDOWN.adduser(user).chechUsers()
                         print('can user', self.COOLDOWN.canUse(user))
-                        if self.USERS.HasPerm(user, funk.perms) and self.MODULES.CanAfford(self.USERS.GetCurrency(user),Command) and (self.COOLDOWN.canUse(user) or self.USERS.HasPerm(user, 'core.nolimit')):
+                        if self.USERS.HasPerm(user, funk.perms) and self.MODULES.CanAfford(self.USERS.GetCurrency(user),
+                                                                                           Command) and (
+                            self.COOLDOWN.canUse(user) or self.USERS.HasPerm(user, 'core.nolimit')):
                             self.COOLDOWN.useUser(user)
                             try:
                                 print("Executing command {},\n arguments:{}".format(Command, message.args))
@@ -589,14 +642,15 @@ class Bot:
                                 print(defargs['message'])
                                 # self.Reply(self.UserApi, args)
                                 self.Checkqueue.task_done()
-                                #self.Replyqueue.put(defargs)
+                                # self.Replyqueue.put(defargs)
                         elif not self.MODULES.CanAfford(self.USERS.GetCurrency(user), Command):
                             defargs["message"] = "Нехватает валюты. Попробуйте обратиться к администрации"
                             self.Checkqueue.task_done()
                             self.Replyqueue.put(defargs)
                         elif not self.COOLDOWN.canUse(user) and not self.COOLDOWN.iswarned(user):
                             self.COOLDOWN.warned(user)
-                            defargs["message"] = "Вы превысили лимит команд. Последующий спам команд будет увеличивать время отката на 10 секунд"
+                            defargs[
+                                "message"] = "Вы превысили лимит команд. Последующий спам команд будет увеличивать время отката на 10 секунд"
                             self.Checkqueue.task_done()
                             self.Replyqueue.put(defargs)
 
@@ -773,15 +827,18 @@ class Bot:
         # print('\n', '\n'.join([str(m) for m in updates.messages]))
         self.Checkqueue.put(updates)
 
-
-@overload
-def MultipleStrCheck(string: str, *list: str) -> bool:
-    for item in list:
+from utils.overload_fixed import Overload,signature
+@Overload
+@signature(str,tuple)
+def MultipleStrCheck(string: str, *list_: tuple) -> bool:
+    for item in list_:
         if item in string:
             return True
     return False
 
-def MultipleStrCheck(string: str, list: list) -> bool:
+@MultipleStrCheck.overload
+@signature(str,list)
+def _(string: str, list: list) -> bool:
     for item in list:
         if item in string:
             return True
@@ -789,11 +846,14 @@ def MultipleStrCheck(string: str, list: list) -> bool:
 
 
 def CustomTriggers(api: Bot):
-    t1 = trigger.Trigger(cond=lambda data: MultipleStrCheck(data.body.lower(), ['python', 'питон']) and int(data.user_id) != int(api.MyUId), onetime=False, infinite=True,
-                         callback=lambda message, result: api.Replyqueue.put(ArgBuilder.Args_message()
-                                                                     .setpeer_id(message.chat_id)
-                                                                     .setmessage('Кто-то сказал питон?')
-                                                                     .setattachment([api.UploadFromDisk(api.GetImg('Python.jpg'))])))
+    t1 = trigger.Trigger(
+        cond=lambda data: MultipleStrCheck(data.body.lower(), ['python', 'питон']) and int(data.user_id) != int(
+            api.MyUId), onetime=False, infinite=True,
+        callback=lambda message, result: api.Replyqueue.put(ArgBuilder.Args_message()
+                                                            .setpeer_id(message.chat_id)
+                                                            .setmessage('Кто-то сказал питон?')
+                                                            .setattachment(
+            [api.UploadFromDisk(api.GetImg('Python.jpg'))])))
 
     api.TRIGGERS.addTrigger(t1)
 
@@ -803,10 +863,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='VkBot')
     parser.add_argument('-r', dest='resend', help='Switch - resend messages or not', action="store_true")
     parser.add_argument('-thr', dest='threads', help='Number of threads for commands', default=4)
+    parser.add_argument('-t', dest='token_only', help='login via token', action="store_true", default=False)
     args = parser.parse_args()
     if args.resend:
         ArgBuilder.Args_message.DoNotResend()
-    bot = Bot(DEBUG=True, threads=int(args.threads))
-    #CustomTriggers(bot)
+    bot = Bot(DEBUG=True, threads=int(args.threads), token_only=args.token_only)
+    # CustomTriggers(bot)
     print(f'Loaded in {time.time()-s} seconds')
     bot.ContiniousMessageCheck()

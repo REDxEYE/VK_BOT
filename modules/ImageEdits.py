@@ -8,11 +8,12 @@ import sys
 
 from DataTypes.attachments import attachment
 from Module_manager_v2 import ModuleManager
+from libs.photo_replacer import replacePhoto
 from trigger import Trigger
 
 try:
 
-    from PIL import ImageGrab
+    from PIL import ImageGrab, Image
 
     windows = True
 except ImportError:
@@ -458,7 +459,7 @@ class Command_merge(C_template):
         args.attachment = Topost
         self.api.Replyqueue.put(args)
 
-@ModuleManager.command(names=["скрин"], perm='photo.screen', desc="Скрин экрана")
+@ModuleManager.command(names=["скрин"], perm='core.screen', desc="Скрин экрана")
 class Command_screen(C_template):
     enabled = windows
     name = ["скрин"]
@@ -534,4 +535,68 @@ class Command_everyPixel(C_template):
         tags_msg = tags_template.format('\n'.join(tags))
 
         args.message = tags_msg + 'Годнота этой пикчи - {}\n'.format(int(quality))
+        self.api.Replyqueue.put(args)
+
+@ModuleManager.command(names=["маска",'цензура'], perm='core.mask', desc="маскирует фото")
+class Mask_photo(C_template):
+
+
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
+        args = ArgBuilder.Args_message()
+        args.peer_id = data.chat_id
+        args.forward_messages = data.id
+        atts = data.attachments #type: list[attachment]
+        # print(atts)
+        if len(atts) < 2:
+            args.message = 'Нужны 2 файла'
+            self.api.Replyqueue.put(args)
+            return
+        Topost = []
+
+        try:
+
+            photo = atts[0].photo.GetHiRes
+        except:
+            return False
+        try:
+            photo1 = atts[1].photo.GetHiRes
+        except:
+            return False
+        req = urllib.request.Request(photo, headers=HDR)
+        req1 = urllib.request.Request(photo1, headers=HDR)
+        img = urlopen(req).read()
+        img1 = urlopen(req1).read()
+        Tmp500 = TempFile(img, 'jpg')
+        Tmp1000 = TempFile(img1, 'jpg')
+        img1 = Image.open(open(Tmp500.path_,'rb'))
+        img1 = resize_(500,img1,ret=True)
+        img1.save(Tmp500.path_)
+        img2 = Image.open(open(Tmp1000.path_,'rb'))
+        img2 = resize_(1500, img2, ret=True)
+        img2.save(Tmp1000.path_)
+
+        pid_ = self.api.UploadFromDisk(Tmp500.path_)
+        print(pid_)
+        owner, pid_ = pid_[5:].split('_')
+        args.message = 'Ща всё будет'
+        #args.attachment = [f'photo{owner}_{pid_}']
+        self.api.Replyqueue.put(args)
+
+        replacePhoto(f'{owner}_{pid_}',Tmp500.path_,self.api.remixsed)
+        replacePhoto(f'{owner}_{pid_}',Tmp1000.path_,self.api.remixsed)
+        img2 = Image.open(open(Tmp1000.path_, 'rb'))
+        img2 = resize_(1500, img2, ret=True)
+        img2.save(Tmp1000.path_)
+        replacePhoto(f'{owner}_{pid_}',Tmp1000.path_,self.api.remixsed)
+        replacePhoto(f'{owner}_{pid_}',Tmp500.path_,self.api.remixsed)
+
+        self.api.UserApi.photos.delete(owner_id = owner, photo_id = pid_)
+        self.api.UserApi.photos.restore(owner_id = owner, photo_id = pid_)
+        Tmp500.cachefile(Tmp500.path_)
+        Tmp1000.cachefile(Tmp1000.path_)
+        Tmp500.rem()
+        Tmp1000.rem()
+        args.message = 'Вотъ'
+        #args.attachment = []
+        args.attachment = [f'photo{owner}_{pid_}']
         self.api.Replyqueue.put(args)
