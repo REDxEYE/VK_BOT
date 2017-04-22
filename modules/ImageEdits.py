@@ -578,7 +578,7 @@ class Mask_photo(C_template):
         img1 = resize_(500,img1,ret=True)
         img1.save(Tmp500.path_)
         img2 = Image.open(open(Tmp1000.path_,'rb'))
-        img2 = resize_(1500, img2, ret=True)
+        img2 = resize_(1000, img2, ret=True)
         img2.save(Tmp1000.path_)
 
         pid_ = self.api.UploadFromDisk(Tmp500.path_)
@@ -587,15 +587,28 @@ class Mask_photo(C_template):
         args.message = 'Ща всё будет'
         #args.attachment = [f'photo{owner}_{pid_}']
         self.api.Replyqueue.put(args)
+        c = 0
 
-        replacePhoto(f'{owner}_{pid_}',Tmp500.path_,self.api.remixsed)
-        replacePhoto(f'{owner}_{pid_}',Tmp1000.path_,self.api.remixsed)
-        img2 = Image.open(open(Tmp1000.path_, 'rb'))
-        img2 = resize_(1500, img2, ret=True)
-        img2.save(Tmp1000.path_)
-        replacePhoto(f'{owner}_{pid_}',Tmp1000.path_,self.api.remixsed)
-        replacePhoto(f'{owner}_{pid_}',Tmp500.path_,self.api.remixsed)
+        def replace(c):
+            try:
+                replacePhoto(f'{owner}_{pid_}',Tmp500.path_,self.api.remixsed)
+                replacePhoto(f'{owner}_{pid_}',Tmp1000.path_,self.api.remixsed)
+                img2 = Image.open(open(Tmp1000.path_, 'rb'))
+                img2 = resize_(1500, img2, ret=True)
+                img2.save(Tmp1000.path_)
+                replacePhoto(f'{owner}_{pid_}',Tmp1000.path_,self.api.remixsed)
+                replacePhoto(f'{owner}_{pid_}',Tmp500.path_,self.api.remixsed)
+            except:
+                c +=1
+                if c >2:
+                    args.attachment = []
+                    args.message = 'Чёто пошло совсем не так'
+                    self.api.Replyqueue.put(args)
+                    return
+                self.api.check_remixsid(force=True)
+                replace(c)
 
+        replace(c)
         self.api.UserApi.photos.delete(owner_id = owner, photo_id = pid_)
         self.api.UserApi.photos.restore(owner_id = owner, photo_id = pid_)
         Tmp500.cachefile(Tmp500.path_)

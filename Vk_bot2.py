@@ -144,11 +144,12 @@ class Bot:
 
         self.LoadConfig()
 
-        self.check_remixsid()
+
 
         self.SaveConfig()
 
         self.UserAccess_token = self.Settings['UserAccess_token']
+        self.check_remixsid()
         if 'GroupAccess_token' in self.Settings:
             self.GroupAccess_token = self.Settings['GroupAccess_token']
             self.GroupSession = SessionCapchaFix(access_token=self.GroupAccess_token)
@@ -178,11 +179,15 @@ class Bot:
             pass
         print('LOADED')
 
-    def check_remixsid(self):
-        print(self.cookies_creation_time - time.time())
-        if self.cookies_creation_time - time.time() > 86400:
+    def check_remixsid(self, force = False):
+        print(time.time()-self.cookies_creation_time )
+        if time.time() - self.cookies_creation_time  > 86400 and not force:
             self.remixsed, self.UserAccess_token = get_cookies(self.login, self.pass_, self.client_id)
             self.cookies_creation_time = time.time()
+        elif force:
+            self.remixsed, self.UserAccess_token = get_cookies(self.login, self.pass_, self.client_id)
+            self.cookies_creation_time = time.time()
+        self.Settings['UserAccess_token'] = self.UserAccess_token
         self.SaveConfig()
 
     def GetImg(self, name) -> str:
@@ -346,6 +351,7 @@ class Bot:
     def SaveConfig(self):
         path = getpath()
         data = {}
+
         with open(path + '/settings.json', 'w') as config:
             data['stat'] = self.Stat
             data['prefix'] = self.prefix
