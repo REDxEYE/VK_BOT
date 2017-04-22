@@ -1,5 +1,6 @@
 import io
 import queue
+import random
 import re
 import threading
 import urllib
@@ -144,8 +145,6 @@ class Bot:
 
         self.LoadConfig()
 
-
-
         self.SaveConfig()
 
         self.UserAccess_token = self.Settings['UserAccess_token']
@@ -179,9 +178,9 @@ class Bot:
             pass
         print('LOADED')
 
-    def check_remixsid(self, force = False):
-        print(time.time()-self.cookies_creation_time )
-        if time.time() - self.cookies_creation_time  > 86400 and not force:
+    def check_remixsid(self, force=False):
+        print(time.time() - self.cookies_creation_time)
+        if time.time() - self.cookies_creation_time > 86400 and not force:
             self.remixsed, self.UserAccess_token = get_cookies(self.login, self.pass_, self.client_id)
             self.cookies_creation_time = time.time()
         elif force:
@@ -201,6 +200,27 @@ class Bot:
         """
         if name in os.listdir(self.IMAGES):
             return os.path.join(self.IMAGES, name)
+
+        else:
+            raise FileNotFoundError('There is no file named {} in images folder'.format(name))
+
+    def GetRandomImg(self, name) -> str:
+        """
+
+        Args:
+            name: Image name for pattern NAME_([0-9]+)
+
+        Returns:
+            str:Path to img
+        """
+        patt = re.compile('{}_([0-9]+)'.format(name), re.IGNORECASE)
+        results = list([file_name for file_name in os.listdir(self.IMAGES) if patt.findall(file_name)])
+
+
+
+        if len(results) != 0:
+            return os.path.join(self.IMAGES, random.choice(results))
+
 
         else:
             raise FileNotFoundError('There is no file named {} in images folder'.format(name))
@@ -346,7 +366,6 @@ class Bot:
                 except KeyError:
                     print('No remixsed')
                     self.remixsed = 0
-
 
     def SaveConfig(self):
         path = getpath()
@@ -607,7 +626,7 @@ class Bot:
                         print('can user', self.COOLDOWN.canUse(user))
                         if self.USERS.HasPerm(user, funk.perms) and self.MODULES.CanAfford(self.USERS.GetCurrency(user),
                                                                                            Command) and (
-                            self.COOLDOWN.canUse(user) or self.USERS.HasPerm(user, 'core.nolimit')):
+                                    self.COOLDOWN.canUse(user) or self.USERS.HasPerm(user, 'core.nolimit')):
                             self.COOLDOWN.useUser(user)
                             try:
                                 print("Executing command {},\n arguments:{}".format(Command, message.args))
@@ -833,18 +852,11 @@ class Bot:
         # print('\n', '\n'.join([str(m) for m in updates.messages]))
         self.Checkqueue.put(updates)
 
-from utils.overload_fixed import Overload,signature
-@Overload
-@signature(str,tuple)
-def MultipleStrCheck(string: str, *list_: tuple) -> bool:
-    for item in list_:
-        if item in string:
-            return True
-    return False
 
-@MultipleStrCheck.overload
-@signature(str,list)
-def _(string: str, list: list) -> bool:
+from utils.overload_fixed import Overload, signature
+
+
+def MultipleStrCheck(string: str, list: list) -> bool:
     for item in list:
         if item in string:
             return True
@@ -856,10 +868,10 @@ def CustomTriggers(api: Bot):
         cond=lambda data: MultipleStrCheck(data.body.lower(), ['python', 'питон']) and int(data.user_id) != int(
             api.MyUId), onetime=False, infinite=True,
         callback=lambda message, result: api.Replyqueue.put(ArgBuilder.Args_message()
-                                                            .setpeer_id(message.chat_id)
-                                                            .setmessage('Кто-то сказал питон?')
-                                                            .setattachment(
-            [api.UploadFromDisk(api.GetImg('Python.jpg'))])))
+            .setpeer_id(message.chat_id)
+            .setmessage('Кто-то сказал питон?')
+            .setattachment(
+            [api.UploadFromDisk(api.GetRandomImg('python'))])))
 
     api.TRIGGERS.addTrigger(t1)
 
@@ -874,6 +886,6 @@ if __name__ == "__main__":
     if args.resend:
         ArgBuilder.Args_message.DoNotResend()
     bot = Bot(DEBUG=True, threads=int(args.threads), token_only=args.token_only)
-    # CustomTriggers(bot)
+    CustomTriggers(bot)
     print(f'Loaded in {time.time()-s} seconds')
     bot.ContiniousMessageCheck()

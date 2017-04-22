@@ -3,8 +3,10 @@ from urllib.parse import urlparse, urlencode
 from urllib.request import *
 import requests.cookies
 
-from HTMLParser import HTMLParser
-
+from fixed_buildins.HTMLParser import HTMLParser
+import sys
+import _markupbase
+sys.modules['markupbase'] = _markupbase
 
 class FormParser(HTMLParser):
     def __init__(self):
