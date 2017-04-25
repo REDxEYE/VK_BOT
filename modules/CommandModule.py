@@ -267,12 +267,14 @@ class Command_Help(C_template):
         args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
         if len(data.args) >= 1 and data.args[0] != "":
             print(data.args)
-            Command_Help.GetHelp(data, data.args[0])
+            self.GetHelp(data, data.args[0])
             return
         args['message'] = 'Список команд'
-        a = "Вам доступны:\n"
         UserPerms = self.api.USERS.GetPerms(data.user_id)
-        for command in self.api.MODULES.GetAvailable(UserPerms):
+        all_commands = self.api.MODULES.GetAvailable(UserPerms)
+        a = f"Вам доступно {len(all_commands)} \ {len(self.api.MODULES.MODULES)}:\n"
+
+        for command in all_commands:
             a += 'Команда: "{}", {}. Стоимость: {}\n'.format('" или "'.join(command.names), command.desc, command.cost)
         args['message'] = str(a)
         self.api.Replyqueue.put(args)
@@ -355,8 +357,8 @@ class Command_kick(C_template):
         return True
 
 
-#@ModuleManager.command(names=["5nights"], desc="Добавляет в беседу", perm='text.joinChat',
-#                       template="{botname}, 5nights")
+@ModuleManager.command(names=["5nights"], desc="Добавляет в беседу", perm='text.joinChat',
+                       template="{botname}, 5nights")
 class Command_JoinFiveNigths(C_template):
     name = ["5nights"]
     access = ["all"]
@@ -403,7 +405,7 @@ class Command_StatComm(C_template):
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
 
-        string = StringBuilder(sep= '\n')
+        string = StringBuilder(sep='\n')
         string += f'Кол-во обработанных сообщений: {self.api.Stat["messages"]}'
         string += f'Кол-во обработанных сообщений: {self.api.Stat["messages"]}'
         string += f'Зарегестрировано польхователей: {len(self.api.USERS.DB)}'
@@ -493,17 +495,17 @@ class Command_About(C_template):
         args['message'] = \
             'Создан *red_eye_rus (Red Dragon)\n' \
             'Множество идей взяты у *rukifox (Яна)\n' \
-            #'GitHub: www.github.com/REDxEYE/VK_BOT\n'
+            # 'GitHub: www.github.com/REDxEYE/VK_BOT\n'
         self.api.Replyqueue.put(args)
 
-#@ModuleManager.command(names=["namelock"], desc="Лочит имя беседы", perm='chat.LockName',template='{botname}, namelock')
+
+# @ModuleManager.command(names=["namelock"], desc="Лочит имя беседы", perm='chat.LockName',template='{botname}, namelock')
 class _Command_LockName(C_template):
     name = ["namelock"]
     access = ["admin"]
     desc = "Лочит имя беседы"
     perm = 'chat.LockName'
     template = '{botname}, namelock'
-
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
@@ -523,7 +525,9 @@ class _Command_LockName(C_template):
         self.api.SaveConfig()
         return True
 
-@ModuleManager.command(names=["этослучилось", 'ithappens'], desc="Рандомная история с ithappens.me", perm='text.Zadolbali',template= '{botname}, этослучилось')
+
+@ModuleManager.command(names=["этослучилось", 'ithappens'], desc="Рандомная история с ithappens.me",
+                       perm='text.Zadolbali', template='{botname}, этослучилось')
 class Command_ithappens(C_template):
     name = ["этослучилось", 'ithappens']
     access = ["all"]
@@ -549,7 +553,6 @@ class Command_ithappens(C_template):
         s.feed(html)
         return s.get_data()
 
-    
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
         feed = feedparser.parse('http://www.ithappens.me/rss')['entries']
@@ -566,8 +569,10 @@ class Command_ithappens(C_template):
         # if __name__ == "__main__":
         #    Command_Zadolbali().execute(None,{})
 
-@ModuleManager.command(names=["блок"], desc="блокирует команду в чате", perm='chat.BlockCommand', template='{botname}, блок\n' \
-               'команда:название команды\n')
+
+@ModuleManager.command(names=["блок"], desc="блокирует команду в чате", perm='chat.BlockCommand',
+                       template='{botname}, блок\n' \
+                                'команда:название команды\n')
 class Command_banCommand(C_template):
     name = ["блок"]
     access = ["admin", "editor", "moderator"]
@@ -583,7 +588,9 @@ class Command_banCommand(C_template):
         else:
             self.api.Settings['bannedCommands'][comm] = [str(data.id)]
 
-@ModuleManager.command(names= ["выбери"], desc="Выбирает из представленных вариантов", perm='text.choice', template='{botname}, вариант1 вариант2 вариант3 вариантN ')
+
+@ModuleManager.command(names=["выбери"], desc="Выбирает из представленных вариантов", perm='text.choice',
+                       template='{botname}, вариант1 вариант2 вариант3 вариантN ')
 class Command_Choice(C_template):
     name = ["выбери"]
     access = ["all"]
@@ -591,15 +598,18 @@ class Command_Choice(C_template):
     perm = 'text.choice'
     template = '{botname}, вариант1 вариант2 вариант3 вариантN '
 
-    @staticmethod
+
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
-        var = random.choice(data.args)
+        var = random.choice(data.text.split(','))
         templates = ['Я выбираю: {}', "Вот это: {}", "Думаю это лучший вариант: {}"]
         args['message'] = random.choice(templates).format(var)
         self.api.Replyqueue.put(args)
 
-@ModuleManager.command(names= ["скажи"], desc='Произносит ваш текст на выбранном языке ("Имя бота", "нужный язык (2буквы)" " ВАШ ТЕКСТ")', perm='text.tts', template='{botname}, нужный язык(2буквы) ВАШ ТЕКСТ)')
+
+@ModuleManager.command(names=["скажи"],
+                       desc='Произносит ваш текст на выбранном языке ("Имя бота", "нужный язык (2буквы)" " ВАШ ТЕКСТ")',
+                       perm='text.tts', template='{botname}, нужный язык(2буквы) ВАШ ТЕКСТ)')
 class Command_TTS(C_template):
     enabled = gttsAvalable
     name = ["скажи"]
@@ -608,17 +618,16 @@ class Command_TTS(C_template):
     perm = 'text.tts'
     template = '{botname}, нужный язык(2буквы) ВАШ ТЕКСТ)'
 
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
         apiurl = f"https://api.vk.com/method/docs.getUploadServer?access_token={self.api.UserAccess_token}&type=audio_message&v=5.60"
         server = json.loads(urlopen(apiurl).read().decode('utf-8'))['response']['upload_url']
-		
+
         lang = data.args[0]
         tosay = data.args[1:]
         if lang not in gtts.gTTS.LANGUAGES:
             lang = 'ru'
-            tosay =data.args
+            tosay = data.args
         tts = gtts.gTTS(' '.join(tosay), lang=lang, debug=True)
         a = tempF.NamedTemporaryFile('w+b', suffix='.mp3', dir='tmp', delete=False)
         try:
@@ -640,9 +649,8 @@ class Command_TTS(C_template):
             self.api.Replyqueue.put(args)
 
 
-
-
-@ModuleManager.command(names= ['зашквар', "жир"], desc='Замеряет зашкварность сообщения', perm='text.zashkvar', template='{botname}, зашквар')
+@ModuleManager.command(names=['зашквар', "жир"], desc='Замеряет зашкварность сообщения', perm='text.zashkvar',
+                       template='{botname}, зашквар')
 class Command_Zashkvar(C_template):
     name = ['зашквар', "жир"]
     access = ['user']

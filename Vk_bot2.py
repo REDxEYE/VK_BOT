@@ -22,7 +22,7 @@ from User_Manager import *
 from utils.cookies import get_cookies
 from utils.cooldown import cooldown_manager
 from libs.tempfile_ import *
-
+import asyncio
 try:
     import aiml_.Core
 except ImportError:
@@ -38,7 +38,7 @@ except ImportError:
     ChatBotAvalible = False
     ChatBot = None
 from utils import ArgBuilder
-
+from socket_server import Server
 HDR = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -125,6 +125,7 @@ class Bot:
 
         self.Checkqueue = queue.Queue()
         self.Replyqueue = queue.Queue()
+        self.Serverqueue = queue.Queue()
         self.LP_threads = []
         self.EX_threadList = []
         for i in range(threads):
@@ -172,11 +173,41 @@ class Bot:
         self.MyUId = self.UserApi.users.get(v='5.60')[0]['id']
 
         self.MyName = self.GetUserNameById(self.MyUId, update=True)
+
+        self.server = Server.Server(sender = self.send_to_chat,api = self,message_queue = self.Serverqueue, database = self.USERS)
         try:
             aiml_.Core.InitCore(self)
         except:
             pass
         print('LOADED')
+
+    def send_to_chat(self,message,user_id,chat_id):
+        print(message,user_id,chat_id)
+        args = ArgBuilder.Args_message()
+        args.setpeer_id(int(chat_id)+2000000000)
+        args.setmessage(f"{self.GetUserNameById(user_id).Name}:{message}")
+        self.Replyqueue.put(args)
+
+    def get_chats(self):
+        chats = self.UserApi.messages.getDialogs(count = 10,v= '5.60')['items']
+
+        t = {}
+        for chat in chats:
+            try:
+                t[chat['message']['chat_id']] = chat['message']['title']
+            except KeyError:
+                continue
+        #chats = {a['message']['chat_id']:a['message']['title'] for a in chats}
+        return t
+
+
+
+
+
+
+
+
+
 
     def check_remixsid(self, force=False):
         print(time.time() - self.cookies_creation_time)
@@ -265,7 +296,7 @@ class Bot:
         """
         print(Id, type_='GetUserNameById/DEBUG')
         if self.USERS.isCached(Id) and case == 'nom' and not update:
-            print('Using cached data for user {}'.format(Id))
+            #print('Using cached data for user {}'.format(Id))
             User = self.USERS.getCache(str(Id))
 
         else:
@@ -481,6 +512,42 @@ class Bot:
 
             return f'doc{doc_["owner_id"]}_{doc_["id"]}', doc_
 
+    def UploadDocsDisk(self, urls: list) -> list:
+        """
+
+        Args:
+            urls (list): list of strings ( urls )
+
+        Returns:
+            list: list of strings ( doc )
+
+        """
+        atts = []
+
+        if isinstance(urls, str):
+            urls = [urls]
+        i = 0
+        for url in urls:
+            i += 1
+            print(f'downloading Doc№{i}')
+            server = self.UserApi.docs.getUploadServer()['upload_url']
+            req = urllib.request.Request(url, headers=HDR)
+            doc = urlopen(req).read()
+            name = url.split('/')[-1]
+            Tmp = TempFile(doc, name.split('.')[-1])
+            print('uploading file')
+            req = requests.post(server, files={'file': open(Tmp.path_, 'rb')})
+            Tmp.rem()
+            print('Done')
+            # req = requests.post(server,files = {'photo':img})
+            if req.status_code == requests.codes.ok:
+                # print('req',req.json())
+                params = {'file': req.json()['file'], 'title': name, 'v': 5.53}
+                doc_ = self.UserApi.docs.save(**params)[0]
+                atts.append(f'doc{doc_["owner_id"]}_{doc_["id"]}')
+        return atts
+
+
     def ExecCommands(self):
 
         def process_fwd_msg(message_: LongPoolHistoryMessage) -> LongPoolHistoryMessage:
@@ -551,7 +618,7 @@ class Bot:
 
                 subj = "PM" if "..." in data_.title else data_.title
 
-                usr = user.first_name + ' ' + user.last_name
+                usr = user.Name
 
                 msg = data_.body.replace('<br>', '\n| ')
 
@@ -575,7 +642,15 @@ class Bot:
 
         while True:
             PvUpdates = self.Checkqueue.get()
-            for message in PvUpdates.messages:
+            for message in PvUpdates.messages: #type: LongPoolHistoryMessage
+                try:
+                    for peername, client in self.server.clients.items():
+                        if client.connected_chat == int(message.chat_id)-2000000000:
+                            a = f'{self.GetUserNameById(message.user_id).Name}: {message.body}'
+                            print(a)
+                            self.server.send_to(peername, a)
+                except Exception as e:
+                    print('queue exception')
                 if message.hasAction:
                     self.SourceAct(message, PvUpdates)
                 sleep(0.3)
@@ -647,7 +722,6 @@ class Bot:
                                 self.Stat['commands'] += 1
                                 self.SaveConfig()
                             except Exception as Ex:
-
                                 print(Ex.__traceback__)
                                 print(Ex.__cause__)
                                 sleep(1)
@@ -666,17 +740,26 @@ class Bot:
                                                                                                               "Перешлите это сообщение владельцу бота")
                                 print(defargs['message'])
                                 # self.Reply(self.UserApi, args)
-                                self.Checkqueue.task_done()
-                                # self.Replyqueue.put(defargs)
+                                try:
+                                    self.Checkqueue.task_done()
+                                except ValueError:
+                                    pass
+                                #self.Replyqueue.put(defargs)
                         elif not self.MODULES.CanAfford(self.USERS.GetCurrency(user), Command):
                             defargs["message"] = "Нехватает валюты. Попробуйте обратиться к администрации"
-                            self.Checkqueue.task_done()
+                            try:
+                                self.Checkqueue.task_done()
+                            except ValueError:
+                                pass
                             self.Replyqueue.put(defargs)
                         elif not self.COOLDOWN.canUse(user) and not self.COOLDOWN.iswarned(user):
                             self.COOLDOWN.warned(user)
                             defargs[
                                 "message"] = "Вы превысили лимит команд. Последующий спам команд будет увеличивать время отката на 10 секунд"
-                            self.Checkqueue.task_done()
+                            try:
+                                self.Checkqueue.task_done()
+                            except ValueError:
+                                pass
                             self.Replyqueue.put(defargs)
 
                         elif not self.COOLDOWN.canUse(user) and self.COOLDOWN.iswarned(user):
@@ -685,13 +768,19 @@ class Bot:
                         else:
                             print('"Недостаточно прав"')
                             defargs["message"] = "Недостаточно прав"
-                            self.Checkqueue.task_done()
+                            try:
+                                self.Checkqueue.task_done()
+                            except ValueError:
+                                pass
                             self.Replyqueue.put(defargs)
 
                     elif ChatBotAvalible:
                         ans = self.chatbot.get_response(str(message.message))
                         defargs['message'] = ans
-                        self.Checkqueue.task_done()
+                        try:
+                            self.Checkqueue.task_done()
+                        except ValueError:
+                            pass
                         self.Replyqueue.put(defargs)
 
     def SourceAct(self, data: LongPoolHistoryMessage, LongPoolUpdate: Updates):

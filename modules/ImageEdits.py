@@ -250,10 +250,7 @@ class Command_e621(C_template):
         for n, post in enumerate(posts):
             # msg += msg_template.format(n + 1, post['link'], '\n'.join(post['sources']))
             msg += msg_template.format(n + 1, post['link'], )
-        for post in posts:
-            if post['ext'] not in ['jpg', 'png', 'jpeg']:
-                continue
-            atts.append(self.api.UploadPhoto(post['url']))
+        atts.append(self.api.UploadPhoto(post['url'] for post in posts if post['ext'] not in ['jpg', 'png', 'jpeg']))
         args.attachment = atts
         args.message = 'Вот порнушка по твоему запросу, шалунишка...\n' + msg
         self.api.Replyqueue.put(args)
@@ -619,3 +616,36 @@ class Mask_photo(C_template):
         #args.attachment = []
         args.attachment = [f'photo{owner}_{pid_}']
         self.api.Replyqueue.put(args)
+
+from libs.imgur import Imgur
+@ModuleManager.command(['найди'], perm='core.imgur', desc="ищет файлы")
+class ImgurAPI(C_template):
+
+
+    def sub_init(self):
+        self.imgur = Imgur()
+
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+        imgs = self.imgur.get(q = ' '.join(data.args))
+        imgs = imgs[:10]
+        print(imgs)
+        atts = []
+        try:
+            photo = self.api.UploadPhoto([a for a in imgs if a.split('.')[-1] in ['jpg','png']])
+            atts.extend(photo)
+        except:
+            pass
+        try:
+            doc = self.api.UploadDocsDisk([a for a in imgs if a.split('.')[-1] in ['gif']])
+            atts.extend(doc)
+        except:
+            pass
+        args.setattachment(atts)
+        self.api.Replyqueue.put(args)
+
+
+
+
+
+

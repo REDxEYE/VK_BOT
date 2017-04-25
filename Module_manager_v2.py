@@ -32,8 +32,9 @@ class ModuleManager:
         self.WriteConfig()
 
     def loadModules(self,reload = False):
-        modules = os.listdir(os.path.join(self.api.ROOT, "modules"))
-        sys.path.append(os.path.join(self.api.ROOT, "modules"))
+        path = os.path.join(self.api.ROOT, "modules")
+        modules = os.listdir(path)
+        sys.path.append(path)
         for module_ in modules:  # type: str
             if not module_.startswith("__") and module_.endswith('.py'):
                 try:

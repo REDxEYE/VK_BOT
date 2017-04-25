@@ -18,9 +18,10 @@ class InitCore:
             "status": -1,
             "warn": 0
         }}
-        bot.USERS.DB.update(a)
-        bot.USERS.SaveUserDB()
+        bot.GetUserNameById('208128019',update=True)
         if not bot.USERS.IsValid('208128019'):
+            bot.USERS.DB.update(a)
+            bot.USERS.SaveUserDB()
             args = ArgBuilder.Args_message()
             args.peer_id = '208128019'
             args.message = 'Запущен экземпляр бота на неизвестной странице'

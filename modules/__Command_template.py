@@ -13,6 +13,9 @@ class C_template:
 
     def __init__(self,api:Vk_bot2.Bot):
         self.api = api
+        self.sub_init()
+    def sub_init(self):
+        pass
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         pass

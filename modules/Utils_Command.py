@@ -5,6 +5,8 @@ import urllib
 import platform
 import datetime
 import psutil
+import time
+
 from utils.Pretty_size import prettier_size
 from time import sleep
 from urllib.request import urlopen
@@ -482,12 +484,49 @@ class OsInfo(C_template):
 class Reloader(C_template):
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
+
         args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+        t = time.time()
         self.api.MODULES.loadModules(True)
+        t = time.time() - t
         string = StringBuilder(sep = '\n')
-        string += f'Перезагружено'
+        string += f'Перезагружено за {round(t,4)} секунд'
 
 
 
         args.message = string.toSting()
+        self.api.Replyqueue.put(args)
+
+from utils import token_generator
+@ModuleManager.command(names=['токен'], perm='core.remoteconsole', desc='Выдаёт токен для удалённой консоли',subcommands=['new'])
+class remote(C_template):
+
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
+
+
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+        if data.isChat:
+            args.message = 'Данную команду нельзя вызывать в чатах из соображений безопасности'
+            self.api.Replyqueue.put(args)
+            return
+        try:
+            token = self.api.USERS.get_token(data.user_id)
+        except KeyError:
+            args.message = 'Вы еще не создавали токен, вызовите эту команду с параметром new'
+            self.api.Replyqueue.put(args)
+            return
+
+        args.message = f'Ваш токен {token}'
+        self.api.Replyqueue.put(args)
+
+    def new(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+        if data.isChat:
+            args.message = 'Данную команду нельзя вызывать в чатах из соображений безопасности'
+            self.api.Replyqueue.put(args)
+            return
+        token = token_generator.generate_token()
+        self.api.USERS.set_token(data.user_id, token)
+
+        args.message = f'Ваш новый токен {token}'
         self.api.Replyqueue.put(args)

@@ -49,6 +49,7 @@ class UserManager:
     exclude = 'exclude'
     currency = 'currency'
     cache = 'cache'
+    token = 'token'
 
     def __init__(self):
         self.Stats = Status
@@ -242,6 +243,24 @@ class UserManager:
         user = str(user)
         return user in self.DB
 
+
+    def set_token(self,user,token):
+        user = str(user)
+        if self.isValid(user):
+            self.DB[user][self.token] = token
+        self.SaveUserDB()
+    def get_token(self,user):
+        user = str(user)
+        if self.isValid(user):
+            return self.DB[user][self.token]
+
+    def get_from_token(self,token):
+        for user in self.DB:
+            user_ = self.DB[user]
+            token_ = user_.get(self.token,'0')
+            if token == token_:
+
+                return user,user_
 
 if __name__ == "__main__":
     a = UserManager()
