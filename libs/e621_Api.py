@@ -96,7 +96,7 @@ def e926(tags, n, page, sort_=None):
         return ss[:n]
 
 
-def e926v2(tags, n, sort_='score'):
+def e926v2(tags, n):
     hdr = {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -118,7 +118,7 @@ def e926v2(tags, n, sort_='score'):
     return Posts[:n]
 
 
-def e621v2(tags, n, sort_=None):
+def e621v2(tags, n):
     hdr = {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -138,15 +138,15 @@ def e621v2(tags, n, sort_=None):
 
 
 
-def get(tags, n, page, sort_):
+def get(tags, n):
     print(tags)
-    return e621v2(tags, n, sort_)
+    return e621v2(tags, n)
 
 
-def getSafe(tags, n, page, sort_):
+def getSafe(tags, n):
     print(tags)
-    return e926v2(tags, n, sort_)
+    return e926v2(tags, n)
 
 
 if __name__ == "__main__":
-    print(e621v2(['female', 'order:score', 'animated', 'fnaf', 'rating:q'], 50, 'score'))
+    print(e621v2(['female', 'order:score', 'animated', 'fnaf', 'rating:q'], 5))

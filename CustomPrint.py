@@ -2,8 +2,7 @@ import copy
 import sys
 import traceback
 from datetime import *
-
-
+import builtins
 def CustPrint(*text, type_=None, end=" ", file=None):
     if text[0] == Exception:
         text = [str(text)]
@@ -33,7 +32,8 @@ def CustPrint(*text, type_=None, end=" ", file=None):
     return
 
 
-print_ = copy.deepcopy(__builtins__['print'])
-__builtins__['print'] = CustPrint
-__builtins__['print_'] = print_
+print_ = copy.deepcopy(builtins.print)
+builtins.print = CustPrint
+builtins.print_ = print_
+
 print('custom print loaded')

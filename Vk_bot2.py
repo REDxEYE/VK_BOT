@@ -18,7 +18,9 @@ from DataTypes.attachments import attachment
 from DataTypes.user import user
 from DataTypes.group import group
 from Module_manager_v2 import *
+from Module_struct import Module
 from User_Manager import *
+from utils.StringBuilder import StringBuilder
 from utils.cookies import get_cookies
 from utils.cooldown import cooldown_manager
 from libs.tempfile_ import *
@@ -169,8 +171,16 @@ class Bot:
         self.ReplyThread.setDaemon(True)
         self.ReplyThread.setName('Reply Thread')
         self.ReplyThread.start()
+        try:
+            self.MyUId = self.UserApi.users.get(v='5.60')[0]['id']
+        except:
+            self.check_remixsid(True)
+            self.UserSession = SessionCapchaFix(access_token=self.UserAccess_token)
+            self.DefSession = SessionCapchaFix()
 
-        self.MyUId = self.UserApi.users.get(v='5.60')[0]['id']
+            self.UserApi = API(self.UserSession)
+            self.DefApi = API(self.DefSession)
+            self.MyUId = self.UserApi.users.get(v='5.60')[0]['id']
 
         self.MyName = self.GetUserNameById(self.MyUId, update=True)
 
@@ -547,6 +557,8 @@ class Bot:
                 atts.append(f'doc{doc_["owner_id"]}_{doc_["id"]}')
         return atts
 
+    from DataTypes.LongPoolHistoryUpdate import Updates
+
 
     def ExecCommands(self):
 
@@ -557,89 +569,6 @@ class Bot:
                 if fwd.hasAttachment:
                     message_.attachments.extend(fwd.attachments)
             return message_
-
-        from DataTypes.LongPoolHistoryUpdate import Updates
-
-        def print_message(data_: LongPoolHistoryMessage, LongPoolData: Updates):
-            # print_(data)
-            data_ = copy.deepcopy(data_)
-            p = '[\U0001F600-\U0001F64F]|[\U0001F300-\U0001F5FF]|[\U0001F680-\U0001F6FF]|[\U0001F1E0-\U0001F1FF]'
-            emoji_pattern = re.compile(p, re.VERBOSE)
-            data_.body = emoji_pattern.sub('', data_.body)
-
-            def process_attachments(_data: LongPoolHistoryMessage, _LongPoolData: Updates):
-                fwdMessages = []
-                attachments_ = []
-
-                def process_FWD(fwds: list, depth=1):
-
-                    for fwd in fwds:
-                        # fwd = fwd_message()
-                        if fwd.hasFwd:
-                            process_FWD(fwd.fwd_messages, depth + 1)
-
-                        templateFWD = '|{}{} : \n|{}| {}\n'
-                        try:
-                            try:
-                                Tuser = _LongPoolData.GetUserProfile(fwd.user_id)
-                                Tusr = Tuser.first_name + ' ' + Tuser.last_name
-                                Tmsg = fwd.body.replace('<br>', '\n| ')
-                                fwdMessages.append(
-                                    templateFWD.format('    ' * fwd.depth, Tusr, ' ' + '    ' * fwd.depth, Tmsg))
-                            except Exception:
-                                Tuser = user.Fill(self.USERS.getCache(fwd.user_id))
-                                Tusr = Tuser.first_name + ' ' + Tuser.last_name
-                                Tmsg = fwd.body.replace('<br>', '\n| ')
-                                fwdMessages.append(
-                                    templateFWD.format('    ' * fwd.depth, Tusr, ' ' + '    ' * fwd.depth, Tmsg))
-                        except Exception:
-                            fwdMessages.append(templateFWD.format(' ', 'ERROR', '', 'ERROR'))
-                            continue
-
-                process_FWD(_data.fwd_messages)
-                if _data.hasAttachment:
-                    for t in _data.attachments:
-                        if t.type == attachment.types.photo:
-                            template_attach = "{} : {}"
-                            attachments_.append(template_attach.format(t.type, t.photo.GetHiRes))
-
-                out = ''
-                out += ''.join(fwdMessages) if len(fwdMessages) > 0 else ''
-                out += '\n' if (len(fwdMessages) > 0) and (len(attachments_) > 0) else ''
-                out += ('Attachments :\n ' + '\n'.join(attachments_[::-1])) if len(attachments_) > 0 else ""
-                out += '\n' if len(attachments_) > 0 else ''
-                return out
-
-            try:
-                user = LongPoolData.GetUserProfile(data_.user_id)
-                template = '{} : {} : \n| {}\n'
-
-                template2 = '[ message_id : {} | peer_id : {} ]\n'
-
-                subj = "PM" if "..." in data_.title else data_.title
-
-                usr = user.Name
-
-                msg = data_.body.replace('<br>', '\n| ')
-
-                attachments = process_attachments(data_, LongPoolData)
-
-                toPrint = template.format(subj, usr, msg) + attachments + template2.format(message.id,
-                                                                                           message.chat_id) if self.DEBUG else '\n'
-                print(toPrint, type_="message")
-                self.log.write(toPrint)
-                self.log.flush()
-                os.fsync(self.log.fileno())
-                # print(data)
-            except Exception as ex:
-                print(ex.__traceback__)
-                print(ex.__cause__)
-
-                exc_type, exc_value, exc_traceback = sys.exc_info()
-                TB = traceback.format_tb(exc_traceback)
-                print(exc_type, exc_value, ''.join(TB))
-                pass
-
         while True:
             PvUpdates = self.Checkqueue.get()
             for message in PvUpdates.messages: #type: LongPoolHistoryMessage
@@ -660,49 +589,76 @@ class Bot:
                 if self.AdminModeOnly:
                     if 0 <= self.USERS.GetStatusId(message.user_id):
                         continue
-                defargs = {"peer_id": message.chat_id, "v": "5.60", "forward_messages": message.id}
+                defargs = ArgBuilder.Args_message().setpeer_id(message.chat_id).setforward_messages(message.id)
 
-                print_message(message, PvUpdates)
+                self.print_message(message, PvUpdates)
                 comm = message.body.split("\n")
-                temp = {}
+                message.custom = {}
                 for C in comm[1:]:
-                    C = str(C)
                     C = C.split(":")
-                    temp[C[0].replace(" ", "").lower()] = ':'.join(C[1:])
-                message.custom = temp
+                    message.custom[C[0].strip().lower()] = ':'.join(C[1:])
+
 
                 pattern = "^{}, ?|^{}, ?|^{}, ?|^{}, ?".format(self.MyName.first_name.lower(), self.MyName.first_name,
                                                                'ред', "Ред")
-                if message.body.startswith(self.prefix):
-                    Command = message.body[len(self.prefix):].split(' ')[0].lower()
-                    message.args = message.body[1:].split(' ')[1:]
-                    message.message = ' '.join(message.args)
-                    message.text = message.message
-                else:
-                    Command = str(re.split(pattern, comm[0])[-1])
-                    text = copy.deepcopy(Command)
-                    message.message = text
-                    message.text = ' '.join(text.split(' ')[1:])
-                    message.args = Command.split(' ')[1:]
-                    Command = Command.split(' ')[0].lower()
+
                 if (re.search(pattern, message.body) or message.body.startswith(self.prefix)) and int(
                         message.user_id) != int(self.MyUId):
                     message = process_fwd_msg(message)
-
+                    if message.body.startswith(self.prefix):
+                        Command = message.body[len(self.prefix):].split('\n')[0].split(' ')[0].lower()
+                        message.args = message.body[len(self.prefix):].strip().split('\n')[0].split(' ')[1:]
+                        message.message = message.body[len(self.prefix)+len(Command):].strip()
+                        message.text = message.body[len(self.prefix)+len(Command):].strip()
+                    else:
+                        Command = re.split(pattern, comm[0])[-1]
+                        Command_ = Command.split(' ')[0].lower()
+                        message.message = Command[len(Command_):].strip()
+                        message.text = Command[len(Command_):].strip()
+                        message.args = Command.split(' ')[1:]
+                        Command = Command_
                     if Command in self.Settings['bannedCommands']:
                         if message.chat_id in self.Settings['bannedCommands'][Command]:
                             self.Checkqueue.task_done()
-                            return
-
+                            continue
                     if self.MODULES.isValid(Command):
-                        funk = self.MODULES.GetModule(Command, message.args)
+                        funk = self.MODULES.GetModule(Command, message.args) #type: Module
                         user = message.user_id
                         self.COOLDOWN.adduser(user).chechUsers()
-                        print('can user', self.COOLDOWN.canUse(user))
                         if self.USERS.HasPerm(user, funk.perms) and self.MODULES.CanAfford(self.USERS.GetCurrency(user),
                                                                                            Command) and (
                                     self.COOLDOWN.canUse(user) or self.USERS.HasPerm(user, 'core.nolimit')):
                             self.COOLDOWN.useUser(user)
+
+
+                            if hasattr(funk.funk,'vars'):
+                                defargs.message = ''
+                                msg = StringBuilder(sep = '\n')
+                                for line in message.message.splitlines():
+                                    funk.funk.vars.parse(line)
+                                for var_ in funk.funk.vars.get_unfilled:
+                                    print(var_)
+                                    msg.append(f'Отсутствует обязательный параметр {var_.key}')
+                                if funk.funk.vars.has_missing:
+                                    self.Replyqueue.put(defargs.setmessage(msg.toSting()))
+                                    self.Checkqueue.task_done()
+                                    continue
+
+                            if hasattr(funk.funk,'side'):
+                                side = funk.funk.side
+                                print(side)
+                                if message.isChat and side == 2:
+                                    defargs.message = 'Данную команду нельзя вызывать в чате'
+                                    self.Replyqueue.put(defargs.AsDict_())
+                                    self.Checkqueue.task_done()
+                                    continue
+                                elif not message.isChat and side == 1:
+                                    defargs.message = 'Данную команду нельзя вызывать в личных сообщениях'
+                                    self.Replyqueue.put(defargs.AsDict_())
+                                    self.Checkqueue.task_done()
+                                    continue
+
+
                             try:
                                 print("Executing command {},\n arguments:{}".format(Command, message.args))
                                 print(message)
@@ -782,6 +738,85 @@ class Bot:
                         except ValueError:
                             pass
                         self.Replyqueue.put(defargs)
+
+    def print_message(self, data: LongPoolHistoryMessage, LongPoolData: Updates):
+        data = copy.deepcopy(data)
+        p = '[\U0001F600-\U0001F64F]|[\U0001F300-\U0001F5FF]|[\U0001F680-\U0001F6FF]|[\U0001F1E0-\U0001F1FF]'
+        emoji_pattern = re.compile(p, re.VERBOSE)
+        data.body = emoji_pattern.sub('', data.body)
+
+        def process_attachments(_data: LongPoolHistoryMessage, _LongPoolData: Updates):
+            fwdMessages = []
+            attachments_ = []
+
+            def process_FWD(fwds: list, depth=1):
+
+                for fwd in fwds:
+                    # fwd = fwd_message()
+                    if fwd.hasFwd:
+                        process_FWD(fwd.fwd_messages, depth + 1)
+
+                    templateFWD = '|{}{} : \n|{}| {}\n'
+                    try:
+                        try:
+                            Tuser = _LongPoolData.GetUserProfile(fwd.user_id)
+                            Tusr = Tuser.first_name + ' ' + Tuser.last_name
+                            Tmsg = fwd.body.replace('<br>', '\n| ')
+                            fwdMessages.append(
+                                templateFWD.format('    ' * fwd.depth, Tusr, ' ' + '    ' * fwd.depth, Tmsg))
+                        except Exception:
+                            Tuser = user.Fill(self.USERS.getCache(fwd.user_id))
+                            Tusr = Tuser.first_name + ' ' + Tuser.last_name
+                            Tmsg = fwd.body.replace('<br>', '\n| ')
+                            fwdMessages.append(
+                                templateFWD.format('    ' * fwd.depth, Tusr, ' ' + '    ' * fwd.depth, Tmsg))
+                    except Exception:
+                        fwdMessages.append(templateFWD.format(' ', 'ERROR', '', 'ERROR'))
+                        continue
+
+            process_FWD(_data.fwd_messages)
+            if _data.hasAttachment:
+                for t in _data.attachments:
+                    if t.type == attachment.types.photo:
+                        template_attach = "{} : {}"
+                        attachments_.append(template_attach.format(t.type, t.photo.GetHiRes))
+
+            out = ''
+            out += ''.join(fwdMessages) if len(fwdMessages) > 0 else ''
+            out += '\n' if (len(fwdMessages) > 0) and (len(attachments_) > 0) else ''
+            out += ('Attachments :\n ' + '\n'.join(attachments_[::-1])) if len(attachments_) > 0 else ""
+            out += '\n' if len(attachments_) > 0 else ''
+            return out
+
+        try:
+            user = LongPoolData.GetUserProfile(data.user_id)
+            template = '{} : {} : \n| {}\n'
+
+            template2 = '[ message_id : {} | peer_id : {} ]\n'
+
+            subj = "PM" if "..." in data.title else data.title
+
+            usr = user.Name
+
+            msg = data.body.replace('<br>', '\n| ')
+
+            attachments = process_attachments(data, LongPoolData)
+
+            toPrint = template.format(subj, usr, msg) + attachments + template2.format(data.id,
+                                                                                       data.chat_id) if self.DEBUG else '\n'
+            print(toPrint, type_="message")
+            self.log.write(toPrint)
+            self.log.flush()
+            os.fsync(self.log.fileno())
+            # print(data)
+        except Exception as ex:
+            print(ex.__traceback__)
+            print(ex.__cause__)
+
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            TB = traceback.format_tb(exc_traceback)
+            print(exc_type, exc_value, ''.join(TB))
+            pass
 
     def SourceAct(self, data: LongPoolHistoryMessage, LongPoolUpdate: Updates):
         """

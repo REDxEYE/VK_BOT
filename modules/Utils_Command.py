@@ -15,6 +15,7 @@ import requests
 
 from DataTypes.attachments import attachment
 from Module_manager_v2 import ModuleManager
+from Module_manager_v2 import Workside
 from libs.tempfile_ import TempFile
 from trigger import Trigger
 from utils.StringBuilder import StringBuilder
@@ -365,7 +366,9 @@ class Command_Graphity(C_template):
 
         apiurl = 'https://api.vk.com/method/docs.getUploadServer?access_token={}&type=graffiti&v=5.60'.format(
             self.api.UserAccess_token)
-        server = json.loads(urlopen(apiurl).read().decode('utf-8'))['response']['upload_url']
+        server = json.loads(urlopen(apiurl).read().decode('utf-8'))
+        print(server)
+        server = server['response']['upload_url']
         att = data.attachments[0]  # type: attachment
 
         if att.type == attachment.types.doc:
@@ -529,4 +532,26 @@ class remote(C_template):
         self.api.USERS.set_token(data.user_id, token)
 
         args.message = f'Ваш новый токен {token}'
+        self.api.Replyqueue.put(args)
+
+@ModuleManager.command(names=['тест'], perm='core.test', desc='тест')
+@ModuleManager.side(Workside.both)
+@ModuleManager.argument('test','Da','Net',True)
+@ModuleManager.argument('test2','Da','Net',False)
+class Test(C_template):
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
+
+
+        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+        args.message = 'тест'
+        if data.isChat:
+            msg = StringBuilder(sep= '\n')
+            msg.append('Параметры:')
+            msg.append(f"Параметр test, значение {self.vars.test}")
+            msg.append(f"Параметр test2, значение {self.vars.test2}")
+            args.message = msg.toSting()
+        else:
+            args.message = 'Это личка'
+
+
         self.api.Replyqueue.put(args)

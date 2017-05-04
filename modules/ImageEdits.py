@@ -20,7 +20,8 @@ try:
 except ImportError:
     windows = False
     ImageGrab = None
-
+No = False
+Yes = True
 from libs import e621_Api as e6, EveryPixel
 from libs.GlitchLib import Merge
 from libs.PIL_module import kok, kek, roll, rollsmast, add, resize_, Glitch2
@@ -159,26 +160,14 @@ class Command_Filter(C_template):
 
 
 @ModuleManager.command(names=["увеличь"], perm='photo.resize', desc="Позволяет увеличивать\уменьшать фото")
+@ModuleManager.argument('size', 1000, 'Желаемый размер, не более 3000', Yes)
 class Command_Resize(C_template):
-    name = ["увеличь"]
-    access = ["all"]
-    desc = "Позволяет увеличивать\уменьшать фото"
-    perm = 'photo.resize'
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
-        if 'size' in data.custom:
-            x = int(data.custom['size'])
-            if x > 3000:
-                args.message = "Неее, слишком жирно"
-                self.api.Replyqueue.put(args)
-                return False
-        else:
-            args.message = "Размер не указан"
-            self.api.Replyqueue.put(args)
-            return False
+        x = self.vars.size
         Topost = []
         for att in data.attachments:
             try:
@@ -218,104 +207,76 @@ from bs4 import *
 
 
 @ModuleManager.command(names=["e621"], perm='core.e621', desc="Ищет пикчи на e612",
-                       template="Ищет пикчи на e612, форма запроса:\n"\
-                                "{botname}, e621\n"\
-                                "tags:тэги через ;\n"\
-                                "sort:fav_count либо score либо вообще не пишите это, если хотите случайных\n"\
-                                "n:кол-во артов(максимум 10)\n"\
+                       template="Ищет пикчи на e612, форма запроса:\n" \
+                                "{botname}, e621\n" \
+                                "tags:тэги через ;\n" \
+                                "sort:fav_count либо score либо вообще не пишите это, если хотите случайных\n" \
+                                "n:кол-во артов(максимум 10)\n" \
                                 "page:страница на которой искать")
-class Command_e621(C_template):
-    name = ["e621"]
-    access = ["admin", "editor", "moderator"]
-    desc = "Ищет пикчи на e612"
-    perm = 'core.e621'
+@ModuleManager.argument('tags', 'female', 'Тэги через ";"', True)
+@ModuleManager.argument('n', 5, 'Кол-во фото', No)
 
+class Command_e621(C_template):
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
-        data.custom['tags'] = BeautifulSoup(data.custom['tags'], "html.parser").get_text()
-        tags = data.custom['tags'].replace(' ', '').split(';') if 'tags' in data.custom else None
-        if tags == None:
-            args.message = Command_e926.info
-            self.api.Replyqueue.put(args)
-            return True
-        n = int(data.custom['n']) if 'n' in data.custom else 5
-        page = int(data.custom['page']) if 'page' in data.custom else 1
-        sort_ = data.custom['sort'].replace(' ', '') if 'sort' in data.custom else 'score'
-        posts = e6.get(tags=tags, n=n, page=page, sort_=sort_)
+        tags = self.vars.tags.strip().split(';')
+        n = self.vars.n
+        posts = e6.get(tags=tags, n=n)
         msg_template = '{} - {}\n'
         msg = ""
         atts = []
         for n, post in enumerate(posts):
             # msg += msg_template.format(n + 1, post['link'], '\n'.join(post['sources']))
             msg += msg_template.format(n + 1, post['link'], )
-        atts.append(self.api.UploadPhoto(post['url'] for post in posts if post['ext'] not in ['jpg', 'png', 'jpeg']))
+            if post['ext'] not in ['jpg', 'png', 'jpeg']:
+                atts.append(self.api.UploadPhoto(post['url']))
         args.attachment = atts
         args.message = 'Вот порнушка по твоему запросу, шалунишка...\n' + msg
         self.api.Replyqueue.put(args)
 
+
 @ModuleManager.command(names=["e926"], perm='photo.e926', desc="Ищет пикчи на e612",
-                       template="Ищет пикчи на e926, форма запроса:\n"\
-                                "{botname}, e926\n"\
-                                "tags:тэги через ;\n"\
-                                "sort:fav_count либо score либо вообще не пишите это, если хотите случайных\n"\
-                                "n:кол-во артов(максимум 10)\n"\
-                                "page:страница на которой искать",cost=15)
+                       template="Ищет пикчи на e926, форма запроса:\n" \
+                                "{botname}, e926\n" \
+                                "tags:тэги через ;\n" \
+                                "sort:fav_count либо score либо вообще не пишите это, если хотите случайных\n" \
+                                "n:кол-во артов(максимум 10)\n" \
+                                "page:страница на которой искать", cost=15)
+@ModuleManager.argument('tags', 'female', 'Тэги через ";"', True)
+@ModuleManager.argument('n', 5, 'Кол-во фото', No)
 class Command_e926(C_template):
-    name = ["e926"]
-    access = ["all"]
-    info = """Ищет пикчи на e926, форма запроса:\n
-           Ред, e926\n
-           tags:тэги через ;\n
-           sort:fav_count либо score либо вообще не пишите это, если хотите случайных\n
-           n:кол-во артов(максимум 10)\n
-           page:страница на которой искать"""
-    desc = "Ищет пикчи на e926"
-    perm = 'photo.e926'
-    cost = 15
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
-        data.custom['tags'] = BeautifulSoup(data.custom['tags'], "html.parser").get_text()
-        tags = data.custom['tags'].replace(' ', '').split(';') if 'tags' in data.custom else None
-        if tags == None:
-            args.message = Command_e926.info
-            self.api.Replyqueue.put(args)
-            return True
-        n = int(data.custom['n']) if 'n' in data.custom else 5
-        page = int(data.custom['page']) if 'page' in data.custom else 1
-        sort_ = data.custom['sort'].replace(' ', '') if 'sort' in data.custom else 'score'
-        posts = e6.getSafe(tags=tags, n=n, page=page, sort_=sort_)
+        tags = self.vars.tags.strip().split(';')
+        n = self.vars.n
+        posts = e6.getSafe(tags=tags, n=n)
         msg_template = '{} - {}\n'
         msg = ""
+        atts = []
         for n, post in enumerate(posts):
             # msg += msg_template.format(n + 1, post['link'], '\n'.join(post['sources']))
             msg += msg_template.format(n + 1, post['link'], )
-
-        atts = []
-        for post in posts:
             if post['ext'] not in ['jpg', 'png', 'jpeg']:
-                continue
-            atts.append(self.api.UploadPhoto(post['url']))
+                atts.append(self.api.UploadPhoto(post['url']))
         args.attachment = atts
-        args.message = 'Вот пикчи по твоему запросу\n' + msg
+        args.message = 'Вот порнушка по твоему запросу, шалунишка...\n' + msg
         self.api.Replyqueue.put(args)
 
+
 @ModuleManager.command(names=["rollrows"], perm='photo.rollRows', desc="Сдвигает строки в фото")
+@ModuleManager.argument('delta', 20, 'Сила смещений', False)
 class Command_rollRows(C_template):
-    name = ["rollrows"]
-    access = ["all"]
-    desc = "Сдвигает строки в фото"
-    perm = 'photo.rollRows'
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
-        delta = int(data.custom['delta']) if 'delta' in data.custom else 20
+        delta = self.vars.delta
 
         Topost = []
         for att in data.attachments:
@@ -336,7 +297,9 @@ class Command_rollRows(C_template):
         args.message = ':D'
         self.api.Replyqueue.put(args)
 
+
 @ModuleManager.command(names=["rollsmart"], perm='photo.rollRowssmart', desc="Сдвигает строки в фото")
+@ModuleManager.argument('delta', 20, 'Сила смещений', False)
 class Command_rollRowssmart(C_template):
     name = ["rollsmart"]
     access = ["all"]
@@ -348,7 +311,7 @@ class Command_rollRowssmart(C_template):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
-        delta = int(data.custom['delta']) if 'delta' in data.custom else 20
+        delta = self.vars.delta
 
         Topost = []
         for att in data.attachments:
@@ -369,12 +332,9 @@ class Command_rollRowssmart(C_template):
         args.message = ':D'
         self.api.Replyqueue.put(args)
 
+
 @ModuleManager.command(names=["сложи"], perm='photo.add', desc="Соединяет 2 фото")
 class Command_AddImages(C_template):
-    name = ["сложи"]
-    access = ['all']
-    desc = "Соединяет 2 фото"
-    perm = 'photo.add'
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
@@ -412,12 +372,9 @@ class Command_AddImages(C_template):
         args.attachment = Topost
         self.api.Replyqueue.put(args)
 
+
 @ModuleManager.command(names=["совмести"], perm='photo.merge', desc="Соединяет 2 фото")
 class Command_merge(C_template):
-    name = ["совмести"]
-    access = ['all']
-    desc = "Соединяет 2 фото"
-    perm = 'photo.merge'
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
@@ -457,6 +414,7 @@ class Command_merge(C_template):
         args.attachment = Topost
         self.api.Replyqueue.put(args)
 
+
 @ModuleManager.command(names=["скрин"], perm='core.screen', desc="Скрин экрана")
 class Command_screen(C_template):
     enabled = windows
@@ -464,7 +422,6 @@ class Command_screen(C_template):
     access = ['admin']
     desc = "Скрин экрана"
     perm = 'core.screen'
-
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
@@ -479,14 +436,9 @@ class Command_screen(C_template):
         args.attachment = att
         self.api.Replyqueue.put(args)
 
+
 @ModuleManager.command(names=["глитч"], perm='photo.glitch', desc="Глючит фото")
 class Command_GlitchImg(C_template):
-    name = ["глитч"]
-    access = ["all"]
-    desc = "Глючит фото"
-    perm = 'photo.glitch'
-    cost = 0
-
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
@@ -511,13 +463,9 @@ class Command_GlitchImg(C_template):
         args.attachment = Topost
         self.api.Replyqueue.put(args)
 
+
 @ModuleManager.command(names=["everypixel"], perm='photo.everypixel', desc='Описывает ваше фото')
 class Command_everyPixel(C_template):
-    name = ['everypixel']
-    access = ['all']
-    desc = 'Описывает ваше фото'
-    perm = 'photo.everypixel'
-
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
@@ -535,10 +483,9 @@ class Command_everyPixel(C_template):
         args.message = tags_msg + 'Годнота этой пикчи - {}\n'.format(int(quality))
         self.api.Replyqueue.put(args)
 
-@ModuleManager.command(names=["маска",'цензура'], perm='core.mask', desc="маскирует фото")
+
+@ModuleManager.command(names=["маска", 'цензура'], perm='core.mask', desc="маскирует фото")
 class Mask_photo(C_template):
-
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
 
         args = ArgBuilder.Args_message()
@@ -548,7 +495,7 @@ class Mask_photo(C_template):
             args.message = 'Невозможно выполнить так-как нету печенек :C'
             self.api.Replyqueue.put(args)
             return
-        atts = data.attachments #type: list[attachment]
+        atts = data.attachments  # type: list[attachment]
         # print(atts)
         if len(atts) < 2:
             args.message = 'Нужны 2 файла'
@@ -571,10 +518,10 @@ class Mask_photo(C_template):
         img1 = urlopen(req1).read()
         Tmp500 = TempFile(img, 'jpg')
         Tmp1000 = TempFile(img1, 'jpg')
-        img1 = Image.open(open(Tmp500.path_,'rb'))
-        img1 = resize_(500,img1,ret=True)
+        img1 = Image.open(open(Tmp500.path_, 'rb'))
+        img1 = resize_(500, img1, ret=True)
         img1.save(Tmp500.path_)
-        img2 = Image.open(open(Tmp1000.path_,'rb'))
+        img2 = Image.open(open(Tmp1000.path_, 'rb'))
         img2 = resize_(1000, img2, ret=True)
         img2.save(Tmp1000.path_)
 
@@ -582,22 +529,22 @@ class Mask_photo(C_template):
         print(pid_)
         owner, pid_ = pid_[5:].split('_')
         args.message = 'Ща всё будет'
-        #args.attachment = [f'photo{owner}_{pid_}']
+        # args.attachment = [f'photo{owner}_{pid_}']
         self.api.Replyqueue.put(args)
         c = 0
 
         def replace(c):
             try:
-                replacePhoto(f'{owner}_{pid_}',Tmp500.path_,self.api.remixsed)
-                replacePhoto(f'{owner}_{pid_}',Tmp1000.path_,self.api.remixsed)
+                replacePhoto(f'{owner}_{pid_}', Tmp500.path_, self.api.remixsed)
+                replacePhoto(f'{owner}_{pid_}', Tmp1000.path_, self.api.remixsed)
                 img2 = Image.open(open(Tmp1000.path_, 'rb'))
                 img2 = resize_(1500, img2, ret=True)
                 img2.save(Tmp1000.path_)
-                replacePhoto(f'{owner}_{pid_}',Tmp1000.path_,self.api.remixsed)
-                replacePhoto(f'{owner}_{pid_}',Tmp500.path_,self.api.remixsed)
+                replacePhoto(f'{owner}_{pid_}', Tmp1000.path_, self.api.remixsed)
+                replacePhoto(f'{owner}_{pid_}', Tmp500.path_, self.api.remixsed)
             except:
-                c +=1
-                if c >2:
+                c += 1
+                if c > 2:
                     args.attachment = []
                     args.message = 'Чёто пошло совсем не так'
                     self.api.Replyqueue.put(args)
@@ -606,33 +553,34 @@ class Mask_photo(C_template):
                 replace(c)
 
         replace(c)
-        self.api.UserApi.photos.delete(owner_id = owner, photo_id = pid_)
-        self.api.UserApi.photos.restore(owner_id = owner, photo_id = pid_)
+        self.api.UserApi.photos.delete(owner_id=owner, photo_id=pid_)
+        self.api.UserApi.photos.restore(owner_id=owner, photo_id=pid_)
         Tmp500.cachefile(Tmp500.path_)
         Tmp1000.cachefile(Tmp1000.path_)
         Tmp500.rem()
         Tmp1000.rem()
         args.message = 'Вотъ'
-        #args.attachment = []
+        # args.attachment = []
         args.attachment = [f'photo{owner}_{pid_}']
         self.api.Replyqueue.put(args)
 
+
 from libs.imgur import Imgur
+
+
 @ModuleManager.command(['найди'], perm='core.imgur', desc="ищет файлы")
 class ImgurAPI(C_template):
-
-
     def sub_init(self):
         self.imgur = Imgur()
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
-        imgs = self.imgur.get(q = ' '.join(data.args))
+        imgs = self.imgur.get(q=' '.join(data.args))
         imgs = imgs[:10]
         print(imgs)
         atts = []
         try:
-            photo = self.api.UploadPhoto([a for a in imgs if a.split('.')[-1] in ['jpg','png']])
+            photo = self.api.UploadPhoto([a for a in imgs if a.split('.')[-1] in ['jpg', 'png']])
             atts.extend(photo)
         except:
             pass
@@ -643,9 +591,3 @@ class ImgurAPI(C_template):
             pass
         args.setattachment(atts)
         self.api.Replyqueue.put(args)
-
-
-
-
-
-

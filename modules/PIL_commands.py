@@ -24,6 +24,11 @@ except:
     from __Command_template import *
 
 @ModuleManager.command(names=["глюк"], perm='photo.glitch2', desc="Глючная обработка",cost=10)
+@ModuleManager.argument('sigma',5,'Сила смещений',False)
+@ModuleManager.argument('iter',150,'Кол-во семплов',False)
+@ModuleManager.argument('size',32,'Размер блока',False)
+@ModuleManager.argument('color',True,'Двигать каждый цвет отдельно (True либо False)',False)
+@ModuleManager.argument('rand',True,'Случайные размеры блока',False)
 class Command_Glitch_(C_template):
     name = ["глюк"]
     access = ['all']
@@ -33,11 +38,11 @@ class Command_Glitch_(C_template):
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
-        sigma = int(data.custom['sigma']) if 'sigma' in data.custom else 5
-        iter = int(data.custom['iter']) if 'iter' in data.custom else 150
-        size = int(data.custom['size']) if 'size' in data.custom else 32
-        Glitch_ = bool(data.custom['color']) if 'color' in data.custom else True
-        random_ = bool(data.custom['rand']) if 'rand' in data.custom else True
+        sigma = self.vars.sigma
+        iter = self.vars.iter
+        size = self.vars.size
+        Glitch_ = self.vars.color
+        random_ = self.vars.rand
         atts = data.attachments
         Topost = []
         for att in atts:
@@ -61,6 +66,13 @@ class Command_Glitch_(C_template):
         return True
 
 @ModuleManager.command(names=["глюкгиф"], perm='photo.glitchGif', desc="Глючная обработка гифки",cost=30)
+@ModuleManager.argument('sigma',5,'Сила смещений',False)
+@ModuleManager.argument('iter',150,'Кол-во семплов',False)
+@ModuleManager.argument('size',32,'Размер блока',False)
+@ModuleManager.argument('color',True,'Двигать каждый цвет отдельно (True либо False)',False)
+@ModuleManager.argument('rand',True,'Случайные размеры блока',False)
+@ModuleManager.argument('vsh',True,'Накладывать VSH эффект',False)
+@ModuleManager.argument('len_',30,'Кол-во кадров',False)
 class Command_GlitchGif_(C_template):
     name = ["глюкгиф"]
     access = ['admin', "editor", "moderator"]
@@ -70,13 +82,13 @@ class Command_GlitchGif_(C_template):
     
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
-        sigma = int(data.custom['sigma']) if 'sigma' in data.custom else 5
-        iter = int(data.custom['iter']) if 'iter' in data.custom else 150
-        size = int(data.custom['size']) if 'size' in data.custom else 32
-        vsh = bool(data.custom['vsh']) if 'vsh' in data.custom else False
-        Glitch_ = bool(data.custom['color']) if 'color' in data.custom else True
-        len_ = int(data.custom['len']) if 'len' in data.custom else 60
-        random_ = bool(data.custom['rand']) if 'rand' in data.custom else True
+        sigma = self.vars.sigma
+        iter = self.vars.iter
+        size = self.vars.size
+        Glitch_ = self.vars.color
+        random_ = self.vars.rand
+        vsh = self.vars.vsh
+        len_ = self.vars.len_
         atts = data.attachments # type: list[attachment}
         Topost = []
         for att in atts:

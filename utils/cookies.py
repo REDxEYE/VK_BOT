@@ -67,7 +67,7 @@ def get_cookies(email, password, client_id, scope = ['offline','notify','friends
         parser.params["email"] = email
         parser.params["pass"] = password
         if parser.method == "POST":
-            response = opener.open(parser.url, urlencode(parser.params))
+            response = opener.open(str(parser.url),urlencode(parser.params))
         else:
             raise NotImplementedError("Method '%s'" % parser.method)
         return response.read(), response.geturl()
@@ -80,7 +80,7 @@ def get_cookies(email, password, client_id, scope = ['offline','notify','friends
         if not parser.form_parsed or parser.url is None:
             raise RuntimeError("Something wrong")
         if parser.method == "POST":
-            response = opener.open(parser.url, urlencode(parser.params))
+            response = opener.open(str(parser.url), urlencode(parser.params))
         else:
             raise NotImplementedError("Method '%s'" % parser.method)
         return response.geturl()
@@ -104,6 +104,4 @@ def get_cookies(email, password, client_id, scope = ['offline','notify','friends
     return cookie._cookies['.vk.com']['/']['remixsid'].value,answer['access_token']
 
 
-if __name__ == '__main__':
-    a = get_cookies('375295655101', '1265347iZB', '5786393', ['offline','notify','friends','photos','audio','video','pages','status','notes','messages','wall','ads','offline','docs','groups','notifications','stats','email'])
-    print(a)
+

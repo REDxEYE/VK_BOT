@@ -10,6 +10,7 @@ class Module:
         self.subcommands = subcommands
         self.issubcommad = issubcommad
 
+
     @property
     def hasSubcommands(self):
         return len(self.subcommands)>0

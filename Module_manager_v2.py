@@ -1,3 +1,4 @@
+import distutils.util
 import importlib
 import inspect
 import os.path
@@ -11,27 +12,75 @@ import Module_struct
 from Vk_bot2 import Bot
 from utils.utils import getpath
 import CustomPrint
+
+
+class Argument_parser:
+    def __init__(self):
+        self.vars_ = []
+
+    def add(self, key, defval='', desc='None', required=False):
+        self.vars_.append(arg(key=key, desc=desc, required=required, defval=defval))
+        # print(self.vars_)
+        self.__dict__[key] = defval
+        return self
+
+    def parse(self, string: str):
+        t = string.strip().split(':')
+        key = t[0]
+        data = ':'.join(t[1:])
+        for var in self.vars_:  # type: arg
+            if var.key == key:
+
+                if type(var.defval) is bool:
+                    data = distutils.util.strtobool(data)
+                print(f'found arg {var.key} with val {data}')
+                self.__dict__[var.key] = type(var.defval)(data)
+
+    @property
+    def get_unfilled(self):
+        return [var for var in self.vars_ if (self.__dict__[var.key] == var.defval and var.required)]
+
+    @property
+    def has_missing(self):
+        return any(self.get_unfilled)
+
+    @property
+    def get_vars(self):
+        return self.vars_
+
+
+class Workside:
+    both = 0
+    chat = 1
+    pm = 2
+
+
+class arg:
+    def __init__(self, key, desc, required=False, defval=None):
+        self.key = key
+        self.desc = desc
+        self.required = required
+        self.defval = defval
+
+
 class ModuleManager:
     MODULES = []  # type: list[Module_struct.Module]
-    FILTERS = {} # type: dict[str,Module_struct.Filter]
+    FILTERS = {}  # type: dict[str,Module_struct.Filter]
     api = None
 
-
-    def __init__(self, api:Bot):
+    def __init__(self, api: Bot):
         self.setApi(api)
         self.CONGIFPATH = os.path.join(api.ROOT, 'modules', 'plugins.json')
+        self.Config = {}
         self.ReadConfig()
-        self.mods = [] # type: list[Module_struct.Filter]
+        self.mods = []  # type: list[Module_struct.Filter]
         self.loadModules()
 
-        print(f'LOADED {len(self.MODULES)} command and {len(self.FILTERS)} filters ',type_ = 'MODULE LOADER')
-
-
-
+        print(f'LOADED {len(self.MODULES)} command and {len(self.FILTERS)} filters ', type_='MODULE LOADER')
 
         self.WriteConfig()
 
-    def loadModules(self,reload = False):
+    def loadModules(self, reload=False):
         path = os.path.join(self.api.ROOT, "modules")
         modules = os.listdir(path)
         sys.path.append(path)
@@ -56,23 +105,48 @@ class ModuleManager:
 
     @classmethod
     def command(cls, names=["Change me"], perm='core.dev', desc='В разработке',
-                template='{botname}, данная команда в разработке', cost=0,subcommands = []):
-        def loader(funk):
+                template='{botname}, данная команда в разработке', cost=0, subcommands=[]):
+        def loader(funk) -> object:
             print(f'registered command "{names[0]}"')
             f = funk(cls.api)
             subs = {}
             for sub in subcommands:
-                subs[sub]=Module_struct.Module(names=[sub], perms=perm, desc=desc, template=template, cost=cost, funk=getattr(f,sub),issubcommad=True)
-            cls.MODULES.append(Module_struct.Module(names=names, perms=perm, desc=desc, template=template, cost=cost, funk=f,subcommands= subs))
+                subs[sub] = Module_struct.Module(names=[sub], perms=perm, desc=desc, template=template, cost=cost,
+                                                 funk=getattr(f, sub), issubcommad=True)
+            cls.MODULES.append(
+                Module_struct.Module(names=names, perms=perm, desc=desc, template=template, cost=cost, funk=f,
+                                     subcommands=subs))
+            return f
+
         return loader
 
+    @staticmethod
+    def side(side=Workside.both):
+        def loader(obj: object):
+            obj.side = side
+            return obj
+
+        return loader
+
+    @staticmethod
+    def argument(argname, defvalue, desc, required):
+
+        def loader(cls_: object):
+            if not hasattr(cls_, 'vars'):
+                cls_.vars = Argument_parser().add(key=argname, defval=defvalue, desc=desc, required=required)
+            else:
+                cls_.vars.add(key=argname, defval=defvalue, desc=desc, required=required)
+            return cls_
+
+        return loader
 
     @classmethod
-    def Filter(cls, name='changeme', desc='В разработке',):
+    def Filter(cls, name='changeme', desc='В разработке', ):
         def loader(funk):
             print(f'registered command "{name}"')
-            cls.FILTERS[name] = Module_struct.Filter(funk = funk,name=name,desc=desc)
+            cls.FILTERS[name] = Module_struct.Filter(funk=funk, name=name, desc=desc)
             return funk
+
         return loader
 
     @property
@@ -83,34 +157,38 @@ class ModuleManager:
     def setApi(cls, api):
         cls.api = api
 
-
-    def GetModule(self, name,args:list = None):
+    def GetModule(self, name, args: list = None):
         """
         :param name - module name
+        :param args - command args
         :rtype Module
+
+        Args:
+            name (str): module name 
+            args (list): command args
         """
-        for module in self.MODULES:
+        for module_ in self.MODULES:
             if args is not None:
-                if module.hasSubcommands and any(args):
+                if module_.hasSubcommands and any(args):
                     print(args)
-                    if args[0] in module.subcommands:
-                        c =args[0]
+                    if args[0] in module_.subcommands:
+                        c = args[0]
                         args.remove(args[0])
-                        return module.subcommands[c]
-            if name in module.names:
-                return module
+                        return module_.subcommands[c]
+            if name in module_.names:
+                return module_
 
     def GetFilter(self, name):
         return self.FILTERS[name]
 
     def isValid(self, name):
-        for module in self.MODULES:
-            if name in module.names:
+        for module_ in self.MODULES:
+            if name in module_.names:
                 return True
         return False
 
     def CanAfford(self, user_curr, name):
-        comm = self.GetModule(name,None)
+        comm = self.GetModule(name, None)
         if user_curr > comm.cost:
             return True
         else:
@@ -120,30 +198,28 @@ class ModuleManager:
         Available = []
         for perm in perms:
             core, sec = perm.split('.')
-            for module in self.MODULES:
-                ModPerm = module.perms
+            for module_ in self.MODULES:
+                ModPerm = module_.perms
                 ModCore, ModSec = ModPerm.split('.')
                 if core == ModCore and sec == ModSec:
-                    Available.append(module)
+                    Available.append(module_)
                 elif core == ModCore and sec == '*':
-                    Available.append(module)
+                    Available.append(module_)
                 else:
                     continue
         return Available
 
-
     def ReadConfig(self):
         if os.path.isfile(self.CONGIFPATH):
-            self.Config = ujson.load(open(self.CONGIFPATH,'r'))
+            self.Config = ujson.load(open(self.CONGIFPATH, 'r'))
         else:
             self.Config = {}
 
     def WriteConfig(self):
         if os.path.isfile(self.CONGIFPATH):
-            ujson.dump(self.Config,open(self.CONGIFPATH,'w'), indent=4, sort_keys=True)
+            ujson.dump(self.Config, open(self.CONGIFPATH, 'w'), indent=4, sort_keys=True)
         else:
-            ujson.dump(self.Config,open(self.CONGIFPATH,'w'), indent=4, sort_keys=True)
-
+            ujson.dump(self.Config, open(self.CONGIFPATH, 'w'), indent=4, sort_keys=True)
 
 
 if __name__ == '__main__':

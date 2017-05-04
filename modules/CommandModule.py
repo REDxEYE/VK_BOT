@@ -257,12 +257,6 @@ class Command_You(C_template):
 @ModuleManager.command(names=["команды", "помощь"], desc="Выводит это сообщение", perm='text.help',
                        template='"{botname}, помощь" или "{botname}, команды" - выводится список команд,\nа "{botname}, помощь НАЗВАНИЕ КОМАНДЫ" или "{botname}, команды НАЗВАНИЕ_КОМАНДЫ" - Выведет шаблон запроса')
 class Command_Help(C_template):
-    name = ["команды", "помощь"]
-    access = ['all']
-    desc = "Выводит это сообщение"
-    template = '"{botname}, помощь" или "{botname}, команды" - выводится список команд,\nа "{botname}, помощь НАЗВАНИЕ КОМАНДЫ" или "{botname}, команды НАЗВАНИЕ_КОМАНДЫ" - Выведет шаблон запроса'
-    perm = 'text.help'
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
         if len(data.args) >= 1 and data.args[0] != "":
@@ -285,10 +279,19 @@ class Command_Help(C_template):
 
         if self.api.MODULES.isValid(command):
             mod = self.api.MODULES.GetModule(command)
-            try:
-                args['message'] = mod.template.format(botname=self.api.MyName.first_name)
-            except:
-                args['message'] = mod.template.format(botname="Имя бота")
+            msg = StringBuilder(sep='\n')
+            msg += f'Команда: "{command}"'
+            msg += f'Информация: {mod.desc}'
+            msg += f'Альтернативы: {mod.names}'
+            msg += f'Уровень доступа: {mod.perms}'
+            if hasattr(mod.funk,'vars'):
+                msg += 'Параметры:'
+                for var in mod.funk.vars.get_vars:
+                    msg += f"&#8192;>>{var.key}"
+                    msg += f"&#8192;&#8192;&#8192;Описание: {var.desc}"
+                    msg += f"&#8192;&#8192;&#8192;Обязателен: {var.required}"
+                    msg += f"&#8192;&#8192;&#8192;Стандартное значене: {var.defval}"
+            args.message = msg.toSting()
 
         else:
             args['message'] = 'Неизвестная команда'
@@ -330,6 +333,7 @@ class Command_resend(C_template):
 
 @ModuleManager.command(names=["изгнать", "kick", "votekick"], desc="Изгоняет пользователя", perm='chat.kick',
                        template="{botname}, изгнать UID1 UID2 UID3")
+@ModuleManager.argument('id','','Id того кого нужно выгнать', False)
 class Command_kick(C_template):
     name = ["изгнать", "kick", "votekick"]
     access = ['admin', 'moderator', 'editor']
@@ -360,11 +364,6 @@ class Command_kick(C_template):
 @ModuleManager.command(names=["5nights"], desc="Добавляет в беседу", perm='text.joinChat',
                        template="{botname}, 5nights")
 class Command_JoinFiveNigths(C_template):
-    name = ["5nights"]
-    access = ["all"]
-    desc = "Добавляет в беседу"
-    perm = 'text.joinChat'
-    template = '{botname}, 5nights'
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
@@ -396,11 +395,6 @@ class Command_JoinFiveNigths(C_template):
 @ModuleManager.command(names=["инфо", "инфа", "info", 'stats', 'stat'], desc="Статистика", perm='text.info',
                        template='{botname}, инфо')
 class Command_StatComm(C_template):
-    name = ["инфо", "инфа", "info", 'stats', 'stat']
-    access = ["all"]
-    desc = "Статистика"
-    perm = 'text.info'
-    template = '{botname}, инфо'
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
@@ -419,11 +413,6 @@ class Command_StatComm(C_template):
 
 @ModuleManager.command(names=["дебаг"], desc="Врубает режим АдминОнли", perm='core.debug', template='{botname}, дебаг')
 class Command_AdminOnly(C_template):
-    name = ["дебаг"]
-    access = ["admin"]
-    desc = "Врубает режим АдминОнли"
-    perm = 'core.debug'
-    template = '{botname}, дебаг'
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
@@ -483,12 +472,6 @@ class _Command_BanAllGroupUsers(C_template):
 @ModuleManager.command(names=['about', 'ктоты'], desc='Выводит информацию о боте', perm='text.about',
                        template='{botname}, about')
 class Command_About(C_template):
-    name = ['about', 'ктоты']
-    access = ['all']
-    desc = 'Выводит информацию о боте'
-    perm = 'text.about'
-    template = '{botname}, about'
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
 
@@ -501,11 +484,6 @@ class Command_About(C_template):
 
 # @ModuleManager.command(names=["namelock"], desc="Лочит имя беседы", perm='chat.LockName',template='{botname}, namelock')
 class _Command_LockName(C_template):
-    name = ["namelock"]
-    access = ["admin"]
-    desc = "Лочит имя беседы"
-    perm = 'chat.LockName'
-    template = '{botname}, namelock'
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, forward=True):
         args = {"peer_id": data.chat_id, "v": "5.60", }
@@ -529,11 +507,6 @@ class _Command_LockName(C_template):
 @ModuleManager.command(names=["этослучилось", 'ithappens'], desc="Рандомная история с ithappens.me",
                        perm='text.Zadolbali', template='{botname}, этослучилось')
 class Command_ithappens(C_template):
-    name = ["этослучилось", 'ithappens']
-    access = ["all"]
-    desc = "Рандомная история с ithappens.me"
-    perm = 'text.Zadolbali'
-    template = '{botname}, этослучилось'
 
     class MLStripper(HTMLParser):
         def __init__(self):
@@ -573,16 +546,12 @@ class Command_ithappens(C_template):
 @ModuleManager.command(names=["блок"], desc="блокирует команду в чате", perm='chat.BlockCommand',
                        template='{botname}, блок\n' \
                                 'команда:название команды\n')
+@ModuleManager.argument('command','','Команда которую нужно забанить',True)
 class Command_banCommand(C_template):
-    name = ["блок"]
-    access = ["admin", "editor", "moderator"]
-    desc = "блокирует команду в чате"
-    perm = 'chat.BlockCommand'
-    template = '{botname}, блок\n' \
-               'команда:название команды\n'
+
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
-        comm = data.custom['команда']
+        comm = self.vars.command
         if comm in ['bannedCommands']:
             self.api.Settings['bannedCommands'][comm].append(str(data.id))
         else:
@@ -597,7 +566,6 @@ class Command_Choice(C_template):
     desc = "Выбирает из представленных вариантов"
     perm = 'text.choice'
     template = '{botname}, вариант1 вариант2 вариант3 вариантN '
-
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
         args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
