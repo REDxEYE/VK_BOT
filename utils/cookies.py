@@ -45,7 +45,7 @@ class FormParser(HTMLParser):
             self.form_parsed = True
 
 
-def get_cookies(email, password, client_id, scope = ['offline','notify','friends','photos','audio','video','pages','status','notes','messages','wall','ads','offline','docs','groups','notifications','stats','email']):
+def get_cookies(email, password, client_id, scope = ['offline','notify','friends','photos','audio','video','pages','status','notes','messages','wall','ads','docs','groups','notifications','stats','email']):
     def split_key_value(kv_pair):
         kv = kv_pair.split("=")
         return kv[0], kv[1]
