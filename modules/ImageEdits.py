@@ -491,7 +491,7 @@ class Mask_photo(C_template):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
         args.forward_messages = data.id
-        if self.api.remixsed == 0:
+        if self.api.remixsed == 0 or not self.api.remixsed_avalible:
             args.message = 'Невозможно выполнить так-как нету печенек :C'
             self.api.Replyqueue.put(args)
             return
