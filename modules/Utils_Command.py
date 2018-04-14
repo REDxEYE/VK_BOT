@@ -49,13 +49,7 @@ HDR = {
 @ModuleManager.command(names=['группа', 'groupinfo'], perm='text.groupinfo', desc="Выводит инфу о группе",
                        template='{botname}, группа ID группы')
 class Command_GetGroup(C_template):
-    name = ['группа', 'groupinfo']
-    access = ['user']
-    perm = 'text.groupinfo'
-    template = '{botname}, группа '
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
-        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
         if len(data.args) < 1:
             return False
         g = group.Fill(self.api.UserApi.groups.getById(v='5.60', group_id=data.args[0],
@@ -78,22 +72,15 @@ class Command_GetGroup(C_template):
             contacts.append(ContactTemplate.format(user.first_name, user.last_name, contact.desc,
                                                    contact.phone if contact.phone != None else ""))
             sleep(0.2)
-        args.message = GroupTemplate.format(g.name, g.members_count, g.description) + '\n'.join(contacts)
+        msg = GroupTemplate.format(g.name, g.members_count, g.description) + '\n'.join(contacts)
 
-        self.api.Replyqueue.put(args.AsDict_())
+        data.send_back(msg, [], True)
 
 
 @ModuleManager.command(names=['whois'], perm='text.whois',
                        desc="Выводит информацию о статусе и правах пользователя у бота", template='{botnmae}, whois')
 class Command_Whois(C_template):
-    name = ['whois']
-    access = ['user']
-    desc = 'Выводит информацию о вашем статусе и правах у бота'
-    perm = 'text.whois'
-    template = '{botnmae}, whois'
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
-        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
         bb = data.text.split(' ')
 
         try:
@@ -116,22 +103,13 @@ class Command_Whois(C_template):
         msg = msg_template.format(userstatus, userName.first_name, userName.last_name,
                                   ',\n'.join(userperms) if isinstance(userperms, list) else userperms, UD['reg'],
                                   UD['Bday'], UD['gender'])
-        args['message'] = msg
-        self.api.Replyqueue.put(args)
+        data.send_back(msg, [], True)
 
 
 @ModuleManager.command(names=['whoami', "uname",'профиль'], perm='text.whoami',
                        desc="Выводит информацию о вашем статусе и правах у бота", template='{botnmae}, whoami')
 class Command_AboutUser(C_template):
-    name = ['whoami', "uname"]
-    access = ['user']
-    desc = 'Выводит информацию о вашем статусе и правах у бота'
-    perm = 'text.whoami'
-    template = '{botname}, whoami'
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
-        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
-
         userperms = self.api.USERS.GetPerms(data.user_id)
         userstatus = self.api.USERS.GetStatus(data.user_id)
         UD = VK_foaf.GetUser(data.user_id)
@@ -146,37 +124,24 @@ class Command_AboutUser(C_template):
         string += f"║Баланс: {self.api.USERS.GetCurrency(data.user_id)}\n" \
                   f"╚════════════\n"
 
-        args['message'] = string.toSting()
-        self.api.Replyqueue.put(args)
+        data.send_back(string.toString(), [], True)
 
 
 @ModuleManager.command(names=['evaljs'], perm='core.EvJs', desc='Выполняет JS скрипт')
 class Command_EvalJS(C_template):
-    enabled = execjsAvalible
-    name = ['evaljs']
-    access = ['admin']
-    desc = 'Выполняет JS скрипт'
-    perm = 'core.EvJs'
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
-        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+
         code = self.api.html_decode(' '.join(data.body.split('<br>')[1:]))
         JavaScript = execjs.get(execjs.runtime_names.Node)
         print('JavaScript runtime -- ', execjs.get().name)
         js = JavaScript.eval(code)
 
-        args['message'] = 'Выполнено {}\n{}'.format(execjs.get().name, js)
-        self.api.Replyqueue.put(args)
+        msg = 'Выполнено {}\n{}'.format(execjs.get().name, js)
+        data.send_back(msg, [], True)
 
 
 @ModuleManager.command(names=['execjs'], perm='core.ExJs', desc='Выполняет JS скрипт, (вызываетмый метод - exec)')
 class Command_ExecJS(C_template):
-    enabled = execjsAvalible
-    name = ['execjs']
-    access = ['admin']
-    desc = 'Выполняет JS скрипт, (вызываетмый метод - exec)'
-    perm = 'core.ExJs'
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
         code = self.api.html_decode(' '.join(data.body.split('<br>')[1:]))
@@ -185,55 +150,34 @@ class Command_ExecJS(C_template):
         js = JavaScript.compile(code)
         js = js.call('exec')
 
-        args['message'] = 'Выполнено {}\n{}'.format(execjs.get().name, js)
-        self.api.Replyqueue.put(args)
+        msg = 'Выполнено {}\n{}'.format(execjs.get().name, js)
+        data.send_back(msg, [], True)
 
 
 @ModuleManager.command(names=['shutdown'], perm='core.shutdown', desc='Выключение бота', template='{botname}, shutdown')
 class Command_quit(C_template):
-    name = ["shutdown"]
-    access = ["admin"]
-    desc = "Выключение бота"
-    perm = 'core.shutdown'
-    template = '{botname}, shutdown'
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
-        args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id,
-                "message": "Увидимся позже"}
-        self.api.Replyqueue.put(args)
+        data.send_back("Увидимся позже", [], True)
         sleep(2)
         os._exit(0)
 
 
 @ModuleManager.command(names=['рестарт'], perm='core.restart', desc='Рестарт бота', template='{botname}, рестарт')
 class Command_restart(C_template):
-    name = ["рестарт"]
-    access = ['admin']
-    desc = "Рестарт бота"
-    perm = 'core.restart'
-    template = '{botname}, рестарт'
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         import sys
-        os.execl(sys.executable, sys.executable, os.path.join(self.api.ROOT, 'Vk_bot2.py'))
+        os.execl('"{}"'.format(sys.executable), '"{}"'.format(sys.executable), os.path.join(self.api.ROOT, 'Vk_bot2.py'))
 
 
 @ModuleManager.command(names=["py", "python"], perm='core.PY', desc="Выполняет код из сообщения",
                        template='{botname}, py\nВаш код здесь')
 class Command_ExecCode(C_template):
-    name = ["py", "python"]
-    access = ['admin']
-    desc = "Выполняет код из сообщения"
-    perm = 'core.PY'
-    template = '{botname}, py\nВаш код здесь'
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
-        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
         code = self.api.html_decode(data.body)
 
         code = '\n'.join(code.split('\n')[1:]).replace('|', '  ')
         code = code.replace('print', 'print_')
-        a = compile(code, '<string>', 'exec')
+        a = compile(code, "VK", 'exec')
         from io import StringIO
         import contextlib, sys, traceback
 
@@ -255,15 +199,14 @@ class Command_ExecCode(C_template):
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 TB = traceback.format_tb(exc_traceback)
 
-                args['message'] = "Не удалось выполнить, ошибка:{}\n {}\n {} \n {}".format(exc_type, exc_value,
+                msg = "Не удалось выполнить, ошибка:{}\n {}\n {} \n {}".format(exc_type, exc_value,
                                                                                            ''.join(TB),
                                                                                            "Перешлите это сообщение владельцу бота")
-                self.api.Replyqueue.put(args)
+                data.send_back(msg, [], True)
                 return
         template = """Принты:\n{}\nФинальный ответ:\n{}\n """
         out = template.format(s.getvalue(), str(l['out']) if 'out' in l else "None")
-        args['message'] = out
-        self.api.Replyqueue.put(args)
+        data.send_back(out, [], True)
         return True
 
 
@@ -278,7 +221,6 @@ class Command_triggers(C_template):
     perm = 'core.triggers'
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
-        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
         triggers = self.api.TRIGGERS
         t = []  # type: list[str]
         trigger_template = 'Тригер №{}\n' \
@@ -291,39 +233,27 @@ class Command_triggers(C_template):
                 lamb = inspect.getsource(trigger.cond)
                 lamb = lamb[lamb.find('lambda'):lamb.find(',', lamb.find('lambda'))]
                 t.append(trigger_template.format(n, lamb, trigger.timeout, trigger.onetime, trigger.infinite))
-            args.message = '\n'.join(t) + '\n.'
+            msg = '\n'.join(t) + '\n.'
         else:
-            args.message = 'Нету активных тригеров'
+            msg = 'Нету активных тригеров'
 
-        self.api.Replyqueue.put(args.AsDict_())
+        data.send_back(msg, [], True)
 
 
 @ModuleManager.command(names=['setprefix', 'префикс'], perm='core.prefix', desc='Устанавливает префикс')
 class Command_SetPrefix(C_template):
-    name = ['setprefix', 'префикс']
-    access = ['admin']
-    desc = 'Устанавливает префикс'
-    perm = 'core.prefix'
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
-        args = ArgBuilder.Args_message()
-        args.peer_id = data.chat_id
         if len(data.args) == 1:
             self.api.prefix = data.args[0]
             self.api.SaveConfig()
-            args.message = 'Новый префикс "{}" установлен'.format(data.args[0])
+            msg = 'Новый префикс "{}" установлен'.format(data.args[0])
         else:
-            args.message = 'Текущий префикс - {}'.format(self.api.prefix)
-        self.api.Replyqueue.put(args.AsDict_())
+            msg = 'Текущий префикс - {}'.format(self.api.prefix)
+        data.send_back(msg, [], True)
 
 
 @ModuleManager.command(names=['чат', 'chat'], perm='core.currchat', desc='Выводит инфу о чата')
 class Command_CurChat(C_template):
-    name = ['чат', 'chat']
-    access = ['admin']
-    desc = 'Выводит инфу о чата'
-    perm = 'core.currchat'
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
@@ -340,12 +270,12 @@ class Command_CurChat(C_template):
                        '»Список пользователей {}\n'
             chat = Updates.GetChat(int(data.chat_id) - 2000000000)
             print(chat.photo_200)
-            args.attachment = self.api.UploadPhoto(chat.photo_200)
-            args.message = template.format(str(chat.id), chat.title, str(chat.admin_id),
+            att = self.api.UploadPhoto(chat.photo_200)
+            msg = template.format(str(chat.id), chat.title, str(chat.admin_id),
                                            ('\n{}'.format('&#127;' * 23)).join(map(str, chat.users)))
         else:
-            args.message = 'Ну... Это как бы личка...'
-        self.api.Replyqueue.put(args.AsDict_())
+            msg = 'Ну... Это как бы личка...'
+        data.send_back(msg, [att], True)
 
 
 import DataTypes.doc
@@ -355,22 +285,14 @@ from io import BytesIO
 
 @ModuleManager.command(names=['граффити'], perm='core.graphity', desc='Заливает как графити')
 class Command_Graphity(C_template):
-    name = ['граффити']
-    access = ['admin']
-    desc = 'Заливает как графити'
-    perm = 'core.graphity'
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
-        args = ArgBuilder.Args_message()
-        args.peer_id = data.chat_id
-
         apiurl = 'https://api.vk.com/method/docs.getUploadServer?access_token={}&type=graffiti&v=5.60'.format(
             self.api.UserAccess_token)
         server = json.loads(urlopen(apiurl).read().decode('utf-8'))
         print(server)
         server = server['response']['upload_url']
         att = data.attachments[0]  # type: attachment
-
+        msg= ""
         if att.type == attachment.types.doc:
             if att.doc.type == DataTypes.doc.doc.DocTypes.gif or att.doc.type == DataTypes.doc.doc.DocTypes.img:
                 gif = att.doc.url
@@ -384,19 +306,19 @@ class Command_Graphity(C_template):
                     params = {'file': req.json()['file'], 'v': '5.60'}
                     doc = self.api.UserApi.docs.save(**params)[0]
                     Graff = 'doc{}_{}'.format(doc['owner_id'], doc['id'])
-                    args.attachment = Graff
+   
 
             elif att.doc.type == DataTypes.doc.doc.DocTypes.audio:
-                args.message = 'Аудио нельзя'
+                msg = 'Аудио нельзя'
             elif att.doc.type == DataTypes.doc.doc.DocTypes.archive:
-                args.message = 'Архивы нельзя'
+                msg = 'Архивы нельзя'
             elif att.doc.type == DataTypes.doc.doc.DocTypes.Ebook:
-                args.message = 'Книги нельзя'
+                msg = 'Книги нельзя'
             elif att.doc.type == DataTypes.doc.doc.DocTypes.video:
-                args.message = 'Видео нельзя'
+                msg = 'Видео нельзя'
             else:
-                args.message = 'Это нельзя'
-        if att.type == attachment.types.photo:
+                msg = 'Это нельзя'
+        elif att.type == attachment.types.photo:
             photo_url = att.photo.GetHiRes
             req = urllib.request.Request(photo_url, headers=HDR)
             img = Image.open(BytesIO(urlopen(req).read()))
@@ -409,17 +331,13 @@ class Command_Graphity(C_template):
                 params = {'file': req.json()['file'], 'v': '5.60'}
                 doc = self.api.UserApi.docs.save(**params)[0]
                 Graff = 'doc{}_{}'.format(doc['owner_id'], doc['id'])
-                args.attachment = Graff
-        self.api.Replyqueue.put(args)
+
+                msg = ""
+        data.send_back(msg, [Graff], True)
 
 
 @ModuleManager.command(names=['threads', "потоки"], perm='core.threads', desc='List all threads')
 class Command_Threads(C_template):
-    name = ['threads', "потоки"]
-    access = ['admin']
-    desc = 'List all threads'
-    perm = 'core.threads'
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message()
         args.peer_id = data.chat_id
@@ -428,17 +346,12 @@ class Command_Threads(C_template):
 
         for th in threading.enumerate():  # type: threading.Thread
             threads.append(template.format(th.name, th.isAlive()))
-        args.message = '\n'.join(threads) + '\nВсего живых - {}'.format(threading.active_count())
-        self.api.Replyqueue.put(args)
+        msg = '\n'.join(threads) + '\nВсего живых - {}'.format(threading.active_count())
+        data.send_back(msg, [], True)
 
 
 @ModuleManager.command(names=['обновименя'], perm='text.updateCache', desc='Обновляек кэш пользователя')
 class Command_updateCache(C_template):
-    name = ['обновименя']
-    access = ['all']
-    desc = 'Обновляек кэш пользователя'
-    perm = 'text.updateCache'
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         self.api.GetUserNameById(int(data.user_id), update=True)
 
@@ -446,24 +359,23 @@ class Command_updateCache(C_template):
 class ClearBD(C_template):
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates,):
-        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
-
+        msg = StringBuilder()
         for target in data.args:
             try:
                 user = DataTypes.user.user.Fill(self.api.USERS.DB[target]['cache'])
                 del self.api.USERS.DB[target]
-                args.message += f'Пользователь {user.Name} был удалён из базы данных\n'
+                msg += f'Пользователь {user.Name} был удалён из базы данных\n'
 
 
             except KeyError:
                 continue
-        self.api.Replyqueue.put(args)
+        data.send_back(msg, [], True)
 
 @ModuleManager.command(names=['система'], perm='text.sys', desc='Выводит информацию о система')
 class OsInfo(C_template):
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
-        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+
         string = StringBuilder(sep = '\n')
         ram = psutil.virtual_memory()
         cpu = psutil.cpu_freq()
@@ -480,25 +392,22 @@ class OsInfo(C_template):
         string += f'Время системы: {datetime.datetime.now()}'
 
 
-        args.message = string.toSting()
-        self.api.Replyqueue.put(args)
+
+        data.send_back(string.toString(), [], True)
 
 @ModuleManager.command(names=['reload'], perm='core.reload', desc='Перегрузка модулей')
 class Reloader(C_template):
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
 
-        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+
         t = time.time()
         self.api.MODULES.loadModules(True)
         t = time.time() - t
         string = StringBuilder(sep = '\n')
         string += f'Перезагружено за {round(t,4)} секунд'
 
-
-
-        args.message = string.toSting()
-        self.api.Replyqueue.put(args)
+        data.send_back(string.toString(), [], True)
 
 from utils import token_generator
 @ModuleManager.command(names=['токен'], perm='core.remoteconsole', desc='Выдаёт токен для удалённой консоли',subcommands=['new'])
@@ -507,32 +416,32 @@ class remote(C_template):
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
 
 
-        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
+
         if data.isChat:
-            args.message = 'Данную команду нельзя вызывать в чатах из соображений безопасности'
-            self.api.Replyqueue.put(args)
+            msg = 'Данную команду нельзя вызывать в чатах из соображений безопасности'
+            data.send_back(msg, [], True)
             return
         try:
             token = self.api.USERS.get_token(data.user_id)
         except KeyError:
-            args.message = 'Вы еще не создавали токен, вызовите эту команду с параметром new'
-            self.api.Replyqueue.put(args)
+            msg = 'Вы еще не создавали токен, вызовите эту команду с параметром new'
+            data.send_back(msg, [], True)
             return
 
-        args.message = f'Ваш токен {token}'
-        self.api.Replyqueue.put(args)
+        msg = f'Ваш токен {token}'
+        data.send_back(msg, [], True)
 
     def new(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
         if data.isChat:
-            args.message = 'Данную команду нельзя вызывать в чатах из соображений безопасности'
-            self.api.Replyqueue.put(args)
+            msg = 'Данную команду нельзя вызывать в чатах из соображений безопасности'
+            data.send_back(msg, [], True)
             return
         token = token_generator.generate_token()
         self.api.USERS.set_token(data.user_id, token)
 
-        args.message = f'Ваш новый токен {token}'
-        self.api.Replyqueue.put(args)
+        msg = f'Ваш новый токен {token}'
+        data.send_back(msg, [], True)
 
 @ModuleManager.command(names=['тест'], perm='core.test', desc='тест')
 @ModuleManager.side(Workside.both)
@@ -549,9 +458,19 @@ class Test(C_template):
             msg.append('Параметры:')
             msg.append(f"Параметр test, значение {self.vars.test}")
             msg.append(f"Параметр test2, значение {self.vars.test2}")
-            args.message = msg.toSting()
+            msg = msg.toString()
         else:
-            args.message = 'Это личка'
+            msg = 'Это личка'
+
+        data.send_back(msg, [], True)
+
+@ModuleManager.command(names=["ihj"], perm='core.ihj', desc="Все мы ненавидим жабу", cost=2)
+class Command_ihj(C_template):
 
 
-        self.api.Replyqueue.put(args)
+    def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
+        img = os.path.join(self.api.IMAGES,'ihj.png')
+        att = self.api.UploadFromDisk(img)
+
+        data.send_back("", [att], True)
+        return True

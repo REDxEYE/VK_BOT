@@ -5,7 +5,7 @@ from DataTypes.user import user
 from DataTypes.photo import photo
 from DataTypes.action import action
 
-
+from utils import ArgBuilder
 
 
 class LongPoolHistoryMessage:
@@ -24,13 +24,18 @@ class LongPoolHistoryMessage:
         self.hasFwd = False
         self.users_count = 0
         self.admin_id = 0
-        self.custom = {}
         self.attachments = []
         self.isChat = False
         self.hasAttachment = False
         self.text = ''
         self.message = ''
         self.args = []
+        self.name_args = []
+        self.api = None
+
+    def set_api(self,api):
+        self.api = api
+
     def __str__(self):
         return str(dict({var: str(vars(self)[var]) for var in vars(self)}))
 
@@ -38,7 +43,10 @@ class LongPoolHistoryMessage:
         return {var: vars(self)[var] for var in vars(self)}
         # source_act = Source_act
 
-
+    def send_back(self, message="", atts=None, fwd=False):
+        if atts is None:
+            atts = []
+        self.api.UserApi.messages.send(**ArgBuilder.Args_message().setmessage(message).setattachment(atts).setforward_messages(self.id if fwd else []).setpeer_id(self.chat_id).AsDict_())
 
 
 class Updates:
@@ -82,6 +90,7 @@ class Updates:
     def AsDict(self):
         return {var: vars(self)[var] for var in vars(self)}
 
+
 class fwd_message:
     def __init__(self):
         self.user_id = 0
@@ -92,18 +101,22 @@ class fwd_message:
         self.hasAttachment = False
         self.depth = 1
         self.attachments = []
+
     def __str__(self):
         return str(dict({var: str(vars(self)[var]) for var in vars(self)}))
 
     def AsDict(self):
         return {var: vars(self)[var] for var in vars(self)}
+
+
 def FillUpdates(resp) -> Updates:
     """
 
     Args:
         resp (dict): LongPoolHistory response
     """
-    def RecirsionFwd(fwd:dict,depth = 1) -> fwd_message:
+
+    def RecirsionFwd(fwd: dict, depth=1) -> fwd_message:
         tFwd = fwd_message()
         tFwd.user_id = fwd['user_id']
         tFwd.date = fwd['date']
@@ -111,21 +124,22 @@ def FillUpdates(resp) -> Updates:
         if 'attachments' in fwd:
             tFwd.hasAttachment = True
             for att in fwd['attachments']:
-                    fAttachment = attachment()
-                    fAttachment.type = att['type']
-                    if fAttachment.type == attachment.types.photo:
-                        fPhoto = photo.Fill(att['photo'])
-                        fAttachment.photo = fPhoto
-                    if fAttachment.type == attachment.types.doc:
-                        fDoc = doc.Fill(att['doc'])
-                        fAttachment.doc = fDoc
-                    tFwd.attachments.append(fAttachment)
+                fAttachment = attachment()
+                fAttachment.type = att['type']
+                if fAttachment.type == attachment.types.photo:
+                    fPhoto = photo.Fill(att['photo'])
+                    fAttachment.photo = fPhoto
+                if fAttachment.type == attachment.types.doc:
+                    fDoc = doc.Fill(att['doc'])
+                    fAttachment.doc = fDoc
+                tFwd.attachments.append(fAttachment)
         tFwd.depth = depth
         if 'fwd_messages' in fwd:
             tFwd.hasFwd = True
             for fwd2 in fwd['fwd_messages']:
-                tFwd.fwd_messages.append(RecirsionFwd(fwd2,depth+1))
+                tFwd.fwd_messages.append(RecirsionFwd(fwd2, depth + 1))
         return tFwd
+
     a = Updates()
     a.history = resp['history']
     for message in resp['messages']['items']:
@@ -138,17 +152,17 @@ def FillUpdates(resp) -> Updates:
         if 'attachments' in message:
             tMessage.hasAttachment = True
             for att in message['attachments']:
-                    tAttachment = attachment()
-                    tAttachment.type = att['type']
-                    if tAttachment.type == attachment.types.photo:
-                        tPhoto = photo.Fill(att['photo'])
-                        tAttachment.photo = tPhoto
+                tAttachment = attachment()
+                tAttachment.type = att['type']
+                if tAttachment.type == attachment.types.photo:
+                    tPhoto = photo.Fill(att['photo'])
+                    tAttachment.photo = tPhoto
 
-                    if tAttachment.type == attachment.types.doc:
-                        tDoc = doc.Fill(att['doc'])
-                        tAttachment.doc = tDoc
+                if tAttachment.type == attachment.types.doc:
+                    tDoc = doc.Fill(att['doc'])
+                    tAttachment.doc = tDoc
 
-                    tMessage.attachments.append(tAttachment)
+                tMessage.attachments.append(tAttachment)
         if 'fwd_messages' in message:
             tMessage.hasFwd = True
             for fwd in message['fwd_messages']:

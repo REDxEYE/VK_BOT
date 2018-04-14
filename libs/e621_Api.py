@@ -105,7 +105,7 @@ def e926v2(tags, n):
         'Accept-Language': 'en-US,en;q=0.8',
         'Connection': 'keep-alive'}
     linkTemplate = "http://e926.net/post/show/{}/"
-    js = json.loads(requests.request('GET', 'http://e926.net/post/index.json?tags={}'.format(' '.join(tags))).text)
+    js = json.loads(requests.request('GET', 'http://e926.net/post/index.json?tags={}'.format(' '.join(tags)),headers = hdr).text)
     Posts = []
 
     for post in js:
@@ -127,7 +127,7 @@ def e621v2(tags, n):
         'Accept-Language': 'en-US,en;q=0.8',
         'Connection': 'keep-alive'}
     linkTemplate = "http://e621.net/post/show/{}/"
-    js = json.loads(requests.request('GET', 'http://e621.net/post/index.json?tags={}'.format(' '.join(tags))).text)
+    js = json.loads(requests.request('GET', 'http://e621.net/post/index.json?tags={}'.format(' '.join(tags)),headers = hdr).text)
     #print(js)
     Posts = []
     for post in js[:n]:

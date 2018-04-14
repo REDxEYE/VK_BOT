@@ -1,8 +1,11 @@
 import os
 import uuid
+import warnings
 from os.path import isdir
 from random import randint
 from zipfile import *
+
+import sys
 
 
 def getpath():
@@ -48,9 +51,12 @@ class TempFile:
         self.cache.write(path_)
 
         self.cache.close()
-    def rem(self):
 
-        os.remove(self.path_)
+    def rem(self):
+        try:
+            os.remove(self.path_)
+        except Exception:
+            sys.stderr.write(f'Can\'t remove file {self.path_}')
 
     @staticmethod
     def generatePath(ras):

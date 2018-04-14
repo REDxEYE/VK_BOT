@@ -21,20 +21,13 @@ except:
 
 @ModuleManager.command(names=["wanted"], perm='photo.wanted', desc="Вставляет 2 фото внутрь фото с написью Разыскивается")
 class Command_WantedFunk(C_template):
-    name = ["wanted"]
-    access = ["all"]
-    desc = "Вставляет 2 фото внутрь фото с написью Разыскивается"
-    perm = 'photo.wanted'
-    cost = 5
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
-        args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
         atts = data.attachments
         # print(atts)
         Topost = []
         if len(atts) != 2:
-            args['message'] = 'Нужно 2 фотографии'
-            self.api.Replyqueue.put(args)
+            msg = 'Нужно 2 фотографии'
+            data.send_back(msg, [], True)
             return False
         try:
 
@@ -56,17 +49,16 @@ class Command_WantedFunk(C_template):
         Topost.append(att)
         Tmp.rem()
         Tmp1.rem()
-        args['attachment'] = Topost
-        self.api.Replyqueue.put(args)
+
+        data.send_back("", [att], True)
 
 @ModuleManager.command(names=["jontron"], perm='photo.jontron', desc="Вставляет фото в фото с ДжонТроном")
+@ModuleManager.argument('text','Meh...','Текст',False)
+@ModuleManager.argument('size',120,'Размер шрифта',False)
+@ModuleManager.argument('font','times.ttf','Шрифт',False)
+@ModuleManager.argument('x',100,'Х координата',False)
+@ModuleManager.argument('y',150,'Y координата',False)
 class Command_JonTronFunk(C_template):
-    name = ["jontron"]
-    access = ['all']
-    desc = "Вставляет фото в фото с ДжонТроном"
-    perm = 'photo.jontron'
-    cost = 5
-
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
         atts = data.attachments
@@ -87,11 +79,11 @@ class Command_JonTronFunk(C_template):
             Tmp.rem()
         except:
 
-            text = data.custom.get('text','Meh...')
-            size = int(data.custom.get('size',120))
-            font = data.custom.get('font','times.ttf')
-            x = int(data.custom.get('x', 100))
-            y = int(data.custom.get('y', 150))
+            text = self.vars.text
+            size = self.vars.size
+            font = self.vars.font
+            x = self.vars.x
+            y = self.vars.y
             if text == None:
                 return False
             _path = textPlain(text, size, font, x, y, 512, 512)
@@ -100,24 +92,21 @@ class Command_JonTronFunk(C_template):
             att = self.api.UploadFromDisk(_path)
             os.remove(_path)
             del _path
-        Topost.append(att)
-        args['attachment'] = Topost
-        self.api.Replyqueue.put(args)
+        data.send_back("",[att], True)
 
 @ModuleManager.command(names=["saymax"], perm='photo.saymax', desc="Даёте подержать ваше фото Сойке")
+@ModuleManager.argument('text','кок','Текст',False)
+@ModuleManager.argument('size',300,'Размер шрифта',False)
+@ModuleManager.argument('font','times.ttf','Шрифт',False)
+@ModuleManager.argument('x',250,'Х координата',False)
+@ModuleManager.argument('y',200,'Y координата',False)
 class Command_SayMaxFunk(C_template):
-    name = ["saymax"]
-    access = ['all']
-    desc = "Даёте подержать ваше фото Сойке"
-    perm = 'photo.saymax'
-    cost = 5
-	
-	
+
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates, ):
         args = {"peer_id": data.chat_id, "v": "5.60", "forward_messages": data.id}
         atts = data.attachments
         # print(atts)
-        Topost = []
+
 
         try:
 
@@ -132,11 +121,11 @@ class Command_SayMaxFunk(C_template):
             att = self.api.UploadFromDisk(Tmp.path_)
             Tmp.rem()
         except:
-            text = data.custom.get('text', 'кок')
-            size = int(data.custom.get('size', 300))
-            font = data.custom.get('font', 'times.ttf')
-            x = int(data.custom.get('x', 250))
-            y = int(data.custom.get('y', 200))
+            text = self.vars.text
+            size = self.vars.size
+            font = self.vars.font
+            x = self.vars.x
+            y = self.vars.y
             if text == None:
                 return False
             _path = textPlain(text, size, font, x, y, 1280, 720)
@@ -144,7 +133,4 @@ class Command_SayMaxFunk(C_template):
             att = self.api.UploadFromDisk(_path)
             os.remove(_path)
             del _path
-        Topost.append(att)
-
-        args['attachment'] = Topost
-        self.api.Replyqueue.put(args)
+            data.send_back('', [att], True)

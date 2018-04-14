@@ -1,10 +1,11 @@
 import time
 from DataTypes.LongPoolHistoryUpdate import LongPoolHistoryMessage
 import threading
-
+import ConsoleLogger
+LOGGER = ConsoleLogger.ConsoleLogger('TRIGGERS')
 
 class Trigger:
-    def __init__(self, cond, callback, onetime=True, timeout=20, infinite=False, *callbackArgs, **callbackKwArgs):
+    def __init__(self, cond, callback, onetime=True, timeout=20, infinite=False,name = 'DEFAULT',timeoutCallBack = None,owner = None, *callbackArgs, **callbackKwArgs):
         """
 
         Args:
@@ -17,6 +18,7 @@ class Trigger:
             **callbackKwArgs:
         """
         self.cond = cond
+        self.owner = owner
         self.callback = callback
         self.onetime = onetime
         self.timeout = timeout
@@ -43,7 +45,7 @@ class TriggerHandler:
         Args:
             *trigger (Trigger):
         """
-        print('Trigger registered!')
+        LOGGER.info('Trigger registered!')
         self.triggers.extend(trigger)
 
     def processTriggers(self, data:LongPoolHistoryMessage):
@@ -52,26 +54,25 @@ class TriggerHandler:
         Args:
             data (LongPoolHistoryMessage):
         """
-        for n, trigger in enumerate(self.triggers):
+        for n, trigger in enumerate(self.triggers): #type Trigger
 
             if time.time() - trigger.timestart > trigger.timeout and not trigger.infinite:
                 self.triggers.remove(trigger)
                 LocalcallbackArgs = list(trigger.callbackArgs)
                 LocalcallbackArgs.append(data)
                 trigger.callbackKwArgs['result'] = False
-                print(LocalcallbackArgs, trigger.callbackKwArgs)
+                LOGGER.debug(LocalcallbackArgs, trigger.callbackKwArgs)
                 th = threading.Thread(target=trigger.callback, args=LocalcallbackArgs, kwargs=trigger.callbackKwArgs)
                 th.setName('Trigger Callback thread {}'.format(n))
                 th.start()
                 th.join()
                 th.isAlive = False
             if trigger.cond(data):
-                print('Triggered, calling callback')
-                print(trigger.callbackArgs, trigger.callbackKwArgs)
+                LOGGER.info('Triggered, calling callback')
                 LocalcallbackArgs = list(trigger.callbackArgs)
                 LocalcallbackArgs.append(data)
                 trigger.callbackKwArgs['result'] = True
-                print(LocalcallbackArgs, trigger.callbackKwArgs)
+                LOGGER.debug(LocalcallbackArgs, trigger.callbackKwArgs)
                 th = threading.Thread(target=trigger.callback, args=LocalcallbackArgs, kwargs=trigger.callbackKwArgs)
                 th.setName('Trigger Callback thread {}'.format(n))
                 th.start()

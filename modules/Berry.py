@@ -21,14 +21,12 @@ class Command_PiStat(C_template):
     
     
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
-        args = ArgBuilder.Args_message().setpeer_id(data.chat_id).setforward_messages(data.id)
         template = 'Темпуратура CPU {} градусов\n' \
                    'Загруженность CPU {}%\n' \
                    'Оперативная память {}Мб\n' \
                    'Места на диске {}\n'
         msg = template.format(getCPUtemperature(), getCPUuse(), round(int(getRAMinfo()[2])/1024,3), getDiskSpace()[2])
-        args.message = msg
-        self.api.Replyqueue.put(args)
+        data.send_back(msg)
 
 
 class Command_GITPULL(C_template):
@@ -38,9 +36,6 @@ class Command_GITPULL(C_template):
     desc = 'git pull and git chechout'
 
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
-        args = ArgBuilder.Args_message()
-        args.peer_id = data.chat_id
-        args.forward_messages = data.id
         text = []
         p = os.popen('git pull -f')
 
@@ -51,8 +46,7 @@ class Command_GITPULL(C_template):
             t += 1
             if t > 100:
                 break
-        args.message = '\n'.join(text)
-        self.api.Replyqueue.put(args)
+        data.send_back('\n'.join(text))
 
 class Command_LevelUP(C_template):
     name = ['levelup']
@@ -63,10 +57,8 @@ class Command_LevelUP(C_template):
 
     @staticmethod
     def __call__(self, data: LongPoolHistoryMessage, LongPoolUpdates: Updates):
-        args = ArgBuilder.Args_message()
-        args.peer_id = data.id
-        args.message = 'Запущена процедура обновления!'
-        self.api.Replyqueue.put(args)
+        msg = 'Запущена процедура обновления!'
+        data.send_back(msg, [], True)
         p = os.popen('git pull -f')
         text = []
         text.append(p.readline())
@@ -76,13 +68,11 @@ class Command_LevelUP(C_template):
             t += 1
             if t > 100:
                 break
-        args.message = '\n'.join(text)
-        self.api.Replyqueue.put(args)
+
+        data.send_back('\n'.join(text))
         sleep(1)
-        args.message = 'Загрузка обновления закончена'
-        self.api.Replyqueue.put(args)
+        data.send_back('Загрузка обновления закончена')
         sleep(1)
-        args.message = 'Перезагрузка!'
-        self.api.Replyqueue.put(args)
+        data.send_back('Перезагрузка!')
         sleep(3)
         os.execl(sys.executable,sys.executable, os.path.join(self.api.ROOT, 'Vk_bot2.py'))

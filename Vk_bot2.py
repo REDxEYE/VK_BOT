@@ -6,25 +6,27 @@ import threading
 import urllib
 from math import *
 from time import sleep
-from typing import overload
+from typing import Dict
 from urllib.request import urlopen
+
 import requests
 import vk.exceptions as VKEX
 from PIL import Image
 from vk import *
+
 import trigger
 from DataTypes.LongPoolHistoryUpdate import Updates, LongPoolHistoryMessage, FillUpdates
 from DataTypes.attachments import attachment
 from DataTypes.user import user
-from DataTypes.group import group
 from Module_manager_v2 import *
 from Module_struct import Module
 from User_Manager import *
+from libs.tempfile_ import *
 from utils.StringBuilder import StringBuilder
+from utils.command_parser import Command_parser
 from utils.cookies import get_cookies
 from utils.cooldown import cooldown_manager
-from libs.tempfile_ import *
-import asyncio
+
 try:
     import aiml_.Core
 except ImportError:
@@ -41,6 +43,8 @@ except ImportError:
     ChatBot = None
 from utils import ArgBuilder
 from socket_server import Server
+import ConsoleLogger
+LOGGER = ConsoleLogger.ConsoleLogger('VK')
 HDR = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -136,7 +140,7 @@ class Bot:
             thread.setDaemon(True)
             thread.start()
             self.EX_threadList.append(thread)
-            print('Exec thread №{} started'.format(i))
+            LOGGER.info('Exec thread №{} started'.format(i))
         self.USERS = UserManager()
         self.MODULES = ModuleManager(self)
         self.DEBUG = DEBUG
@@ -150,7 +154,9 @@ class Bot:
 
         self.SaveConfig()
 
-        self.UserAccess_token = self.Settings['UserAccess_token']
+        self.UserAccess_token = self.Settings.get('UserAccess_token',False)
+        if not self.UserAccess_token:
+            self.check_remixsid(True)
         self.remixsed_avalible = True
         self.check_remixsid()
         if 'GroupAccess_token' in self.Settings:
@@ -185,22 +191,27 @@ class Bot:
 
         self.MyName = self.GetUserNameById(self.MyUId, update=True)
 
-        self.server = Server.Server(sender = self.send_to_chat,api = self,message_queue = self.Serverqueue, database = self.USERS)
+        self.server = Server.Server(sender=self.send_to_chat, api=self, message_queue=self.Serverqueue,
+                                    database=self.USERS)
+        pattern = "^{}, ?|^{}, ?|^{}, ?|^{}, ?".format(self.MyName.first_name.lower(), self.MyName.first_name,
+                                                       'ред', "Ред")
+        self.command_parser = Command_parser(self.prefix, pattern)
+
         try:
             aiml_.Core.InitCore(self)
         except:
             pass
-        print('LOADED')
+        LOGGER.info('LOADED')
 
-    def send_to_chat(self,message,user_id,chat_id):
-        print(message,user_id,chat_id)
+    def send_to_chat(self, message, user_id, chat_id):
+        LOGGER.debug(message, user_id, chat_id)
         args = ArgBuilder.Args_message()
-        args.setpeer_id(int(chat_id)+2000000000)
+        args.setpeer_id(int(chat_id) + 2000000000)
         args.setmessage(f"{self.GetUserNameById(user_id).Name}:{message}")
         self.Replyqueue.put(args)
 
     def get_chats(self):
-        chats = self.UserApi.messages.getDialogs(count = 10,v= '5.60')['items']
+        chats = self.UserApi.messages.getDialogs(count=10, v='5.60')['items']
 
         t = {}
         for chat in chats:
@@ -208,21 +219,12 @@ class Bot:
                 t[chat['message']['chat_id']] = chat['message']['title']
             except KeyError:
                 continue
-        #chats = {a['message']['chat_id']:a['message']['title'] for a in chats}
+        # chats = {a['message']['chat_id']:a['message']['title'] for a in chats}
         return t
-
-
-
-
-
-
-
-
-
 
     def check_remixsid(self, force=False):
         try:
-            print(time.time() - self.cookies_creation_time)
+            LOGGER.debug('Is token expired',time.time() - self.cookies_creation_time)
             if time.time() - self.cookies_creation_time > 86400 and not force:
                 self.remixsed, self.UserAccess_token = get_cookies(self.login, self.pass_, self.client_id)
                 self.cookies_creation_time = time.time()
@@ -261,8 +263,6 @@ class Bot:
         patt = re.compile('{}_([0-9]+)'.format(name), re.IGNORECASE)
         results = list([file_name for file_name in os.listdir(self.IMAGES) if patt.findall(file_name)])
 
-
-
         if len(results) != 0:
             return os.path.join(self.IMAGES, random.choice(results))
 
@@ -296,6 +296,7 @@ class Bot:
             s = s.replace(code[1], code[0])
         return s
 
+    # noinspection PyArgumentList
     def GetUserNameById(self, Id, case='nom', update=False) -> user:
 
         """
@@ -308,9 +309,9 @@ class Bot:
         Returns:
             user:User data
         """
-        print(Id, type_='GetUserNameById/DEBUG')
+        LOGGER.debug(Id)
         if self.USERS.isCached(Id) and case == 'nom' and not update:
-            #print('Using cached data for user {}'.format(Id))
+            # print('Using cached data for user {}'.format(Id))
             User = self.USERS.getCache(str(Id))
 
         else:
@@ -373,43 +374,38 @@ class Bot:
         if not os.path.exists(path + '/settings.json'):
             self.generateConfig(path)
         with open(path + '/settings.json', 'r') as config:
-            settings = json.load(config)
+            settings = json.load(config) #type: Dict[object]
 
-            try:
-                self.Stat = settings["stat"]
-            except KeyError:
-                self.Stat = {'messages': 0, 'commands': 0}
-            try:
-                self.prefix = settings['prefix']
-            except KeyError:
-                self.prefix = '\\\\'
+            self.Stat = settings.get('stat',{'messages': 0, 'commands': 0})
+            self.prefix = settings.get('prefix','\\\\')
+
             self.Settings = settings["settings"]
 
             if not self.token_only:
                 try:
                     self.cookies_creation_time = settings['cookies']
                 except KeyError:
-                    print('No cookies')
+                    LOGGER.warn('No cookies')
                     self.cookies_creation_time = 0.0
                 try:
                     self.login = settings['login']
                 except KeyError:
-                    print('No login')
+                    LOGGER.warn('No login')
                     self.login = input('Page login:')
                 try:
                     self.pass_ = settings['pass']
                 except KeyError:
-                    print('No password')
+                    LOGGER.warn('No password')
                     self.pass_ = input('Page password:')
                 try:
                     self.client_id = settings['client_id']
                 except KeyError:
-                    print('No client_id')
+                    LOGGER.warn('No client_id')
                     self.client_id = input('client_id:')
                 try:
                     self.remixsed = settings['remixsed']
                 except KeyError:
-                    print('No remixsed')
+                    LOGGER.warn('No remixsed')
                     self.remixsed = 0
 
     def SaveConfig(self):
@@ -448,14 +444,14 @@ class Bot:
         i = 0
         for url in urls:
             i += 1
-            print('downloading photo№{}'.format(i))
+            LOGGER.info('downloading photo№{}'.format(i))
             server = self.GetUploadServer()['upload_url']
             req = urllib.request.Request(url, headers=HDR)
             img = urlopen(req).read()
             Tmp = TempFile(img, 'jpg')
-            print('uploading photo №{}'.format(i))
+            LOGGER.info('uploading photo №{}'.format(i))
             req = requests.post(server, files={'photo': open(Tmp.file_(), 'rb')})
-            print('Done')
+            LOGGER.info('Done uploading photo #{}'.format(i))
             Tmp.rem()
 
             if req.status_code == requests.codes.ok:
@@ -483,10 +479,10 @@ class Bot:
             self.Stat['cache'] = 'NO CACHE'
         server = self.GetUploadServer()['upload_url']
 
-        print('uploading photo №')
+        LOGGER.info('uploading photo')
         req = requests.post(server, files={'photo': open(file, 'rb')})
 
-        print('Done')
+        LOGGER.info('Done uploading photo')
         # req = requests.post(server,files = {'photo':img})
         if req.status_code == requests.codes.ok:
             # print('req',req.json())
@@ -515,9 +511,9 @@ class Bot:
         """
         server = self.UserApi.docs.getUploadServer()['upload_url']
         name = file.split('/')[-1]
-        print('uploading file')
+        LOGGER.info('uploading file')
         req = requests.post(server, files={'file': open(file, 'rb')})
-        print('Done')
+        LOGGER.info('Done uploading file')
         # req = requests.post(server,files = {'photo':img})
         if req.status_code == requests.codes.ok:
             # print('req',req.json())
@@ -543,16 +539,16 @@ class Bot:
         i = 0
         for url in urls:
             i += 1
-            print(f'downloading Doc№{i}')
+            LOGGER.info(f'downloading Doc№{i}')
             server = self.UserApi.docs.getUploadServer()['upload_url']
             req = urllib.request.Request(url, headers=HDR)
             doc = urlopen(req).read()
             name = url.split('/')[-1]
             Tmp = TempFile(doc, name.split('.')[-1])
-            print('uploading file')
+            LOGGER.info('uploading file')
             req = requests.post(server, files={'file': open(Tmp.path_, 'rb')})
             Tmp.rem()
-            print('Done')
+            LOGGER.info('Done uploading file')
             # req = requests.post(server,files = {'photo':img})
             if req.status_code == requests.codes.ok:
                 # print('req',req.json())
@@ -563,7 +559,6 @@ class Bot:
 
     from DataTypes.LongPoolHistoryUpdate import Updates
 
-
     def ExecCommands(self):
 
         def process_fwd_msg(message_: LongPoolHistoryMessage) -> LongPoolHistoryMessage:
@@ -573,17 +568,21 @@ class Bot:
                 if fwd.hasAttachment:
                     message_.attachments.extend(fwd.attachments)
             return message_
+
         while True:
             PvUpdates = self.Checkqueue.get()
-            for message in PvUpdates.messages: #type: LongPoolHistoryMessage
+            for message in PvUpdates.messages:  # type: LongPoolHistoryMessage
+
                 try:
                     for peername, client in self.server.clients.items():
-                        if client.connected_chat == int(message.chat_id)-2000000000:
+                        if client.connected_chat == int(message.chat_id) - 2000000000:
                             a = f'{self.GetUserNameById(message.user_id).Name}: {message.body}'
                             print(a)
                             self.server.send_to(peername, a)
                 except Exception as e:
                     print('queue exception')
+
+
                 if message.hasAction:
                     self.SourceAct(message, PvUpdates)
                 sleep(0.3)
@@ -593,40 +592,21 @@ class Bot:
                 if self.AdminModeOnly:
                     if 0 <= self.USERS.GetStatusId(message.user_id):
                         continue
+
                 defargs = ArgBuilder.Args_message().setpeer_id(message.chat_id).setforward_messages(message.id)
 
                 self.print_message(message, PvUpdates)
-                comm = message.body.split("\n")
-                message.custom = {}
-                for C in comm[1:]:
-                    C = C.split(":")
-                    message.custom[C[0].strip().lower()] = ':'.join(C[1:])
 
-
-                pattern = "^{}, ?|^{}, ?|^{}, ?|^{}, ?".format(self.MyName.first_name.lower(), self.MyName.first_name,
-                                                               'ред', "Ред")
-
-                if (re.search(pattern, message.body) or message.body.startswith(self.prefix)) and int(
-                        message.user_id) != int(self.MyUId):
+                if self.command_parser.check_for_command(message.body) and int(message.user_id) != int(self.MyUId):
                     message = process_fwd_msg(message)
-                    if message.body.startswith(self.prefix):
-                        Command = message.body[len(self.prefix):].split('\n')[0].split(' ')[0].lower()
-                        message.args = message.body[len(self.prefix):].strip().split('\n')[0].split(' ')[1:]
-                        message.message = message.body[len(self.prefix)+len(Command):].strip()
-                        message.text = message.body[len(self.prefix)+len(Command):].strip()
-                    else:
-                        Command = re.split(pattern, comm[0])[-1]
-                        Command_ = Command.split(' ')[0].lower()
-                        message.message = Command[len(Command_):].strip()
-                        message.text = Command[len(Command_):].strip()
-                        message.args = Command.split(' ')[1:]
-                        Command = Command_
+                    Command, message.args, message.text = self.command_parser.parse(message.body)
+                    message.message = message.text
                     if Command in self.Settings['bannedCommands']:
                         if message.chat_id in self.Settings['bannedCommands'][Command]:
                             self.Checkqueue.task_done()
                             continue
                     if self.MODULES.isValid(Command):
-                        funk = self.MODULES.GetModule(Command, message.args) #type: Module
+                        funk = self.MODULES.GetModule(Command, message.args)  # type: Module
                         user = message.user_id
                         self.COOLDOWN.adduser(user).chechUsers()
                         if self.USERS.HasPerm(user, funk.perms) and self.MODULES.CanAfford(self.USERS.GetCurrency(user),
@@ -634,59 +614,50 @@ class Bot:
                                     self.COOLDOWN.canUse(user) or self.USERS.HasPerm(user, 'core.nolimit')):
                             self.COOLDOWN.useUser(user)
 
-
-                            if hasattr(funk.funk,'vars'):
+                            if hasattr(funk.funk, 'vars'):
                                 defargs.message = ''
-                                msg = StringBuilder(sep = '\n')
+                                msg = StringBuilder(sep='\n')
                                 for line in message.message.splitlines():
                                     funk.funk.vars.parse(line)
                                 for var_ in funk.funk.vars.get_unfilled:
-                                    print(var_)
+                                    # print(var_)
                                     msg.append(f'Отсутствует обязательный параметр {var_.key}')
                                 if funk.funk.vars.has_missing:
                                     self.Replyqueue.put(defargs.setmessage(msg.toSting()))
-                                    self.Checkqueue.task_done()
+
                                     continue
 
-                            if hasattr(funk.funk,'side'):
+                            if hasattr(funk.funk, 'side'):
                                 side = funk.funk.side
-                                print(side)
-                                if message.isChat and side == 2:
+                                # print(side)
+                                if message.isChat and side == Workside.pm:
                                     defargs.message = 'Данную команду нельзя вызывать в чате'
                                     self.Replyqueue.put(defargs.AsDict_())
-                                    self.Checkqueue.task_done()
+
                                     continue
-                                elif not message.isChat and side == 1:
+                                elif not message.isChat and side == Workside.chat:
                                     defargs.message = 'Данную команду нельзя вызывать в личных сообщениях'
                                     self.Replyqueue.put(defargs.AsDict_())
-                                    self.Checkqueue.task_done()
+
                                     continue
 
-
                             try:
-                                print("Executing command {},\n arguments:{}".format(Command, message.args))
-                                print(message)
+                                LOGGER.debug("Executing command {},\n arguments:{}".format(Command, message.args))
+                                # print(message)
 
                                 stat = funk.funk(message, PvUpdates)
                                 self.USERS.pay(user, funk.cost)
-                                if stat == False:
-                                    print(self.MyName)
-                                    defargs['message'] = 'Неправильно оформлен запрос. Пример запроса : {}'.format(
-                                        funk.template.format(botname=self.MyName.first_name))
-                                    self.Checkqueue.task_done()
-                                    self.Replyqueue.put(defargs)
-                                    continue
                                 if stat == 'Error':
                                     pass
-                                self.Checkqueue.task_done()
                                 self.Stat['commands'] += 1
                                 self.SaveConfig()
-                            except Exception as Ex:
-                                print(Ex.__traceback__)
-                                print(Ex.__cause__)
+                            except VKEX.VkAPIError as E: #type: VKEX.VkAPIError
+                                E = E #type: VKEX.VkAPIError
+                                LOGGER.warn(E.code)
+                                LOGGER.warn(E.message)
                                 sleep(1)
-                                if 'many requests per second' in str(Ex):
-                                    print('Too many requests per second')
+                                if E.code == 6:
+                                    LOGGER.warn('Too many requests per second')
                                     # self.Checkqueue.put(data,timeout=5)
                                     continue
 
@@ -698,49 +669,29 @@ class Bot:
                                                                                                               ''.join(
                                                                                                                   TB),
                                                                                                               "Перешлите это сообщение владельцу бота")
-                                print(defargs['message'])
-                                # self.Reply(self.UserApi, args)
-                                try:
-                                    self.Checkqueue.task_done()
-                                except ValueError:
-                                    pass
-                                #self.Replyqueue.put(defargs)
+                                # print(defargs['message'])
                         elif not self.MODULES.CanAfford(self.USERS.GetCurrency(user), Command):
                             defargs["message"] = "Нехватает валюты. Попробуйте обратиться к администрации"
-                            try:
-                                self.Checkqueue.task_done()
-                            except ValueError:
-                                pass
                             self.Replyqueue.put(defargs)
                         elif not self.COOLDOWN.canUse(user) and not self.COOLDOWN.iswarned(user):
                             self.COOLDOWN.warned(user)
                             defargs[
                                 "message"] = "Вы превысили лимит команд. Последующий спам команд будет увеличивать время отката на 10 секунд"
-                            try:
-                                self.Checkqueue.task_done()
-                            except ValueError:
-                                pass
                             self.Replyqueue.put(defargs)
 
                         elif not self.COOLDOWN.canUse(user) and self.COOLDOWN.iswarned(user):
                             continue
 
                         else:
-                            print('"Недостаточно прав"')
+                            # print('"Недостаточно прав"')
                             defargs["message"] = "Недостаточно прав"
-                            try:
-                                self.Checkqueue.task_done()
-                            except ValueError:
-                                pass
                             self.Replyqueue.put(defargs)
 
                     elif ChatBotAvalible:
                         ans = self.chatbot.get_response(str(message.message))
+                        if ans == '':
+                            continue
                         defargs['message'] = ans
-                        try:
-                            self.Checkqueue.task_done()
-                        except ValueError:
-                            pass
                         self.Replyqueue.put(defargs)
 
     def print_message(self, data: LongPoolHistoryMessage, LongPoolData: Updates):
@@ -808,7 +759,7 @@ class Bot:
 
             toPrint = template.format(subj, usr, msg) + attachments + template2.format(data.id,
                                                                                        data.chat_id) if self.DEBUG else '\n'
-            print(toPrint, type_="message")
+            print(toPrint)
             self.log.write(toPrint)
             self.log.flush()
             os.fsync(self.log.fileno())
@@ -829,7 +780,7 @@ class Bot:
             data (LongPoolMessage): Message
             LongPoolUpdate (LongPoolUpdate): Updates
         """
-        print('Что то с Актом пришло')
+        LOGGER.debug('Что то с Актом пришло')
         Targs = {"peer_id": data.chat_id, "v": "5.60"}
         if type == 'chat_photo_update':
             ChatAdmin = data.admin_id
@@ -868,7 +819,7 @@ class Bot:
             target = data.action.action_mid  # Кого пригласил
 
             if int(target) == self.MyUId or int(who) == self.MyUId:
-                print('Сам себя')
+                LOGGER.debug('Сам себя')
                 return
             if (not self.USERS.HasPerm(who, 'chat.invite')) or self.USERS.GetStatusId(target) < 99:
                 Targs['message'] = 'Вы не имеете права приглашать людей в данную беседу'
@@ -878,14 +829,14 @@ class Bot:
                 self.UserApi.messages.removeChatUser(v=5.45, chat_id=data.chat_id - 2000000000, user_id=target)
 
             else:
-                print('Приглашен администрацией')
+                LOGGER.debug('Приглашен администрацией')
         if type == 'chat_kick_user':
             if int(data.user_id) == int(self.MyUId):
                 return
 
             if int(data.user_id) == int(data.action.action_mid):
                 user = self.GetUserNameById(data.action.action_mid)
-                print(user)
+                # print(user)
                 try:
                     sex = user.sex
                     if sex == 2:
@@ -908,7 +859,7 @@ class Bot:
         while True:
 
             try:
-                if (server == ''):
+                if server == '':
                     results = self.UserApi.messages.getLongPollServer()
                     server = results['server']
                     key = results['key']
@@ -919,11 +870,13 @@ class Bot:
                     req = requests.request('GET', url.format(server, key, ts)).json()
 
                 except Exception:
-                    print('TIMEOUT ERROR, reconnecting in 5 seconds')
+                    LOGGER.error('TIMEOUT ERROR, reconnecting in 5 seconds')
                     sleep(5)
                     server = ""
                     ts = ""
                     key = ""
+                    continue
+                if 'updates' not in req:
                     continue
                 if len(req['updates']) > 0:
                     hasMsg = False
@@ -935,7 +888,11 @@ class Bot:
                         self.parseLongPoolHistory(ts)
                         ts = req['ts']
 
-            except:
+            except Exception as Exc:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                TB = traceback.format_tb(exc_traceback)
+                print(exc_type,exc_value,'\n'.join(TB))
+                print(Exc)
                 print('TIMEOUT ERROR, reconnecting in 5 seconds')
                 sleep(5)
                 server = ""
@@ -981,11 +938,8 @@ class Bot:
         self.Checkqueue.put(updates)
 
 
-from utils.overload_fixed import Overload, signature
-
-
-def MultipleStrCheck(string: str, list: list) -> bool:
-    for item in list:
+def MultipleStrCheck(string: str, list_: list) -> bool:
+    for item in list_:
         if item in string:
             return True
     return False
@@ -1013,7 +967,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.resend:
         ArgBuilder.Args_message.DoNotResend()
+    ArgBuilder.Args_message.DoNotResend()
     bot = Bot(DEBUG=True, threads=int(args.threads), token_only=args.token_only)
-    CustomTriggers(bot)
-    print(f'Loaded in {time.time()-s} seconds')
+    # CustomTriggers(bot)
+    LOGGER.info(f'Loaded in {time.time()-s} seconds')
     bot.ContiniousMessageCheck()

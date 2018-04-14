@@ -5,7 +5,7 @@ import random
 import cv2
 import imageio
 import numpy as np
-from PIL import Image, ImageSequence, ImageChops, ImageFont, ImageDraw, ImageEnhance
+from PIL import Image, ImageSequence, ImageChops, ImageFont, ImageDraw, ImageEnhance, ImageOps
 
 from libs.tempfile_ import TempFile
 
@@ -274,7 +274,7 @@ def roll(imageF, delta):
         delta = xsize - 5
     if delta > ysize:
         delta -= ysize
-    print(delta)
+    # print(delta)
     for i in range(0, ysize - 1):
         part1 = im.crop((0, i, delta + i, i + 1))
         part2 = im.crop((delta + i, i, xsize, i + 1))
@@ -421,3 +421,5 @@ def resize_(x, imf, sharp=False, ret=False):
         return im
     else:
         im.save(imf)
+
+

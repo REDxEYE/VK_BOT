@@ -1,6 +1,7 @@
 import time
-import CustomPrint
-
+# import CustomPrint
+import ConsoleLogger
+LOGGER = ConsoleLogger.ConsoleLogger('Cooldown')
 class cooldown_manager:
     def __init__(self, timeout, limit):
         self.users = {}  # type: dict[str,cooldown]
@@ -15,19 +16,19 @@ class cooldown_manager:
 
     def useUser(self, user: str):
         user = str(user)
-        print(f'user {user} used command')
+        LOGGER.info(f'user {user} used command')
         self.users[user].useUser()
         self.users[user].end = time.time() + self.timeout
         return self
 
     def chechUsers(self):
-        print(f"current time : {time.time()}")
+        LOGGER.debug(f"current time : {time.time()}")
         for user in self.users:
-            print(f'timeout of user {user} : {self.users[user].end}')
+            LOGGER.info(f'timeout of user {user} : {self.users[user].end}')
             if time.time() >= self.users[user].end:
-                print(f'timeout of user {user} is ended')
+                LOGGER.info(f'timeout of user {user} is ended')
                 self.users[user].uses = 0
-            print(f'user {user} still on waiting for timeout, with {self.users[user].uses} uses')
+                LOGGER.info(f'user {user} still on waiting for timeout, with {self.users[user].uses} uses')
         return self
 
     def canUse(self, user):
